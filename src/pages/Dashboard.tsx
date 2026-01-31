@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, GitFork, Play, Clock, Loader2, Globe, Lock, Trash2 } from 'lucide-react'
+import { Plus, GitFork, Play, Clock, Loader2, Globe, Lock, Trash2, Pencil } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
-import { getUserRepositories, deleteRepository } from '@/services/repository'
+import { getUserRepositories, deleteRepository, updateRepository } from '@/services/repository'
 import type { Repository } from '@/types/database'
 
 export function Dashboard() {
@@ -13,6 +14,11 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  // Rename state
+  const [renamingRepo, setRenamingRepo] = useState<Repository | null>(null)
+  const [newName, setNewName] = useState('')
+  const [isRenaming, setIsRenaming] = useState(false)
 
   useEffect(() => {
     async function loadRepositories() {
@@ -47,6 +53,30 @@ export function Dashboard() {
       setError('Failed to delete checklist')
     } finally {
       setDeletingId(null)
+    }
+  }
+
+  const handleRenameClick = (repo: Repository) => {
+    setRenamingRepo(repo)
+    setNewName(repo.title)
+  }
+
+  const submitRename = async () => {
+    if (!renamingRepo || !newName.trim()) return
+
+    try {
+      setIsRenaming(true)
+      const updated = await updateRepository(renamingRepo.id, { title: newName })
+
+      setRepositories(repos =>
+        repos.map(r => r.id === renamingRepo.id ? { ...r, title: updated.title } : r)
+      )
+      setRenamingRepo(null)
+    } catch (err) {
+      console.error('Error renaming repository:', err)
+      setError('Failed to rename checklist')
+    } finally {
+      setIsRenaming(false)
     }
   }
 
@@ -187,22 +217,37 @@ export function Dashboard() {
                   </div>
                 </CardContent>
               </Link>
-              {/* Delete button */}
-              <button
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  handleDelete(repo.id, repo.title)
-                }}
-                disabled={deletingId === repo.id}
-                className="absolute top-4 right-4 p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
-              >
-                {deletingId === repo.id ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Trash2 className="h-4 w-4" />
-                )}
-              </button>
+
+              {/* Actions */}
+              <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleRenameClick(repo)
+                  }}
+                  className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                  title="Rename"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleDelete(repo.id, repo.title)
+                  }}
+                  disabled={deletingId === repo.id}
+                  className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                  title="Delete"
+                >
+                  {deletingId === repo.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </Card>
           ))}
         </div>
@@ -255,6 +300,54 @@ export function Dashboard() {
           </Link>
         </div>
       </div>
+
+      {/* Rename Modal */}
+      {renamingRepo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+          <Card className="w-full max-w-md animate-in fade-in zoom-in-95 duration-200">
+            <CardHeader>
+              <CardTitle>Rename Checklist</CardTitle>
+              <CardDescription>
+                Enter a new name for this checklist.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={(e) => { e.preventDefault(); submitRename(); }}>
+                <Input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Checklist name"
+                  className="mb-6"
+                  autoFocus
+                />
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setRenamingRepo(null)}
+                    disabled={isRenaming}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isRenaming || !newName.trim() || newName === renamingRepo.title}
+                  >
+                    {isRenaming ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Renaming...
+                      </>
+                    ) : (
+                      'Rename'
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }
