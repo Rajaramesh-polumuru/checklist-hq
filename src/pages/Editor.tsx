@@ -7,6 +7,7 @@ import { ChecklistEditor } from '@/components/ChecklistEditor'
 import { VersionHistory } from '@/components/VersionHistory'
 import { DiffView } from '@/components/DiffView'
 import { KeyboardShortcuts } from '@/components/KeyboardShortcuts'
+import { ShareSettingsModal } from '@/components/ShareSettingsModal'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import { useChecklistStore } from '@/stores/checklist-store'
 import { useAuthStore } from '@/stores/auth-store'
@@ -25,7 +26,8 @@ import {
   GitFork,
   ListChecks,
   Cloud,
-  CloudOff
+  CloudOff,
+  Share2
 } from 'lucide-react'
 import type { ChecklistContent, Repository, Commit } from '@/types/database'
 import {
@@ -35,6 +37,7 @@ import {
   saveRepositoryChanges,
   updateRepository,
   restoreToCommit,
+  deleteRepository,
 } from '@/services/repository'
 
 export function Editor() {
@@ -61,6 +64,9 @@ export function Editor() {
 
   // Keyboard shortcuts state
   const [showShortcuts, setShowShortcuts] = useState(false)
+
+  // Share modal state
+  const [shareOpen, setShareOpen] = useState(false)
 
   // Input ref for title
   const titleInputRef = useRef<HTMLInputElement>(null)
@@ -394,16 +400,30 @@ export function Editor() {
               {itemCount} {itemCount === 1 ? 'item' : 'items'}
             </span>
 
-            {/* Privacy toggle */}
+            {/* Share Button (for existing checklists) */}
+            {!isNew && repository && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShareOpen(true)}
+                className="gap-1.5 text-muted-foreground hover:text-foreground"
+              >
+                <Share2 className="h-4 w-4" />
+                <span className="hidden sm:inline text-xs">Share</span>
+              </Button>
+            )}
+
+            {/* Privacy indicator (for new checklists or quick toggle) */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsPublic(!isPublic)}
               className="gap-1.5 text-muted-foreground hover:text-foreground"
+              title={isPublic ? 'Public: Anyone can view' : 'Private: Only you can access'}
             >
               {isPublic ? (
                 <>
-                  <Globe className="h-4 w-4" />
+                  <Globe className="h-4 w-4 text-success" />
                   <span className="hidden sm:inline text-xs">Public</span>
                 </>
               ) : (
@@ -498,6 +518,24 @@ export function Editor() {
 
       {/* Keyboard Shortcuts Modal */}
       <KeyboardShortcuts open={showShortcuts} onClose={() => setShowShortcuts(false)} />
+
+      {/* Share Settings Modal */}
+      {repository && (
+        <ShareSettingsModal
+          repository={{ ...repository, is_public: isPublic }}
+          isOpen={shareOpen}
+          onClose={() => setShareOpen(false)}
+          onVisibilityChange={async (newIsPublic) => {
+            setIsPublic(newIsPublic)
+            await updateRepository(repository.id, { is_public: newIsPublic })
+            setRepository({ ...repository, is_public: newIsPublic })
+          }}
+          onDelete={async () => {
+            await deleteRepository(repository.id)
+            navigate('/app')
+          }}
+        />
+      )}
     </div>
   )
 }

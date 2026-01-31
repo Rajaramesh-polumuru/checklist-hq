@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,23 +13,36 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Plus, GitFork, Play, Clock, Loader2, Globe, Lock, Trash2, Pencil, ArrowRight, ListChecks } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { ShareSettingsModal } from '@/components/ShareSettingsModal'
+import { Plus, GitFork, Play, Clock, Loader2, Globe, Lock, Trash2, Pencil, ArrowRight, ListChecks, MoreVertical, Share2, Copy } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { formatRelativeTime } from '@/lib/date-utils'
-import { getUserRepositories, deleteRepository, updateRepository } from '@/services/repository'
+import { getUserRepositories, deleteRepository, updateRepository, forkRepository } from '@/services/repository'
 import type { Repository } from '@/types/database'
 
 export function Dashboard() {
   const { user } = useAuthStore()
+  const navigate = useNavigate()
   const [repositories, setRepositories] = useState<Repository[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
 
   // Rename state
   const [renamingRepo, setRenamingRepo] = useState<Repository | null>(null)
   const [newName, setNewName] = useState('')
   const [isRenaming, setIsRenaming] = useState(false)
+
+  // Share modal state
+  const [shareRepo, setShareRepo] = useState<Repository | null>(null)
 
   useEffect(() => {
     async function loadRepositories() {
@@ -67,11 +80,6 @@ export function Dashboard() {
     }
   }
 
-  const handleRenameClick = (repo: Repository) => {
-    setRenamingRepo(repo)
-    setNewName(repo.title)
-  }
-
   const submitRename = async () => {
     if (!renamingRepo || !newName.trim()) return
 
@@ -88,6 +96,27 @@ export function Dashboard() {
       setError('Failed to rename checklist')
     } finally {
       setIsRenaming(false)
+    }
+  }
+
+  const handleDuplicate = async (repo: Repository) => {
+    if (!user) return
+
+    try {
+      setDuplicatingId(repo.id)
+      await forkRepository({
+        sourceRepoId: repo.id,
+        newOwnerId: user.id,
+        newTitle: `${repo.title} (Copy)`,
+      })
+      // Reload repos to show the new one
+      const repos = await getUserRepositories(user.id)
+      setRepositories(repos)
+    } catch (err) {
+      console.error('Error duplicating repository:', err)
+      setError('Failed to duplicate checklist')
+    } finally {
+      setDuplicatingId(null)
     }
   }
 
@@ -210,36 +239,56 @@ export function Dashboard() {
                 </CardContent>
               </Link>
 
-              {/* Hover actions */}
-              <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    handleRenameClick(repo)
-                  }}
-                  className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-md bg-card/90 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors focus:ring-2 focus:ring-ring shadow-sm"
-                  aria-label={`Rename ${repo.title}`}
-                >
-                  <Pencil className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    handleDelete(repo.id, repo.title)
-                  }}
-                  disabled={deletingId === repo.id}
-                  className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-md bg-card/90 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors focus:ring-2 focus:ring-destructive shadow-sm disabled:opacity-50"
-                  aria-label={`Delete ${repo.title}`}
-                >
-                  {deletingId === repo.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
+              {/* Dropdown Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="absolute top-3 right-3 p-2 rounded-md bg-card/90 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 shadow-sm"
+                    onClick={(e) => e.preventDefault()}
+                    aria-label="Actions"
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    onClick={() => navigate(`/app/repo/${repo.id}`)}
+                  >
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setShareRepo(repo)}
+                  >
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleDuplicate(repo)}
+                    disabled={duplicatingId === repo.id}
+                  >
+                    {duplicatingId === repo.id ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Copy className="mr-2 h-4 w-4" />
+                    )}
+                    Duplicate
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    destructive
+                    onClick={() => handleDelete(repo.id, repo.title)}
+                    disabled={deletingId === repo.id}
+                  >
+                    {deletingId === repo.id ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="mr-2 h-4 w-4" />
+                    )}
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </Card>
           ))}
         </div>
@@ -346,6 +395,27 @@ export function Dashboard() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Share Settings Modal */}
+      {shareRepo && (
+        <ShareSettingsModal
+          repository={shareRepo}
+          isOpen={!!shareRepo}
+          onClose={() => setShareRepo(null)}
+          onVisibilityChange={async (newIsPublic) => {
+            await updateRepository(shareRepo.id, { is_public: newIsPublic })
+            setRepositories(repos =>
+              repos.map(r => r.id === shareRepo.id ? { ...r, is_public: newIsPublic } : r)
+            )
+            setShareRepo({ ...shareRepo, is_public: newIsPublic })
+          }}
+          onDelete={async () => {
+            await deleteRepository(shareRepo.id)
+            setRepositories(repos => repos.filter(r => r.id !== shareRepo.id))
+            setShareRepo(null)
+          }}
+        />
+      )}
     </main>
   )
 }
