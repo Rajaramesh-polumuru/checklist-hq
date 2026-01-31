@@ -7,6 +7,13 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================
+-- 0. CLEANUP (Ensure fresh start for consolidated schema)
+-- ============================================
+DROP TABLE IF EXISTS public.runs CASCADE;
+DROP TABLE IF EXISTS public.commits CASCADE;
+DROP TABLE IF EXISTS public.repositories CASCADE;
+
+-- ============================================
 -- 1. REPOSITORIES: The "Project" Container
 -- ============================================
 CREATE TABLE public.repositories (
@@ -142,32 +149,7 @@ CREATE POLICY "Users can view their own runs"
 ON public.runs FOR SELECT 
 USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can create runs in their repos" 
-ON public.runs FOR INSERT 
-WITH CHECK (
-    auth.uid() = user_id AND -- Must be the user starting it
-    EXISTS (
-        SELECT 1 FROM public.repositories r 
-        WHERE r.id = runs.repo_id 
-        AND (r.owner_id = auth.uid() OR r.is_public = true) -- Allow running public repos? 
-        -- Note: Previous policy was strictly "Users can create runs in their repos" but the check logic
-        -- in 001 was: repositories.owner_id = auth.uid().
-        -- If we want to allow running public repos, we might need to adjust.
-        -- Usage in 001: 
-        -- SELECT 1 FROM repositories WHERE repositories.id = runs.repo_id AND repositories.owner_id = auth.uid()
-        -- I will stick to the original 001 logic for safety.
-    )
-);
 
--- Reverting to 001 logic for runs insert to be safe (only own repos)
--- Actually, let's look at 001 line 167: "Users can create runs in their repos"
--- CHECK (EXISTS (SELECT 1 FROM repositories WHERE id=repo_id AND owner_id=auth.uid()))
--- This implies you can only run your OWN repos. 
--- However, generally you might want to run public repos. But if you run public repo, maybe you fork it first?
--- The "GitHub for Process" usually implies you fork to "use" it as your own instance?
--- Or maybe you can run a public checklist directly.
--- For now, I will stick to 001's strict logic to avoid behavior changes.
-DROP POLICY IF EXISTS "Users can create runs in their repos" ON public.runs;
 CREATE POLICY "Users can create runs in their repos" 
 ON public.runs FOR INSERT 
 WITH CHECK (
