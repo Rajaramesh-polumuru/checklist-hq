@@ -7,7 +7,7 @@ import { VersionHistory } from '@/components/VersionHistory'
 import { DiffView } from '@/components/DiffView'
 import { useChecklistStore } from '@/stores/checklist-store'
 import { useAuthStore } from '@/stores/auth-store'
-import { ArrowLeft, Save, Play, Globe, Lock, Loader2, Check, History } from 'lucide-react'
+import { ArrowLeft, Save, Play, Globe, Lock, Loader2, Check, History, Pencil } from 'lucide-react'
 import type { ChecklistContent, Repository, Commit } from '@/types/database'
 import {
   createRepositoryWithCommit,
@@ -43,7 +43,13 @@ export function Editor() {
   // Auto-save timer ref
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Input ref for title
+  const titleInputRef = useRef<HTMLInputElement>(null)
+
   const isNew = repoId === 'new' || !repoId
+
+  // Check for unsaved changes
+  const hasMetadataChanges = repository ? (title !== repository.title || isPublic !== repository.is_public) : false
 
   // Load existing repository
   useEffect(() => {
@@ -147,25 +153,34 @@ export function Editor() {
         navigate(`/app/repo/${newRepo.id}`, { replace: true })
       } else if (repository) {
         // Update existing repository
-        // First, update repository metadata if changed
+        const updates: Promise<any>[] = []
+
+        // 1. Update metadata if changed
         if (title !== repository.title || isPublic !== repository.is_public) {
-          const updatedRepo = await updateRepository(repository.id, {
-            title,
-            is_public: isPublic,
-          })
-          setRepository(updatedRepo)
+          updates.push(
+            updateRepository(repository.id, {
+              title,
+              is_public: isPublic,
+            }).then(updatedRepo => setRepository(updatedRepo))
+          )
         }
 
-        // Create new commit with changes
-        const commit = await saveRepositoryChanges({
-          repoId: repository.id,
-          content,
-          message: isAutoSave ? 'Auto-save' : 'Manual save',
-          parentCommitId: latestCommit?.id,
-        })
+        // 2. Create new commit if content changed
+        if (isDirty) {
+          updates.push(
+            saveRepositoryChanges({
+              repoId: repository.id,
+              content,
+              message: isAutoSave ? 'Auto-save' : 'Manual save',
+              parentCommitId: latestCommit?.id,
+            }).then(commit => {
+              setLatestCommit(commit)
+              resetDirty()
+            })
+          )
+        }
 
-        setLatestCommit(commit)
-        resetDirty()
+        await Promise.all(updates)
         setSaveStatus('saved')
       }
 
@@ -178,7 +193,7 @@ export function Editor() {
     } finally {
       setSaving(false)
     }
-  }, [user, isNew, title, isPublic, content, repository, latestCommit, navigate, resetDirty])
+  }, [user, isNew, title, isPublic, content, repository, latestCommit, navigate, resetDirty, isDirty])
 
   const handleStartRun = async () => {
     if (!repository) {
@@ -268,12 +283,26 @@ export function Editor() {
             <Button variant="ghost" size="icon" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="text-lg font-semibold border-none bg-transparent h-auto p-0 focus-visible:ring-0 w-64"
-              placeholder="Checklist title..."
-            />
+
+            <div className="group flex items-center gap-2">
+              <Input
+                ref={titleInputRef}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="text-lg font-semibold border-none bg-transparent h-auto p-0 focus-visible:ring-0 w-64 px-2 py-1 rounded hover:bg-accent/50 transition-colors"
+                placeholder="Checklist title..."
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity -ml-2 text-muted-foreground"
+                onClick={() => titleInputRef.current?.focus()}
+                title="Rename checklist"
+              >
+                <Pencil className="h-3 w-3" />
+              </Button>
+            </div>
+
             {/* Save status indicator */}
             {saveStatus === 'saved' && (
               <span className="flex items-center gap-1 text-sm text-green-600">
@@ -285,6 +314,13 @@ export function Editor() {
               <span className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Saving...
+              </span>
+            )}
+
+            {/* Unsaved changes indicator */}
+            {!isNew && !loading && !saving && saveStatus !== 'saved' && (isDirty || hasMetadataChanges) && (
+              <span className="text-sm text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                Unsaved changes
               </span>
             )}
           </div>
@@ -326,7 +362,8 @@ export function Editor() {
               variant="outline"
               size="sm"
               onClick={() => handleSave(false)}
-              disabled={saving || (!isDirty && !isNew)}
+              disabled={saving || (!isNew && !isDirty && !hasMetadataChanges)}
+              className={isDirty || hasMetadataChanges ? "border-primary text-primary hover:bg-primary/5" : ""}
             >
               <Save className="mr-2 h-4 w-4" />
               {saving ? 'Saving...' : isNew ? 'Create' : 'Save'}
