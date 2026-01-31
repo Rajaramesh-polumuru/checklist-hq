@@ -144,7 +144,7 @@ export function RunMode() {
 
     try {
       setLoading(true)
-      const newRun = await startRunFromLatestCommit(repository.id)
+      const newRun = await startRunFromLatestCommit(repository.id, user?.id)
       navigate(`/app/run/${newRun.id}`, { replace: true })
     } catch (err) {
       console.error('Error restarting run:', err)

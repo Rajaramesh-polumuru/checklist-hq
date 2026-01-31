@@ -4,8 +4,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { getUserRepositories } from '@/services/repository'
 import { getMyActiveRuns, getMyCompletedRuns } from '@/services/run'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Loader2, User, GitFork, Play, CheckCircle2, Globe, Lock } from 'lucide-react'
+import { Loader2, User, GitFork, Globe, Lock } from 'lucide-react'
 import type { Repository } from '@/types/database'
 
 export function Profile() {
