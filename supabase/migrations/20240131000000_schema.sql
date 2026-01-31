@@ -171,6 +171,7 @@ DROP POLICY IF EXISTS "Users can create runs in their repos" ON public.runs;
 CREATE POLICY "Users can create runs in their repos" 
 ON public.runs FOR INSERT 
 WITH CHECK (
+    auth.uid() = user_id AND
     EXISTS (
         SELECT 1 FROM public.repositories r 
         WHERE r.id = runs.repo_id 
@@ -211,7 +212,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger for fork count
 CREATE TRIGGER increment_fork_count_trigger
@@ -236,13 +237,19 @@ DECLARE
   v_title TEXT;
   v_origin_id UUID;
 BEGIN
-  -- 1. Get source repository details
+  -- 0. Security Checks
+  IF new_owner_id != auth.uid() THEN
+    RAISE EXCEPTION 'Cannot fork for another user';
+  END IF;
+
+  -- 1. Get source repository details (and check visibility)
   SELECT * INTO v_source_repo 
   FROM public.repositories 
-  WHERE id = source_repo_id;
+  WHERE id = source_repo_id
+  AND (is_public = true OR owner_id = auth.uid());
   
   IF v_source_repo IS NULL THEN
-    RAISE EXCEPTION 'Source repository not found';
+    RAISE EXCEPTION 'Source repository not found or not accessible';
   END IF;
 
   -- 2. Determine title
