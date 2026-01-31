@@ -71,7 +71,7 @@ export function RunMode() {
           setRepository(repo)
 
           // Create new run from latest commit
-          const newRun = await startRunFromLatestCommit(repoId)
+          const newRun = await startRunFromLatestCommit(repoId, user?.id)
 
           // Load the run with commit details
           const runData = await getRunWithDetails(newRun.id)

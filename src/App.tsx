@@ -4,6 +4,10 @@ import { Layout } from '@/components/Layout'
 import { Home } from '@/pages/Home'
 import { Dashboard } from '@/pages/Dashboard'
 import { Editor } from '@/pages/Editor'
+import { ActiveRuns } from '@/pages/ActiveRuns'
+import { RunHistory } from '@/pages/RunHistory'
+import { Activity } from '@/pages/Activity'
+import { Profile } from '@/pages/Profile'
 import { Explore } from '@/pages/Explore'
 import { AuthCallback } from '@/pages/AuthCallback'
 import { RunMode } from '@/pages/RunMode'
@@ -52,6 +56,38 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="app/runs"
+            element={
+              <ProtectedRoute>
+                <ActiveRuns />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="app/history"
+            element={
+              <ProtectedRoute>
+                <RunHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="app/activity"
+            element={
+              <ProtectedRoute>
+                <Activity />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="app/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

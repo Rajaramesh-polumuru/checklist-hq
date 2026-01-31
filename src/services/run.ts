@@ -178,6 +178,42 @@ export async function getUserActiveRuns(userId: string): Promise<Run[]> {
   })) as Run[]
 }
 
+export async function getMyActiveRuns(userId: string): Promise<(Run & { repository: { title: string; owner_id: string } })[]> {
+  const { data, error } = await supabase
+    .from('runs')
+    .select(`
+      *,
+      repositories (title, owner_id)
+    `)
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .order('started_at', { ascending: false })
+
+  if (error) throw error
+  return (data || []).map((d: any) => ({
+    ...d,
+    repository: d.repositories
+  }))
+}
+
+export async function getMyCompletedRuns(userId: string): Promise<(Run & { repository: { title: string; owner_id: string } })[]> {
+  const { data, error } = await supabase
+    .from('runs')
+    .select(`
+      *,
+      repositories (title, owner_id)
+    `)
+    .eq('user_id', userId)
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false })
+
+  if (error) throw error
+  return (data || []).map((d: any) => ({
+    ...d,
+    repository: d.repositories
+  }))
+}
+
 // ============================================
 // Combined Operations
 // ============================================
@@ -185,7 +221,7 @@ export async function getUserActiveRuns(userId: string): Promise<Run[]> {
 /**
  * Start a new run from the latest commit of a repository
  */
-export async function startRunFromLatestCommit(repoId: string): Promise<Run> {
+export async function startRunFromLatestCommit(repoId: string, userId?: string): Promise<Run> {
   // Get the latest commit
   const { data: commit, error: commitError } = await supabase
     .from('commits')
@@ -208,6 +244,7 @@ export async function startRunFromLatestCommit(repoId: string): Promise<Run> {
     commit_id: commit.id,
     progress: {},
     status: 'active',
+    user_id: userId,
   })
 }
 

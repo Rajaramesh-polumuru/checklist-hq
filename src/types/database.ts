@@ -26,6 +26,7 @@ export interface Run {
   id: string
   repo_id: string
   commit_id: string  // Links to the VERSION used
+  user_id?: string // Who started the run
   progress: RunProgress  // Status of each item
   status: 'active' | 'completed' | 'archived'
   started_at: string
@@ -77,6 +78,7 @@ export interface CommitInsert {
 export interface RunInsert {
   repo_id: string
   commit_id: string
+  user_id?: string
   progress?: RunProgress
   status?: 'active' | 'completed' | 'archived'
 }

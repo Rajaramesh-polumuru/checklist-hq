@@ -51,8 +51,10 @@ export function Layout() {
                     New
                   </Link>
                 </Button>
-                <Button variant="ghost" size="icon">
-                  <User className="h-4 w-4" />
+                <Button variant="ghost" size="icon" asChild>
+                  <Link to="/app/profile">
+                    <User className="h-4 w-4" />
+                  </Link>
                 </Button>
                 <Button variant="ghost" size="icon" onClick={signOut}>
                   <LogOut className="h-4 w-4" />

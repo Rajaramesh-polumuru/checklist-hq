@@ -212,29 +212,33 @@ export function Dashboard() {
       <div className="mt-12">
         <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
         <div className="grid md:grid-cols-3 gap-4">
-          <Card className="cursor-pointer hover:bg-accent transition-colors">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Play className="h-4 w-4" />
-                Active Runs
-              </CardTitle>
-              <CardDescription>
-                View and continue your in-progress checklists
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <Link to="/app/runs">
+            <Card className="cursor-pointer hover:bg-accent transition-colors">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Play className="h-4 w-4" />
+                  Active Runs
+                </CardTitle>
+                <CardDescription>
+                  View and continue your in-progress checklists
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
 
-          <Card className="cursor-pointer hover:bg-accent transition-colors">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Clock className="h-4 w-4" />
-                Recent Activity
-              </CardTitle>
-              <CardDescription>
-                See your latest updates and changes
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <Link to="/app/activity">
+            <Card className="cursor-pointer hover:bg-accent transition-colors">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Clock className="h-4 w-4" />
+                  Recent Activity
+                </CardTitle>
+                <CardDescription>
+                  See your latest updates and changes
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
 
           <Link to="/explore">
             <Card className="cursor-pointer hover:bg-accent transition-colors">
