@@ -1,8 +1,9 @@
-import { useRef, useEffect, useState, type KeyboardEvent } from 'react'
+import { useRef, useEffect, useState, memo, type KeyboardEvent } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { DESIGN_TOKENS } from '@/lib/constants'
 import { useChecklistStore } from '@/stores/checklist-store'
 import type { ChecklistItem as ChecklistItemType } from '@/types/database'
 
@@ -11,7 +12,7 @@ interface ChecklistItemProps {
   depth: number
 }
 
-export function ChecklistItem({ item, depth }: ChecklistItemProps) {
+export const ChecklistItem = memo(function ChecklistItem({ item, depth }: ChecklistItemProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [isHovered, setIsHovered] = useState(false)
 
@@ -161,20 +162,24 @@ export function ChecklistItem({ item, depth }: ChecklistItemProps) {
       {/* Drag Handle */}
       <button
         className={cn(
-          'cursor-grab touch-none text-muted-foreground/50 hover:text-muted-foreground transition-opacity',
+          'cursor-grab touch-none text-muted-foreground/70 hover:text-muted-foreground transition-opacity',
+          'min-w-[44px] min-h-[44px] flex items-center justify-center',
           !isHovered && 'opacity-0'
         )}
+        aria-label="Drag to reorder item"
         {...attributes}
         {...listeners}
       >
         <GripVertical className="h-4 w-4" />
+        <span className="sr-only">Drag handle</span>
       </button>
 
       {/* Indentation */}
       {depth > 0 && (
         <div
           className="border-l-2 border-muted h-6"
-          style={{ marginLeft: `${(depth - 1) * 20}px` }}
+          style={{ marginLeft: `${(depth - 1) * DESIGN_TOKENS.spacing.itemIndentPx}px` }}
+          aria-hidden="true"
         />
       )}
 
@@ -190,23 +195,38 @@ export function ChecklistItem({ item, depth }: ChecklistItemProps) {
         onKeyDown={handleKeyDown}
         onFocus={handleFocus}
         placeholder="Type here..."
+        aria-label={item.text || 'Checklist item'}
         className={cn(
           'flex-1 bg-transparent border-none outline-none text-foreground',
-          'placeholder:text-muted-foreground/50'
+          'placeholder:text-muted-foreground/50',
+          'focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-sm'
         )}
-        style={{ paddingLeft: `${depth * 20}px` }}
+        style={{ paddingLeft: `${depth * DESIGN_TOKENS.spacing.itemIndentPx}px` }}
       />
 
       {/* Delete button */}
       <button
         onClick={handleDelete}
         className={cn(
-          'text-muted-foreground/50 hover:text-destructive transition-opacity',
+          'text-muted-foreground/70 hover:text-destructive transition-opacity',
+          'min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md',
+          'focus:opacity-100 focus:ring-2 focus:ring-destructive',
           !isHovered && 'opacity-0'
         )}
+        aria-label="Delete item"
       >
         <Trash2 className="h-4 w-4" />
+        <span className="sr-only">Delete item</span>
       </button>
     </div>
   )
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison - only re-render if item data or depth changed
+  return (
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.item.text === nextProps.item.text &&
+    prevProps.item.order === nextProps.item.order &&
+    prevProps.item.parent === nextProps.item.parent &&
+    prevProps.depth === nextProps.depth
+  )
+})

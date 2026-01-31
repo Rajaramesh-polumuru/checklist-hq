@@ -1,4 +1,6 @@
 import { cn } from '@/lib/utils'
+import { DESIGN_TOKENS } from '@/lib/constants'
+import { formatCompactTime } from '@/lib/date-utils'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Check } from 'lucide-react'
 import type { ChecklistItem, ItemProgress } from '@/types/database'
@@ -21,18 +23,19 @@ export function RunItem({ item, progress, depth, onToggle }: RunItemProps) {
     <div
       className={cn(
         'group flex items-start gap-3 py-3 px-4 rounded-lg transition-colors',
-        isCompleted ? 'bg-green-50 dark:bg-green-950/20' : 'hover:bg-muted/50',
+        isCompleted ? 'bg-success/10 dark:bg-success/20' : 'hover:bg-muted/50',
         depth > 0 && 'border-l-2 border-muted ml-6'
       )}
-      style={{ marginLeft: depth > 0 ? `${depth * 24}px` : undefined }}
+      style={{ marginLeft: depth > 0 ? `${depth * DESIGN_TOKENS.spacing.itemIndentPx}px` : undefined }}
     >
       <div className="pt-0.5">
         <Checkbox
           checked={isCompleted}
           onCheckedChange={handleToggle}
+          aria-label={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
           className={cn(
             'h-5 w-5 rounded-full transition-all',
-            isCompleted && 'bg-green-600 border-green-600'
+            isCompleted && 'bg-success border-success'
           )}
         />
       </div>
@@ -54,9 +57,9 @@ export function RunItem({ item, progress, depth, onToggle }: RunItemProps) {
         )}
 
         {isCompleted && progress?.timestamp && (
-          <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+          <p className="text-xs text-success mt-1 flex items-center gap-1">
             <Check className="h-3 w-3" />
-            Completed {formatTimestamp(progress.timestamp)}
+            Completed {formatCompactTime(progress.timestamp)}
           </p>
         )}
       </div>
@@ -64,17 +67,3 @@ export function RunItem({ item, progress, depth, onToggle }: RunItemProps) {
   )
 }
 
-function formatTimestamp(timestamp: string): string {
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMinutes = Math.floor(diffMs / (1000 * 60))
-
-  if (diffMinutes < 1) return 'just now'
-  if (diffMinutes < 60) return `${diffMinutes}m ago`
-
-  const diffHours = Math.floor(diffMinutes / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-
-  return date.toLocaleDateString()
-}

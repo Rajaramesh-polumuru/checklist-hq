@@ -7,6 +7,8 @@ import { VersionHistory } from '@/components/VersionHistory'
 import { DiffView } from '@/components/DiffView'
 import { useChecklistStore } from '@/stores/checklist-store'
 import { useAuthStore } from '@/stores/auth-store'
+import { useDebounce } from '@/hooks/useDebounce'
+import { AUTO_SAVE } from '@/lib/constants'
 import { ArrowLeft, Save, Play, Globe, Lock, Loader2, Check, History, Pencil } from 'lucide-react'
 import type { ChecklistContent, Repository, Commit } from '@/types/database'
 import {
@@ -40,11 +42,11 @@ export function Editor() {
   const [historyOpen, setHistoryOpen] = useState(false)
   const [compareCommits, setCompareCommits] = useState<{ commit1: Commit; commit2: Commit } | null>(null)
 
-  // Auto-save timer ref
-  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
   // Input ref for title
   const titleInputRef = useRef<HTMLInputElement>(null)
+
+  // Debounced content for auto-save
+  const debouncedContent = useDebounce(content, AUTO_SAVE.debounceMs)
 
   const isNew = repoId === 'new' || !repoId
 
@@ -101,26 +103,13 @@ export function Editor() {
     loadRepository()
   }, [repoId, isNew, setContent])
 
-  // Auto-save functionality
+  // Auto-save functionality with proper debouncing
   useEffect(() => {
     if (!isDirty || isNew || !repository) return
 
-    // Clear existing timer
-    if (autoSaveTimerRef.current) {
-      clearTimeout(autoSaveTimerRef.current)
-    }
-
-    // Set new timer for auto-save (2 seconds after last change)
-    autoSaveTimerRef.current = setTimeout(() => {
-      handleSave(true) // true = auto-save (silent)
-    }, 2000)
-
-    return () => {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current)
-      }
-    }
-  }, [isDirty, content, isNew, repository])
+    // Trigger save after content has been debounced
+    handleSave(true) // true = auto-save (silent)
+  }, [debouncedContent]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSave = useCallback(async (isAutoSave = false) => {
     if (!user) {

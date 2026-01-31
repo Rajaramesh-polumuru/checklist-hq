@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RunItem } from '@/components/RunItem'
+import { formatRelativeTime } from '@/lib/date-utils'
 import {
   ArrowLeft,
   CheckCircle2,
@@ -261,7 +262,7 @@ export function RunMode() {
       {/* Progress bar */}
       <div className="h-1 bg-muted">
         <div
-          className="h-full bg-green-500 transition-all duration-300"
+          className="h-full bg-success transition-all duration-300"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
@@ -270,13 +271,13 @@ export function RunMode() {
       <main className="container mx-auto px-4 py-8 max-w-3xl">
         {/* Completion celebration */}
         {isComplete && (
-          <Card className="mb-8 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+          <Card className="mb-8 bg-success/10 dark:bg-success/20 border-success/20">
             <CardContent className="py-8 text-center">
-              <Trophy className="h-12 w-12 text-green-600 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-green-800 dark:text-green-200 mb-2">
+              <Trophy className="h-12 w-12 text-success mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-success mb-2">
                 Checklist Complete!
               </h2>
-              <p className="text-green-700 dark:text-green-300 mb-4">
+              <p className="text-success/80 mb-4">
                 You've completed all {totalItems} items in this checklist.
               </p>
               <div className="flex gap-4 justify-center">
@@ -297,12 +298,12 @@ export function RunMode() {
           <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
             <span className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              Started {formatDate(run.started_at)}
+              Started {formatRelativeTime(run.started_at)}
             </span>
             {run.completed_at && (
               <span className="flex items-center gap-1">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                Completed {formatDate(run.completed_at)}
+                <CheckCircle2 className="h-4 w-4 text-success" />
+                Completed {formatRelativeTime(run.completed_at)}
               </span>
             )}
           </div>
@@ -331,21 +332,3 @@ export function RunMode() {
   )
 }
 
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMinutes = Math.floor(diffMs / (1000 * 60))
-
-  if (diffMinutes < 1) return 'just now'
-  if (diffMinutes < 60) return `${diffMinutes} minutes ago`
-
-  const diffHours = Math.floor(diffMinutes / 60)
-  if (diffHours < 24) return `${diffHours} hours ago`
-
-  const diffDays = Math.floor(diffHours / 24)
-  if (diffDays === 1) return 'yesterday'
-  if (diffDays < 7) return `${diffDays} days ago`
-
-  return date.toLocaleDateString()
-}

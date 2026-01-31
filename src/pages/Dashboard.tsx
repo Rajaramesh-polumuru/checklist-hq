@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, GitFork, Play, Clock, Loader2, Globe, Lock, Trash2, Pencil } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
+import { formatRelativeTime } from '@/lib/date-utils'
 import { getUserRepositories, deleteRepository, updateRepository } from '@/services/repository'
 import type { Repository } from '@/types/database'
 
@@ -80,24 +81,6 @@ export function Dashboard() {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-    if (diffDays === 0) {
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-      if (diffHours === 0) {
-        const diffMinutes = Math.floor(diffMs / (1000 * 60))
-        return diffMinutes <= 1 ? 'Just now' : `${diffMinutes} minutes ago`
-      }
-      return diffHours === 1 ? '1 hour ago' : `${diffHours} hours ago`
-    }
-    if (diffDays === 1) return 'Yesterday'
-    if (diffDays < 7) return `${diffDays} days ago`
-    return date.toLocaleDateString()
-  }
 
   // Loading state
   if (loading) {
@@ -117,7 +100,7 @@ export function Dashboard() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <main role="main" aria-label="Dashboard" className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold">Your Checklists</h1>
@@ -207,7 +190,7 @@ export function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>Updated {formatDate(repo.updated_at)}</span>
+                    <span>Updated {formatRelativeTime(repo.updated_at)}</span>
                     {repo.fork_count > 0 && (
                       <span className="flex items-center gap-1">
                         <GitFork className="h-3 w-3" />
@@ -219,17 +202,18 @@ export function Dashboard() {
               </Link>
 
               {/* Actions */}
-              <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                 <button
                   onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
                     handleRenameClick(repo)
                   }}
-                  className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-                  title="Rename"
+                  className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors focus:ring-2 focus:ring-ring"
+                  aria-label={`Rename ${repo.title}`}
                 >
                   <Pencil className="h-4 w-4" />
+                  <span className="sr-only">Rename</span>
                 </button>
                 <button
                   onClick={(e) => {
@@ -238,14 +222,15 @@ export function Dashboard() {
                     handleDelete(repo.id, repo.title)
                   }}
                   disabled={deletingId === repo.id}
-                  className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                  title="Delete"
+                  className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors focus:ring-2 focus:ring-destructive disabled:opacity-50"
+                  aria-label={`Delete ${repo.title}`}
                 >
                   {deletingId === repo.id ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <Trash2 className="h-4 w-4" />
                   )}
+                  <span className="sr-only">Delete</span>
                 </button>
               </div>
             </Card>
@@ -313,12 +298,19 @@ export function Dashboard() {
             </CardHeader>
             <CardContent>
               <form onSubmit={(e) => { e.preventDefault(); submitRename(); }}>
+                <label htmlFor="rename-input" className="text-sm font-medium mb-2 block">
+                  Checklist Name
+                </label>
                 <Input
+                  id="rename-input"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Checklist name"
+                  placeholder="Enter new name"
                   className="mb-6"
+                  disabled={isRenaming}
                   autoFocus
+                  aria-required="true"
+                  aria-label="New checklist name"
                 />
                 <div className="flex justify-end gap-2">
                   <Button
@@ -348,6 +340,6 @@ export function Dashboard() {
           </Card>
         </div>
       )}
-    </div>
+    </main>
   )
 }
