@@ -24,4 +24,5 @@ dist-ssr
 *.sw?
 .env
 
-supabase/*
+supabase/.branches
+supabase/.temp
