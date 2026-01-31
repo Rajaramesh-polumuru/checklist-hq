@@ -407,18 +407,23 @@ export function Dashboard() {
 
         {/* Quick Actions */}
         <div className="mt-12">
-          <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
-          <div className="grid md:grid-cols-3 gap-4">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <span>Quick Actions</span>
+            <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
+          </h2>
+          <div className="grid md:grid-cols-3 gap-5">
+            {/* Active Runs */}
             <Link to="/app/runs">
-              <Card hoverable className="group">
-                <CardHeader className="pb-4">
+              <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/5">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-green-500" />
+                <CardHeader className="pb-4 pt-5">
                   <div className="flex items-center justify-between">
-                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
-                      <Play className="h-4 w-4 text-primary" />
+                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Play className="h-5 w-5 text-emerald-500" />
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                   </div>
-                  <CardTitle className="text-base mt-3">Active Runs</CardTitle>
+                  <CardTitle className="text-base mt-4">Active Runs</CardTitle>
                   <CardDescription className="text-sm">
                     View and continue your in-progress checklists
                   </CardDescription>
@@ -426,16 +431,18 @@ export function Dashboard() {
               </Card>
             </Link>
 
+            {/* Recent Activity */}
             <Link to="/app/activity">
-              <Card hoverable className="group">
-                <CardHeader className="pb-4">
+              <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-500" />
+                <CardHeader className="pb-4 pt-5">
                   <div className="flex items-center justify-between">
-                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
-                      <Clock className="h-4 w-4 text-primary" />
+                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Clock className="h-5 w-5 text-blue-500" />
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                   </div>
-                  <CardTitle className="text-base mt-3">Recent Activity</CardTitle>
+                  <CardTitle className="text-base mt-4">Recent Activity</CardTitle>
                   <CardDescription className="text-sm">
                     See your latest updates and changes
                   </CardDescription>
@@ -443,16 +450,18 @@ export function Dashboard() {
               </Card>
             </Link>
 
+            {/* Browse Templates */}
             <Link to="/explore">
-              <Card hoverable className="group">
-                <CardHeader className="pb-4">
+              <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-violet-500/5">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500" />
+                <CardHeader className="pb-4 pt-5">
                   <div className="flex items-center justify-between">
-                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
-                      <GitFork className="h-4 w-4 text-primary" />
+                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <GitFork className="h-5 w-5 text-violet-500" />
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                   </div>
-                  <CardTitle className="text-base mt-3">Browse Templates</CardTitle>
+                  <CardTitle className="text-base mt-4">Browse Templates</CardTitle>
                   <CardDescription className="text-sm">
                     Discover proven checklists from the community
                   </CardDescription>

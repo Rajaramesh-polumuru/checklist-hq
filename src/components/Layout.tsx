@@ -1,7 +1,7 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth-store'
-import { GitFork, User, LogOut, Plus } from 'lucide-react'
+import { GitFork, LogOut, Plus } from 'lucide-react'
 
 export function Layout() {
   const { user, signInWithGoogle, signOut } = useAuthStore()
@@ -24,22 +24,33 @@ export function Layout() {
         Skip to main content
       </a>
 
-      {/* Navigation */}
-      <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50" role="banner">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
+      {/* Premium Navigation */}
+      <header
+        className="border-b bg-gradient-to-r from-background via-background to-primary/5 backdrop-blur-sm sticky top-0 z-50 shadow-sm"
+        role="banner"
+      >
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center gap-2 font-semibold text-lg hover:opacity-80 transition-opacity">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <GitFork className="h-4 w-4 text-primary" />
+            {/* Logo */}
+            <Link
+              to="/"
+              className="flex items-center gap-2.5 font-semibold text-lg hover:opacity-80 transition-all group"
+            >
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow">
+                <GitFork className="h-5 w-5 text-white" />
               </div>
-              <span className="hidden sm:inline">Checklist HQ</span>
+              <span className="hidden sm:inline font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                Checklist HQ
+              </span>
             </Link>
+
+            {/* Navigation Links */}
             <nav className="hidden md:flex items-center gap-1" role="navigation" aria-label="Main navigation">
               <Link
                 to="/explore"
-                className={`px-3 py-2 text-sm rounded-md transition-colors ${location.pathname === '/explore'
-                    ? 'text-foreground bg-accent'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                className={`px-4 py-2 text-sm font-medium rounded-full transition-all ${location.pathname === '/explore'
+                  ? 'text-primary-foreground bg-primary shadow-md'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                   }`}
               >
                 Explore
@@ -47,9 +58,9 @@ export function Layout() {
               {user && (
                 <Link
                   to="/app"
-                  className={`px-3 py-2 text-sm rounded-md transition-colors ${location.pathname.startsWith('/app')
-                      ? 'text-foreground bg-accent'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                  className={`px-4 py-2 text-sm font-medium rounded-full transition-all ${location.pathname.startsWith('/app')
+                    ? 'text-primary-foreground bg-primary shadow-md'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                     }`}
                 >
                   Dashboard
@@ -58,31 +69,39 @@ export function Layout() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {user ? (
               <>
-                <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
+                {/* New Button */}
+                <Button asChild size="sm" className="hidden sm:inline-flex shadow-md">
                   <Link to="/app/new">
                     <Plus className="mr-2 h-4 w-4" />
                     New
                   </Link>
                 </Button>
-                <Button variant="ghost" size="icon" asChild>
-                  <Link to="/app/profile" aria-label="View profile">
-                    <User className="h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={signOut}
-                  aria-label="Sign out"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
+
+                {/* User Avatar */}
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="icon" asChild className="rounded-full">
+                    <Link to="/app/profile" aria-label="View profile">
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
+                        {user.email?.[0]?.toUpperCase() || 'U'}
+                      </div>
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={signOut}
+                    aria-label="Sign out"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
               </>
             ) : (
-              <Button size="sm" onClick={signInWithGoogle}>
+              <Button size="sm" onClick={signInWithGoogle} className="shadow-md">
                 Sign In
               </Button>
             )}
