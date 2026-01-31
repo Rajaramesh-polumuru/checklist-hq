@@ -6,6 +6,9 @@ import { Dashboard } from '@/pages/Dashboard'
 import { Editor } from '@/pages/Editor'
 import { Explore } from '@/pages/Explore'
 import { AuthCallback } from '@/pages/AuthCallback'
+import { RunMode } from '@/pages/RunMode'
+import { ViewRepository } from '@/pages/ViewRepository'
+import { ViewVersion } from '@/pages/ViewVersion'
 import { useAuthStore } from '@/stores/auth-store'
 
 // Protected route wrapper
@@ -68,9 +71,33 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="app/run/:runId"
+            element={
+              <ProtectedRoute>
+                <RunMode />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="app/run/start/:repoId"
+            element={
+              <ProtectedRoute>
+                <RunMode />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="app/repo/:repoId/version/:commitId"
+            element={
+              <ProtectedRoute>
+                <ViewVersion />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Public repo view (for forking) */}
-          <Route path="repo/:repoId" element={<Explore />} />
+          <Route path="repo/:repoId" element={<ViewRepository />} />
         </Route>
       </Routes>
     </BrowserRouter>

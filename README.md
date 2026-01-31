@@ -1,119 +1,68 @@
 # Checklist HQ
 
-**The GitHub for Process** - Don't write checklists. Fork them.
+> **"Don’t write checklists. Fork them."**
 
-Checklist HQ is a platform that applies the GitHub paradigm of version control, forking, and merging to business processes and SOPs.
+Checklist HQ is the strategic blueprint for the "GitHub for Process" ecosystem. It moves beyond simple to-do lists to a platform for the **standardization of excellence**. By treating Standard Operating Procedures (SOPs) not as static documents but as dynamic, versioned code repositories, we unlock a mechanism for distributed process improvement.
 
-## Tech Stack
+## The Core Concept
+The market has fundamentally misunderstood operational work. The challenge isn't remembering to do a task; it's knowing the *optimal* way to perform it.
+Checklist HQ leverages the mental model of software development—version control, forking, and merging—to revolutionize business operations.
 
-- **Frontend**: React 19 + TypeScript + Vite
-- **Styling**: Tailwind CSS v4 + shadcn/ui components
-- **State Management**: Zustand
-- **Backend**: Supabase (PostgreSQL + Auth)
-- **Drag & Drop**: @dnd-kit
+- **Repositories**: Processes are code-like repositories, not docs.
+- **Commits**: Every change is an immutable snapshot.
+- **Forks**: Don't start from a blank page. Fork an existing process and adapt it.
+- **Runs**: Execute specific versions of a process with full auditability.
 
-## Project Structure
+## Tech Stack (The "Ruthless MVP")
 
-```
-src/
-├── components/
-│   ├── ui/              # shadcn/ui components
-│   ├── ChecklistEditor.tsx
-│   ├── ChecklistItem.tsx
-│   └── Layout.tsx
-├── lib/
-│   ├── supabase.ts      # Supabase client
-│   └── utils.ts         # Utility functions
-├── pages/
-│   ├── AuthCallback.tsx
-│   ├── Dashboard.tsx
-│   ├── Editor.tsx
-│   ├── Explore.tsx
-│   └── Home.tsx
-├── stores/
-│   ├── auth-store.ts    # Auth state
-│   └── checklist-store.ts # Checklist editor state
-├── types/
-│   └── database.ts      # TypeScript types
-├── App.tsx
-└── main.tsx
-
-supabase/
-└── migrations/
-    └── 001_initial_schema.sql  # Database schema
-```
+- **Frontend**: React (Vite) + Tailwind CSS + shadcn/ui
+- **State**: Zustand (for high-performance, transient editor state)
+- **Backend**: Supabase (PostgreSQL + Auth + Real-time)
+- **Drag & Drop**: @dnd-kit/core (Vertical list optimization)
 
 ## Getting Started
 
 ### Prerequisites
-
 - Node.js 18+
-- A Supabase account
+- Supabase Project
 
-### 1. Install Dependencies
+### Installation
+1.  **Clone & Install**
+    ```bash
+    git clone https://github.com/yourusername/checklist-hq.git
+    cd checklist-hq
+    npm install
+    ```
 
-```bash
-npm install
-```
+2.  **Environment Setup**
+    Create `.env` based on `.env.example`:
+    ```env
+    VITE_SUPABASE_URL=your_project_url
+    VITE_SUPABASE_ANON_KEY=your_anon_key
+    ```
 
-### 2. Set Up Supabase
+3.  **Database Migration**
+    Run the SQL scripts in `supabase/migrations` against your Supabase SQL Editor.
 
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Run the migration in `supabase/migrations/001_initial_schema.sql` in the SQL Editor
-3. Enable Google OAuth in Authentication > Providers
-4. Copy your project URL and anon key
+4.  **Run Development Server**
+    ```bash
+    npm run dev
+    ```
 
-### 3. Configure Environment
+## Roadmap
 
-Create a `.env` file:
+- **Phase 1: The Foundation** (Current)
+    - Editor with nested indentation (Tab/Shift+Tab)
+    - "Git-like" Schema Implementation
+    - Forking Mechanism (Deep Copy)
 
-```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-```
+- **Phase 2: The Network**
+    - Public ecosystem
+    - "Forks per User" metrics
 
-### 4. Run Development Server
-
-```bash
-npm run dev
-```
-
-## Key Features
-
-### MVP (Phase 1)
-- Checklist editor with keyboard shortcuts (Enter, Tab, Shift+Tab)
-- Drag-and-drop reordering
-- Fork public checklists
-- Version history (commits)
-- Run mode for executing checklists
-
-### Planned (Phase 2+)
-- Team workspaces
-- Upstream merge (sync with original)
-- Public library with ranking
-- Verified creators
-- Enterprise compliance features
-
-## Database Schema
-
-The schema follows a "Git-like" model:
-
-- **repositories**: The checklist container with forking lineage
-- **commits**: Immutable snapshots of checklist content
-- **runs**: Execution instances with progress tracking
-
-See [supabase/migrations/001_initial_schema.sql](supabase/migrations/001_initial_schema.sql) for details.
-
-## Keyboard Shortcuts (Editor)
-
-| Key | Action |
-|-----|--------|
-| `Enter` | Add new item |
-| `Tab` | Indent item |
-| `Shift+Tab` | Outdent item |
-| `Backspace` (empty) | Delete item |
-| `Arrow Up/Down` | Navigate items |
+- **Phase 3: The Enterprise**
+    - Upstream Merging
+    - Role-Based Access Control (RBAC)
 
 ## License
-
 MIT

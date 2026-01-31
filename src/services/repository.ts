@@ -116,6 +116,48 @@ export async function getCommitHistory(repoId: string): Promise<Commit[]> {
   return (data || []) as Commit[]
 }
 
+export async function getCommit(commitId: string): Promise<Commit | null> {
+  const { data, error } = await supabase
+    .from('commits')
+    .select()
+    .eq('id', commitId)
+    .single()
+
+  if (error) {
+    if (error.code === 'PGRST116') return null // Not found
+    throw error
+  }
+  return data as Commit
+}
+
+/**
+ * Restore a repository to a specific commit version
+ * Creates a new commit with the content from the specified commit
+ */
+export async function restoreToCommit(params: {
+  repoId: string
+  commitId: string
+  latestCommitId?: string
+}): Promise<Commit> {
+  const { repoId, commitId, latestCommitId } = params
+
+  // Get the commit to restore from
+  const sourceCommit = await getCommit(commitId)
+  if (!sourceCommit) {
+    throw new Error('Commit not found')
+  }
+
+  // Create a new commit with the restored content
+  const commit = await createCommit({
+    repo_id: repoId,
+    content: sourceCommit.content,
+    message: `Restored to version from ${new Date(sourceCommit.created_at).toLocaleDateString()}`,
+    parent_commit_id: latestCommitId,
+  })
+
+  return commit
+}
+
 // ============================================
 // Combined Operations
 // ============================================

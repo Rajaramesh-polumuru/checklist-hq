@@ -3,9 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ChecklistEditor } from '@/components/ChecklistEditor'
+import { VersionHistory } from '@/components/VersionHistory'
+import { DiffView } from '@/components/DiffView'
 import { useChecklistStore } from '@/stores/checklist-store'
 import { useAuthStore } from '@/stores/auth-store'
-import { ArrowLeft, Save, Play, Globe, Lock, Loader2, Check } from 'lucide-react'
+import { ArrowLeft, Save, Play, Globe, Lock, Loader2, Check, History } from 'lucide-react'
 import type { ChecklistContent, Repository, Commit } from '@/types/database'
 import {
   createRepositoryWithCommit,
@@ -13,6 +15,7 @@ import {
   getLatestCommit,
   saveRepositoryChanges,
   updateRepository,
+  restoreToCommit,
 } from '@/services/repository'
 
 export function Editor() {
@@ -32,6 +35,10 @@ export function Editor() {
   const [saving, setSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [error, setError] = useState<string | null>(null)
+
+  // Version history state
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [compareCommits, setCompareCommits] = useState<{ commit1: Commit; commit2: Commit } | null>(null)
 
   // Auto-save timer ref
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -173,14 +180,14 @@ export function Editor() {
     }
   }, [user, isNew, title, isPublic, content, repository, latestCommit, navigate, resetDirty])
 
-  const handleStartRun = () => {
+  const handleStartRun = async () => {
     if (!repository) {
-      // Save first if new
-      handleSave()
+      // Save first if new, then navigate to run
+      await handleSave()
       return
     }
-    // TODO: Create a new run and navigate to run mode
-    console.log('Starting run for:', repository.id)
+    // Navigate to run mode - it will create a new run automatically
+    navigate(`/app/run/start/${repository.id}`)
   }
 
   const handleBack = () => {
@@ -189,6 +196,46 @@ export function Editor() {
       if (!confirmLeave) return
     }
     navigate('/app')
+  }
+
+  // Version history handlers
+  const handleViewVersion = (commit: Commit) => {
+    if (!repository) return
+    setHistoryOpen(false)
+    navigate(`/app/repo/${repository.id}/version/${commit.id}`)
+  }
+
+  const handleRestoreVersion = async (commit: Commit) => {
+    if (!repository) return
+
+    const confirmRestore = window.confirm(
+      `Are you sure you want to restore to this version? This will create a new version with the content from "${commit.message || 'this commit'}".`
+    )
+    if (!confirmRestore) return
+
+    try {
+      setSaving(true)
+      const newCommit = await restoreToCommit({
+        repoId: repository.id,
+        commitId: commit.id,
+        latestCommitId: latestCommit?.id,
+      })
+
+      setLatestCommit(newCommit)
+      setContent(newCommit.content)
+      resetDirty()
+      setHistoryOpen(false)
+    } catch (err) {
+      console.error('Error restoring version:', err)
+      setError('Failed to restore version')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleCompareVersions = (commit1: Commit, commit2: Commit) => {
+    setCompareCommits({ commit1, commit2 })
+    setHistoryOpen(false)
   }
 
   // Loading state
@@ -262,6 +309,19 @@ export function Editor() {
               )}
             </Button>
 
+            {/* Version History Button */}
+            {!isNew && repository && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setHistoryOpen(true)}
+                className="gap-2"
+              >
+                <History className="h-4 w-4" />
+                History
+              </Button>
+            )}
+
             <Button
               variant="outline"
               size="sm"
@@ -301,6 +361,29 @@ export function Editor() {
       <main className="container mx-auto px-4 py-8 max-w-3xl">
         <ChecklistEditor />
       </main>
+
+      {/* Version History Panel */}
+      {repository && (
+        <VersionHistory
+          repoId={repository.id}
+          currentCommitId={latestCommit?.id}
+          isOpen={historyOpen}
+          onClose={() => setHistoryOpen(false)}
+          onViewVersion={handleViewVersion}
+          onRestoreVersion={handleRestoreVersion}
+          onCompareVersions={handleCompareVersions}
+        />
+      )}
+
+      {/* Diff View Modal */}
+      {compareCommits && (
+        <DiffView
+          commit1={compareCommits.commit1}
+          commit2={compareCommits.commit2}
+          isOpen={true}
+          onClose={() => setCompareCommits(null)}
+        />
+      )}
     </div>
   )
 }
