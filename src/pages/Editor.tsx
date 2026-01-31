@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
 import { ChecklistEditor } from '@/components/ChecklistEditor'
 import { VersionHistory } from '@/components/VersionHistory'
 import { DiffView } from '@/components/DiffView'
@@ -11,7 +12,21 @@ import { useChecklistStore } from '@/stores/checklist-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useDebounce } from '@/hooks/useDebounce'
 import { AUTO_SAVE } from '@/lib/constants'
-import { ArrowLeft, Save, Play, Globe, Lock, Loader2, Check, History, Pencil, Keyboard } from 'lucide-react'
+import {
+  ArrowLeft,
+  Save,
+  Play,
+  Globe,
+  Lock,
+  Loader2,
+  History,
+  Pencil,
+  Keyboard,
+  GitFork,
+  ListChecks,
+  Cloud,
+  CloudOff
+} from 'lucide-react'
 import type { ChecklistContent, Repository, Commit } from '@/types/database'
 import {
   createRepositoryWithCommit,
@@ -57,6 +72,9 @@ export function Editor() {
 
   // Check for unsaved changes
   const hasMetadataChanges = repository ? (title !== repository.title || isPublic !== repository.is_public) : false
+
+  // Item count
+  const itemCount = Object.keys(content.items).length
 
   // Load existing repository
   useEffect(() => {
@@ -277,7 +295,13 @@ export function Editor() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="text-center animate-fade-in">
+          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <ListChecks className="h-6 w-6 text-primary" />
+          </div>
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mx-auto mb-2" />
+          <p className="text-muted-foreground text-sm">Loading checklist...</p>
+        </div>
       </div>
     )
   }
@@ -297,25 +321,36 @@ export function Editor() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card sticky top-0 z-10">
+      <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={handleBack}>
+          {/* Left side: Back, Logo, Title */}
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={handleBack} className="shrink-0">
               <ArrowLeft className="h-4 w-4" />
             </Button>
 
-            <div className="group flex items-center gap-2">
+            {/* Brand */}
+            <Link to="/app" className="hidden sm:flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+              <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                <GitFork className="h-3.5 w-3.5 text-primary" />
+              </div>
+            </Link>
+
+            <div className="h-4 w-px bg-border hidden sm:block" />
+
+            {/* Title with edit */}
+            <div className="group flex items-center gap-1">
               <Input
                 ref={titleInputRef}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="text-lg font-semibold border-none bg-transparent h-auto p-0 focus-visible:ring-0 w-64 px-2 py-1 rounded hover:bg-accent/50 transition-colors"
+                className="text-base font-semibold border-none bg-transparent h-auto p-0 focus-visible:ring-0 w-44 sm:w-56 px-2 py-1 rounded hover:bg-accent/50 transition-colors"
                 placeholder="Checklist title..."
               />
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity -ml-2 text-muted-foreground"
+                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground"
                 onClick={() => titleInputRef.current?.focus()}
                 title="Rename checklist"
               >
@@ -323,44 +358,58 @@ export function Editor() {
               </Button>
             </div>
 
-            {/* Save status indicator */}
-            {saveStatus === 'saved' && (
-              <span className="flex items-center gap-1 text-sm text-green-600">
-                <Check className="h-4 w-4" />
-                Saved
-              </span>
-            )}
-            {saveStatus === 'saving' && (
-              <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Saving...
-              </span>
-            )}
-
-            {/* Unsaved changes indicator */}
-            {!isNew && !loading && !saving && saveStatus !== 'saved' && (isDirty || hasMetadataChanges) && (
-              <span className="text-sm text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
-                Unsaved changes
-              </span>
-            )}
+            {/* Status indicators */}
+            <div className="hidden md:flex items-center gap-2">
+              {saveStatus === 'saved' && (
+                <Badge variant="success" className="gap-1 text-xs animate-fade-in">
+                  <Cloud className="h-3 w-3" />
+                  Saved
+                </Badge>
+              )}
+              {saveStatus === 'saving' && (
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Saving...
+                </Badge>
+              )}
+              {saveStatus === 'error' && (
+                <Badge variant="destructive" className="gap-1 text-xs">
+                  <CloudOff className="h-3 w-3" />
+                  Error
+                </Badge>
+              )}
+              {!isNew && !loading && !saving && saveStatus === 'idle' && (isDirty || hasMetadataChanges) && (
+                <Badge variant="warning" className="text-xs">
+                  Unsaved
+                </Badge>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Right side: Actions */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Item count */}
+            <span className="hidden lg:flex items-center gap-1.5 text-xs text-muted-foreground mr-2">
+              <ListChecks className="h-3.5 w-3.5" />
+              {itemCount} {itemCount === 1 ? 'item' : 'items'}
+            </span>
+
+            {/* Privacy toggle */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsPublic(!isPublic)}
-              className="gap-2"
+              className="gap-1.5 text-muted-foreground hover:text-foreground"
             >
               {isPublic ? (
                 <>
                   <Globe className="h-4 w-4" />
-                  Public
+                  <span className="hidden sm:inline text-xs">Public</span>
                 </>
               ) : (
                 <>
                   <Lock className="h-4 w-4" />
-                  Private
+                  <span className="hidden sm:inline text-xs">Private</span>
                 </>
               )}
             </Button>
@@ -368,28 +417,30 @@ export function Editor() {
             {/* Keyboard Shortcuts Button */}
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={() => setShowShortcuts(true)}
-              className="gap-2"
+              className="text-muted-foreground hover:text-foreground"
               title="Keyboard shortcuts (?)"
             >
               <Keyboard className="h-4 w-4" />
-              <span className="hidden lg:inline">Shortcuts</span>
             </Button>
 
             {/* Version History Button */}
             {!isNew && repository && (
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={() => setHistoryOpen(true)}
-                className="gap-2"
+                className="text-muted-foreground hover:text-foreground"
+                title="Version history"
               >
                 <History className="h-4 w-4" />
-                History
               </Button>
             )}
 
+            <div className="h-4 w-px bg-border mx-1" />
+
+            {/* Save button */}
             <Button
               variant="outline"
               size="sm"
@@ -397,17 +448,18 @@ export function Editor() {
               disabled={saving || (!isNew && !isDirty && !hasMetadataChanges)}
               className={isDirty || hasMetadataChanges ? "border-primary text-primary hover:bg-primary/5" : ""}
             >
-              <Save className="mr-2 h-4 w-4" />
-              {saving ? 'Saving...' : isNew ? 'Create' : 'Save'}
+              <Save className="mr-1.5 h-4 w-4" />
+              <span className="hidden sm:inline">{isNew ? 'Create' : 'Save'}</span>
             </Button>
 
+            {/* Run button */}
             <Button
               size="sm"
               onClick={handleStartRun}
-              disabled={Object.keys(content.items).length === 0}
+              disabled={itemCount === 0}
             >
-              <Play className="mr-2 h-4 w-4" />
-              Run
+              <Play className="mr-1.5 h-4 w-4" />
+              <span className="hidden sm:inline">Run</span>
             </Button>
           </div>
         </div>
@@ -417,7 +469,7 @@ export function Editor() {
       <ErrorBanner error={error} onDismiss={() => setError(null)} priority="polite" />
 
       {/* Editor */}
-      <main className="container mx-auto px-4 py-8 max-w-3xl">
+      <main className="container mx-auto px-4 py-6 max-w-3xl">
         <ChecklistEditor />
       </main>
 

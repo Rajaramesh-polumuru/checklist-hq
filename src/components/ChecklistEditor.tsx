@@ -16,7 +16,8 @@ import {
 import { useChecklistStore } from '@/stores/checklist-store'
 import { ChecklistItem } from './ChecklistItem'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { Plus, ListChecks, Lightbulb } from 'lucide-react'
 import type { ChecklistItem as ChecklistItemType } from '@/types/database'
 
 export function ChecklistEditor() {
@@ -83,23 +84,50 @@ export function ChecklistEditor() {
       >
         <SortableContext items={allItemIds} strategy={verticalListSortingStrategy}>
           {rootItems.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <p className="mb-4">Start building your checklist</p>
-              <Button onClick={handleAddItem}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add first item
-              </Button>
-            </div>
+            /* Enhanced empty state */
+            <Card className="border-dashed border-2 bg-muted/30">
+              <div className="text-center py-16 px-6">
+                <div className="mx-auto w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-5">
+                  <ListChecks className="h-7 w-7 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Start building your checklist</h3>
+                <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">
+                  Add items to create your standard operating procedure. Press <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded border">Enter</kbd> to add new items.
+                </p>
+                <Button onClick={handleAddItem} size="lg" className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add first item
+                </Button>
+
+                {/* Quick tips */}
+                <div className="mt-8 pt-6 border-t border-dashed">
+                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mb-3">
+                    <Lightbulb className="h-3.5 w-3.5" />
+                    <span>Quick tips</span>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
+                    <span><kbd className="px-1 py-0.5 bg-muted rounded border text-[10px]">Tab</kbd> to indent</span>
+                    <span><kbd className="px-1 py-0.5 bg-muted rounded border text-[10px]">Shift+Tab</kbd> to outdent</span>
+                    <span><kbd className="px-1 py-0.5 bg-muted rounded border text-[10px]">↑↓</kbd> to navigate</span>
+                    <span><kbd className="px-1 py-0.5 bg-muted rounded border text-[10px]">?</kbd> for all shortcuts</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
           ) : (
-            renderItems(rootItems)
+            /* Checklist items */
+            <Card className="divide-y divide-border/50 overflow-hidden">
+              {renderItems(rootItems)}
+            </Card>
           )}
         </SortableContext>
       </DndContext>
 
+      {/* Add item button */}
       {rootItems.length > 0 && (
         <Button
           variant="ghost"
-          className="w-full justify-start text-muted-foreground"
+          className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent/50 h-11 rounded-lg"
           onClick={handleAddItem}
         >
           <Plus className="mr-2 h-4 w-4" />

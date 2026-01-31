@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState, memo, type KeyboardEvent } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Trash2 } from 'lucide-react'
+import { GripVertical, Trash2, Circle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { DESIGN_TOKENS } from '@/lib/constants'
 import { useChecklistStore } from '@/stores/checklist-store'
@@ -15,6 +15,7 @@ interface ChecklistItemProps {
 export const ChecklistItem = memo(function ChecklistItem({ item, depth }: ChecklistItemProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [isHovered, setIsHovered] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   const {
     updateItem,
@@ -133,6 +134,11 @@ export const ChecklistItem = memo(function ChecklistItem({ item, depth }: Checkl
 
   const handleFocus = () => {
     setFocusedItem(item.id)
+    setIsFocused(true)
+  }
+
+  const handleBlur = () => {
+    setIsFocused(false)
   }
 
   const handleDelete = () => {
@@ -146,15 +152,17 @@ export const ChecklistItem = memo(function ChecklistItem({ item, depth }: Checkl
     }
   }
 
+  const isActive = isHovered || isFocused || focusedItemId === item.id
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group flex items-center gap-2 py-1 px-2 rounded-md transition-colors',
-        isDragging && 'opacity-50 bg-accent',
-        focusedItemId === item.id && 'bg-accent/50',
-        'hover:bg-accent/30'
+        'group flex items-center gap-2 px-3 py-2.5 transition-all duration-150',
+        isDragging && 'opacity-50 bg-accent shadow-lg rounded-lg',
+        !isDragging && 'hover:bg-accent/30',
+        focusedItemId === item.id && !isDragging && 'bg-primary/5'
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -162,29 +170,38 @@ export const ChecklistItem = memo(function ChecklistItem({ item, depth }: Checkl
       {/* Drag Handle */}
       <button
         className={cn(
-          'cursor-grab touch-none text-muted-foreground/70 hover:text-muted-foreground transition-opacity',
-          'min-w-[44px] min-h-[44px] flex items-center justify-center',
-          !isHovered && 'opacity-0'
+          'cursor-grab touch-none text-muted-foreground/50 hover:text-muted-foreground transition-all duration-150',
+          'w-6 h-6 flex items-center justify-center rounded shrink-0',
+          !isActive && 'opacity-0',
+          isActive && 'opacity-100'
         )}
         aria-label="Drag to reorder item"
         {...attributes}
         {...listeners}
       >
         <GripVertical className="h-4 w-4" />
-        <span className="sr-only">Drag handle</span>
       </button>
 
-      {/* Indentation */}
+      {/* Indentation spacer */}
       {depth > 0 && (
         <div
-          className="border-l-2 border-muted h-6"
-          style={{ marginLeft: `${(depth - 1) * DESIGN_TOKENS.spacing.itemIndentPx}px` }}
+          className="shrink-0"
+          style={{ width: `${depth * DESIGN_TOKENS.spacing.itemIndentPx}px` }}
           aria-hidden="true"
         />
       )}
 
-      {/* Bullet point */}
-      <div className="w-2 h-2 rounded-full bg-primary/50 shrink-0" />
+      {/* Checkbox-style indicator */}
+      <div className={cn(
+        'shrink-0 transition-colors duration-150',
+        item.text ? 'text-primary/60' : 'text-muted-foreground/40'
+      )}>
+        {item.text ? (
+          <Circle className="h-4 w-4" strokeWidth={2} />
+        ) : (
+          <Circle className="h-4 w-4" strokeWidth={1.5} strokeDasharray="3 3" />
+        )}
+      </div>
 
       {/* Input */}
       <input
@@ -194,29 +211,29 @@ export const ChecklistItem = memo(function ChecklistItem({ item, depth }: Checkl
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onFocus={handleFocus}
+        onBlur={handleBlur}
         placeholder="Type here..."
         aria-label={item.text || 'Checklist item'}
         className={cn(
-          'flex-1 bg-transparent border-none outline-none text-foreground',
-          'placeholder:text-muted-foreground/50',
-          'focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-sm'
+          'flex-1 bg-transparent border-none outline-none text-foreground min-w-0',
+          'placeholder:text-muted-foreground/40',
+          'focus:ring-0'
         )}
-        style={{ paddingLeft: `${depth * DESIGN_TOKENS.spacing.itemIndentPx}px` }}
       />
 
       {/* Delete button */}
       <button
         onClick={handleDelete}
         className={cn(
-          'text-muted-foreground/70 hover:text-destructive transition-opacity',
-          'min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md',
-          'focus:opacity-100 focus:ring-2 focus:ring-destructive',
-          !isHovered && 'opacity-0'
+          'text-muted-foreground/50 hover:text-destructive transition-all duration-150',
+          'w-7 h-7 flex items-center justify-center rounded shrink-0',
+          'hover:bg-destructive/10',
+          !isActive && 'opacity-0',
+          isActive && 'opacity-100'
         )}
         aria-label="Delete item"
       >
         <Trash2 className="h-4 w-4" />
-        <span className="sr-only">Delete item</span>
       </button>
     </div>
   )
