@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { GitFork, List, Users, Zap, CheckCircle2, ArrowRight } from 'lucide-react'
+import { GitFork, List, Users, Zap, ArrowRight, Sparkles } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 
 export function Home() {
@@ -10,114 +10,145 @@ export function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Subtle background pattern */}
+      <section className="relative overflow-hidden min-h-[90vh] flex items-center">
+        {/* Premium gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/10" />
+
+        {/* Animated orbs */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
+
+        {/* Subtle dot pattern */}
         <div
-          className="absolute inset-0 opacity-[0.015]"
+          className="absolute inset-0 opacity-[0.02]"
           style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
-            backgroundSize: '32px 32px',
+            backgroundSize: '24px 24px',
           }}
         />
 
         <div className="container mx-auto px-4 py-20 md:py-28 relative">
-          <div className="text-center max-w-3xl mx-auto">
-            {/* Tagline badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 text-primary text-sm font-medium mb-6 animate-fade-in">
-              <CheckCircle2 className="h-4 w-4" />
+          <div className="text-center max-w-4xl mx-auto">
+            {/* Animated badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8 animate-fade-in shadow-lg shadow-primary/5">
+              <Sparkles className="h-4 w-4" />
               <span>The GitHub for standard operating procedures</span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-slide-up">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 animate-slide-up">
               Don't write checklists.
               <br />
-              <span className="text-primary">Fork them.</span>
+              <span className="bg-gradient-to-r from-primary via-primary to-emerald-500 bg-clip-text text-transparent">
+                Fork them.
+              </span>
             </h1>
 
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '50ms' }}>
+            <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-slide-up leading-relaxed" style={{ animationDelay: '50ms' }}>
               Checklist HQ is where teams version control their SOPs, fork proven templates,
               and evolve their operations with the community.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style={{ animationDelay: '100ms' }}>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-slide-up" style={{ animationDelay: '100ms' }}>
               {user ? (
-                <Button asChild size="lg">
+                <Button asChild size="lg" className="text-lg px-8 py-6 shadow-xl shadow-primary/25">
                   <Link to="/app">
                     Go to Dashboard
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
               ) : (
                 <>
-                  <Button size="lg" onClick={signInWithGoogle}>
+                  <Button size="lg" onClick={signInWithGoogle} className="text-lg px-8 py-6 shadow-xl shadow-primary/25">
                     Get Started Free
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
-                  <Button variant="outline" size="lg" asChild>
+                  <Button variant="outline" size="lg" asChild className="text-lg px-8 py-6">
                     <Link to="/explore">Explore Templates</Link>
                   </Button>
                 </>
               )}
+            </div>
+
+            {/* Stats Row */}
+            <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '200ms' }}>
+              <div className="text-center p-4">
+                <p className="text-3xl md:text-4xl font-bold text-primary">500+</p>
+                <p className="text-sm text-muted-foreground mt-1">Templates</p>
+              </div>
+              <div className="text-center p-4 border-x border-border">
+                <p className="text-3xl md:text-4xl font-bold text-primary">2K+</p>
+                <p className="text-sm text-muted-foreground mt-1">Teams</p>
+              </div>
+              <div className="text-center p-4">
+                <p className="text-3xl md:text-4xl font-bold text-primary">99.9%</p>
+                <p className="text-sm text-muted-foreground mt-1">Uptime</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-16 md:py-24">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-4">
+      <section className="container mx-auto px-4 py-20 md:py-28">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
             Built for teams who take process seriously
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Everything you need to create, share, and improve your standard operating procedures.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card hoverable className="group">
-            <CardHeader>
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/15 transition-colors">
-                <GitFork className="h-5 w-5 text-primary" />
+          <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-emerald-500" />
+            <CardHeader className="pt-6">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <GitFork className="h-6 w-6 text-primary" />
               </div>
               <CardTitle className="text-lg">Fork & Customize</CardTitle>
-              <CardDescription className="text-sm">
+              <CardDescription className="text-sm leading-relaxed">
                 Start with battle-tested templates. Fork, customize, and make them yours.
               </CardDescription>
             </CardHeader>
           </Card>
 
-          <Card hoverable className="group">
-            <CardHeader>
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/15 transition-colors">
-                <List className="h-5 w-5 text-primary" />
+          <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-500" />
+            <CardHeader className="pt-6">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <List className="h-6 w-6 text-blue-500" />
               </div>
               <CardTitle className="text-lg">Version Control</CardTitle>
-              <CardDescription className="text-sm">
+              <CardDescription className="text-sm leading-relaxed">
                 Every change is tracked. Roll back, compare versions, and see the full history.
               </CardDescription>
             </CardHeader>
           </Card>
 
-          <Card hoverable className="group">
-            <CardHeader>
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/15 transition-colors">
-                <Users className="h-5 w-5 text-primary" />
+          <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-violet-500/5">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500" />
+            <CardHeader className="pt-6">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Users className="h-6 w-6 text-violet-500" />
               </div>
               <CardTitle className="text-lg">Community Driven</CardTitle>
-              <CardDescription className="text-sm">
+              <CardDescription className="text-sm leading-relaxed">
                 The best processes rise to the top. Learn from thousands of teams.
               </CardDescription>
             </CardHeader>
           </Card>
 
-          <Card hoverable className="group">
-            <CardHeader>
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/15 transition-colors">
-                <Zap className="h-5 w-5 text-primary" />
+          <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/5">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+            <CardHeader className="pt-6">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-500/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Zap className="h-6 w-6 text-amber-500" />
               </div>
               <CardTitle className="text-lg">Execute with Confidence</CardTitle>
-              <CardDescription className="text-sm">
+              <CardDescription className="text-sm leading-relaxed">
                 Run checklists, track progress, and never miss a critical step.
               </CardDescription>
             </CardHeader>
