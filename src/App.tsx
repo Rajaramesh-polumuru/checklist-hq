@@ -1,19 +1,34 @@
-import { useEffect } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
 import { Layout } from '@/components/Layout'
-import { Home } from '@/pages/Home'
-import { Dashboard } from '@/pages/Dashboard'
-import { Editor } from '@/pages/Editor'
-import { ActiveRuns } from '@/pages/ActiveRuns'
-import { RunHistory } from '@/pages/RunHistory'
-import { Activity } from '@/pages/Activity'
-import { Profile } from '@/pages/Profile'
-import { Explore } from '@/pages/Explore'
-import { AuthCallback } from '@/pages/AuthCallback'
-import { RunMode } from '@/pages/RunMode'
-import { ViewRepository } from '@/pages/ViewRepository'
-import { ViewVersion } from '@/pages/ViewVersion'
 import { useAuthStore } from '@/stores/auth-store'
+
+// Lazy load all pages for code splitting
+const Home = lazy(() => import('@/pages/Home').then(m => ({ default: m.Home })))
+const Dashboard = lazy(() => import('@/pages/Dashboard').then(m => ({ default: m.Dashboard })))
+const Editor = lazy(() => import('@/pages/Editor').then(m => ({ default: m.Editor })))
+const ActiveRuns = lazy(() => import('@/pages/ActiveRuns').then(m => ({ default: m.ActiveRuns })))
+const RunHistory = lazy(() => import('@/pages/RunHistory').then(m => ({ default: m.RunHistory })))
+const Activity = lazy(() => import('@/pages/Activity').then(m => ({ default: m.Activity })))
+const Profile = lazy(() => import('@/pages/Profile').then(m => ({ default: m.Profile })))
+const Explore = lazy(() => import('@/pages/Explore').then(m => ({ default: m.Explore })))
+const AuthCallback = lazy(() => import('@/pages/AuthCallback').then(m => ({ default: m.AuthCallback })))
+const RunMode = lazy(() => import('@/pages/RunMode').then(m => ({ default: m.RunMode })))
+const ViewRepository = lazy(() => import('@/pages/ViewRepository').then(m => ({ default: m.ViewRepository })))
+const ViewVersion = lazy(() => import('@/pages/ViewVersion').then(m => ({ default: m.ViewVersion })))
+
+// Loading fallback component
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-2" />
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+  )
+}
 
 // Protected route wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -45,17 +60,19 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          {/* Public routes */}
-          <Route index element={<Home />} />
-          <Route path="explore" element={<Explore />} />
-          <Route path="auth/callback" element={<AuthCallback />} />
+            {/* Public routes */}
+            <Route index element={<Suspense fallback={<PageLoader />}><Home /></Suspense>} />
+            <Route path="explore" element={<Suspense fallback={<PageLoader />}><Explore /></Suspense>} />
+            <Route path="auth/callback" element={<Suspense fallback={<PageLoader />}><AuthCallback /></Suspense>} />
 
           {/* Protected routes */}
           <Route
             path="app"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <Suspense fallback={<PageLoader />}>
+                  <Dashboard />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -63,7 +80,9 @@ function App() {
             path="app/runs"
             element={
               <ProtectedRoute>
-                <ActiveRuns />
+                <Suspense fallback={<PageLoader />}>
+                  <ActiveRuns />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -71,7 +90,9 @@ function App() {
             path="app/history"
             element={
               <ProtectedRoute>
-                <RunHistory />
+                <Suspense fallback={<PageLoader />}>
+                  <RunHistory />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -79,7 +100,9 @@ function App() {
             path="app/activity"
             element={
               <ProtectedRoute>
-                <Activity />
+                <Suspense fallback={<PageLoader />}>
+                  <Activity />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -87,7 +110,9 @@ function App() {
             path="app/profile"
             element={
               <ProtectedRoute>
-                <Profile />
+                <Suspense fallback={<PageLoader />}>
+                  <Profile />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -95,7 +120,9 @@ function App() {
             path="app/new"
             element={
               <ProtectedRoute>
-                <Editor />
+                <Suspense fallback={<PageLoader />}>
+                  <Editor />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -103,7 +130,9 @@ function App() {
             path="app/repo/:repoId"
             element={
               <ProtectedRoute>
-                <Editor />
+                <Suspense fallback={<PageLoader />}>
+                  <Editor />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -111,7 +140,9 @@ function App() {
             path="app/run/:runId"
             element={
               <ProtectedRoute>
-                <RunMode />
+                <Suspense fallback={<PageLoader />}>
+                  <RunMode />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -119,7 +150,9 @@ function App() {
             path="app/run/start/:repoId"
             element={
               <ProtectedRoute>
-                <RunMode />
+                <Suspense fallback={<PageLoader />}>
+                  <RunMode />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -127,13 +160,15 @@ function App() {
             path="app/repo/:repoId/version/:commitId"
             element={
               <ProtectedRoute>
-                <ViewVersion />
+                <Suspense fallback={<PageLoader />}>
+                  <ViewVersion />
+                </Suspense>
               </ProtectedRoute>
             }
           />
 
           {/* Public repo view (for forking) */}
-          <Route path="repo/:repoId" element={<ViewRepository />} />
+          <Route path="repo/:repoId" element={<Suspense fallback={<PageLoader />}><ViewRepository /></Suspense>} />
         </Route>
       </Routes>
     </BrowserRouter>

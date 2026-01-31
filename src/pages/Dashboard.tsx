@@ -3,7 +3,17 @@ import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, GitFork, Play, Clock, Loader2, Globe, Lock, Trash2, Pencil } from 'lucide-react'
+import { SkeletonCard } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Plus, GitFork, Play, Clock, Loader2, Globe, Lock, Trash2, Pencil, ArrowRight, ListChecks } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { getUserRepositories, deleteRepository, updateRepository } from '@/services/repository'
@@ -81,31 +91,14 @@ export function Dashboard() {
     }
   }
 
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Your Checklists</h1>
-            <p className="text-muted-foreground">Welcome back, {user?.email}</p>
-          </div>
-        </div>
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      </div>
-    )
-  }
-
   return (
     <main role="main" aria-label="Dashboard" className="container mx-auto px-4 py-8">
+      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Your Checklists</h1>
-          <p className="text-muted-foreground">
-            Welcome back, {user?.email}
+          <h1 className="text-2xl font-bold tracking-tight">Your Checklists</h1>
+          <p className="text-muted-foreground text-sm">
+            Welcome back, {user?.email?.split('@')[0]}
           </p>
         </div>
         <Button asChild>
@@ -118,25 +111,33 @@ export function Dashboard() {
 
       {/* Error banner */}
       {error && (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-3 mb-6 text-sm text-destructive">
-          {error}
-          <button onClick={() => setError(null)} className="ml-2 underline">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-3 mb-6 text-sm text-destructive flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={() => setError(null)} className="text-destructive hover:underline text-sm font-medium">
             Dismiss
           </button>
         </div>
       )}
 
-      {repositories.length === 0 ? (
-        <Card>
+      {/* Loading state with skeletons */}
+      {loading ? (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      ) : repositories.length === 0 ? (
+        /* Empty state */
+        <Card className="border-dashed">
           <CardContent className="py-16 text-center">
-            <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-              <GitFork className="h-8 w-8 text-muted-foreground" />
+            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <ListChecks className="h-8 w-8 text-primary" />
             </div>
             <h2 className="text-xl font-semibold mb-2">No checklists yet</h2>
             <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
               Create your first checklist or fork one from the community to get started.
             </p>
-            <div className="flex gap-4 justify-center">
+            <div className="flex gap-3 justify-center">
               <Button asChild>
                 <Link to="/app/new">
                   <Plus className="mr-2 h-4 w-4" />
@@ -153,37 +154,45 @@ export function Dashboard() {
           </CardContent>
         </Card>
       ) : (
+        /* Repository grid */
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {repositories.map((repo) => (
-            <Card key={repo.id} className="group relative hover:shadow-lg transition-shadow">
+          {repositories.map((repo, index) => (
+            <Card
+              key={repo.id}
+              hoverable
+              className="group relative animate-fade-in"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
               <Link to={`/app/repo/${repo.id}`}>
-                <CardHeader>
+                <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-lg truncate">{repo.title}</CardTitle>
-                      <div className="flex items-center gap-2 mt-1">
-                        {repo.is_public ? (
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Globe className="h-3 w-3" />
-                            Public
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Lock className="h-3 w-3" />
-                            Private
-                          </span>
-                        )}
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {repo.is_public ? (
+                            <>
+                              <Globe className="h-3 w-3 mr-1" />
+                              Public
+                            </>
+                          ) : (
+                            <>
+                              <Lock className="h-3 w-3 mr-1" />
+                              Private
+                            </>
+                          )}
+                        </Badge>
                         {repo.upstream_repo_id && (
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <GitFork className="h-3 w-3" />
+                          <Badge variant="outline" className="text-xs">
+                            <GitFork className="h-3 w-3 mr-1" />
                             Forked
-                          </span>
+                          </Badge>
                         )}
                       </div>
                     </div>
                   </div>
                   {repo.description && (
-                    <CardDescription className="mt-2 line-clamp-2">
+                    <CardDescription className="mt-3 line-clamp-2">
                       {repo.description}
                     </CardDescription>
                   )}
@@ -201,19 +210,18 @@ export function Dashboard() {
                 </CardContent>
               </Link>
 
-              {/* Actions */}
-              <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+              {/* Hover actions */}
+              <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                 <button
                   onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
                     handleRenameClick(repo)
                   }}
-                  className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors focus:ring-2 focus:ring-ring"
+                  className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-md bg-card/90 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors focus:ring-2 focus:ring-ring shadow-sm"
                   aria-label={`Rename ${repo.title}`}
                 >
                   <Pencil className="h-4 w-4" />
-                  <span className="sr-only">Rename</span>
                 </button>
                 <button
                   onClick={(e) => {
@@ -222,7 +230,7 @@ export function Dashboard() {
                     handleDelete(repo.id, repo.title)
                   }}
                   disabled={deletingId === repo.id}
-                  className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors focus:ring-2 focus:ring-destructive disabled:opacity-50"
+                  className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-md bg-card/90 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors focus:ring-2 focus:ring-destructive shadow-sm disabled:opacity-50"
                   aria-label={`Delete ${repo.title}`}
                 >
                   {deletingId === repo.id ? (
@@ -230,7 +238,6 @@ export function Dashboard() {
                   ) : (
                     <Trash2 className="h-4 w-4" />
                   )}
-                  <span className="sr-only">Delete</span>
                 </button>
               </div>
             </Card>
@@ -240,16 +247,19 @@ export function Dashboard() {
 
       {/* Quick Actions */}
       <div className="mt-12">
-        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+        <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
         <div className="grid md:grid-cols-3 gap-4">
           <Link to="/app/runs">
-            <Card className="cursor-pointer hover:bg-accent transition-colors">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Play className="h-4 w-4" />
-                  Active Runs
-                </CardTitle>
-                <CardDescription>
+            <Card hoverable className="group">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+                    <Play className="h-4 w-4 text-primary" />
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <CardTitle className="text-base mt-3">Active Runs</CardTitle>
+                <CardDescription className="text-sm">
                   View and continue your in-progress checklists
                 </CardDescription>
               </CardHeader>
@@ -257,13 +267,16 @@ export function Dashboard() {
           </Link>
 
           <Link to="/app/activity">
-            <Card className="cursor-pointer hover:bg-accent transition-colors">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Clock className="h-4 w-4" />
-                  Recent Activity
-                </CardTitle>
-                <CardDescription>
+            <Card hoverable className="group">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+                    <Clock className="h-4 w-4 text-primary" />
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <CardTitle className="text-base mt-3">Recent Activity</CardTitle>
+                <CardDescription className="text-sm">
                   See your latest updates and changes
                 </CardDescription>
               </CardHeader>
@@ -271,13 +284,16 @@ export function Dashboard() {
           </Link>
 
           <Link to="/explore">
-            <Card className="cursor-pointer hover:bg-accent transition-colors">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <GitFork className="h-4 w-4" />
-                  Browse Templates
-                </CardTitle>
-                <CardDescription>
+            <Card hoverable className="group">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+                    <GitFork className="h-4 w-4 text-primary" />
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <CardTitle className="text-base mt-3">Browse Templates</CardTitle>
+                <CardDescription className="text-sm">
                   Discover proven checklists from the community
                 </CardDescription>
               </CardHeader>
@@ -287,59 +303,49 @@ export function Dashboard() {
       </div>
 
       {/* Rename Modal */}
-      {renamingRepo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-md animate-in fade-in zoom-in-95 duration-200">
-            <CardHeader>
-              <CardTitle>Rename Checklist</CardTitle>
-              <CardDescription>
-                Enter a new name for this checklist.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={(e) => { e.preventDefault(); submitRename(); }}>
-                <label htmlFor="rename-input" className="text-sm font-medium mb-2 block">
-                  Checklist Name
-                </label>
-                <Input
-                  id="rename-input"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Enter new name"
-                  className="mb-6"
-                  disabled={isRenaming}
-                  autoFocus
-                  aria-required="true"
-                  aria-label="New checklist name"
-                />
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setRenamingRepo(null)}
-                    disabled={isRenaming}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={isRenaming || !newName.trim() || newName === renamingRepo.title}
-                  >
-                    {isRenaming ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Renaming...
-                      </>
-                    ) : (
-                      'Rename'
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <Dialog open={!!renamingRepo} onOpenChange={() => setRenamingRepo(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rename Checklist</DialogTitle>
+            <DialogDescription>
+              Enter a new name for "{renamingRepo?.title}".
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={(e) => { e.preventDefault(); submitRename(); }}>
+            <div className="py-4">
+              <label htmlFor="rename-input" className="text-sm font-medium mb-2 block">
+                Checklist Name
+              </label>
+              <Input
+                id="rename-input"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Enter new name"
+                disabled={isRenaming}
+                autoFocus
+                aria-required="true"
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setRenamingRepo(null)}
+                disabled={isRenaming}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isRenaming || !newName.trim() || newName === renamingRepo?.title}
+                loading={isRenaming}
+              >
+                Rename
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </main>
   )
 }

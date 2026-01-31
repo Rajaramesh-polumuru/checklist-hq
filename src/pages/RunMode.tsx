@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { Badge } from '@/components/ui/badge'
 import { RunItem } from '@/components/RunItem'
 import { formatRelativeTime } from '@/lib/date-utils'
 import {
@@ -12,6 +14,7 @@ import {
   Trophy,
   Clock,
   ListChecks,
+  PartyPopper,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { getRepository } from '@/services/repository'
@@ -39,6 +42,7 @@ export function RunMode() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [completing, setCompleting] = useState(false)
+  const [justCompleted, setJustCompleted] = useState(false)
 
   // Load run data
   useEffect(() => {
@@ -131,6 +135,7 @@ export function RunMode() {
     try {
       await completeRun(run.id)
       setRun((prev) => prev ? { ...prev, status: 'completed' } : null)
+      setJustCompleted(true)
     } catch (err) {
       console.error('Error completing run:', err)
       setError('Failed to complete run')
@@ -146,6 +151,7 @@ export function RunMode() {
     try {
       setLoading(true)
       const newRun = await startRunFromLatestCommit(repository.id, user?.id)
+      setJustCompleted(false)
       navigate(`/app/run/${newRun.id}`, { replace: true })
     } catch (err) {
       console.error('Error restarting run:', err)
@@ -192,7 +198,7 @@ export function RunMode() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-4" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
           <p className="text-muted-foreground">Loading checklist...</p>
         </div>
       </div>
@@ -224,16 +230,20 @@ export function RunMode() {
             </Button>
             <div>
               <h1 className="font-semibold">{repository?.title || 'Checklist Run'}</h1>
-              <p className="text-xs text-muted-foreground">Run Mode</p>
+              <div className="flex items-center gap-2">
+                <Badge variant={isComplete ? 'success' : 'default'} className="text-xs">
+                  {isComplete ? 'Complete' : 'In Progress'}
+                </Badge>
+              </div>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
             {/* Progress indicator */}
-            <div className="flex items-center gap-2 text-sm">
+            <div className="hidden sm:flex items-center gap-3 text-sm">
               <ListChecks className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{completedItems}/{totalItems}</span>
-              <span className="text-muted-foreground">({progressPercent}%)</span>
+              <span className="font-medium tabular-nums">{completedItems}/{totalItems}</span>
+              <Progress value={progressPercent} className="w-24" size="sm" />
             </div>
 
             {isComplete ? (
@@ -246,12 +256,9 @@ export function RunMode() {
                 onClick={handleComplete}
                 disabled={completing || completedItems < totalItems}
                 size="sm"
+                loading={completing}
               >
-                {completing ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                )}
+                <CheckCircle2 className="mr-2 h-4 w-4" />
                 Mark Complete
               </Button>
             )}
@@ -262,7 +269,7 @@ export function RunMode() {
       {/* Progress bar */}
       <div className="h-1 bg-muted">
         <div
-          className="h-full bg-success transition-all duration-300"
+          className="h-full bg-primary transition-all duration-300 ease-out"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
@@ -271,16 +278,21 @@ export function RunMode() {
       <main className="container mx-auto px-4 py-8 max-w-3xl">
         {/* Completion celebration */}
         {isComplete && (
-          <Card className="mb-8 bg-success/10 dark:bg-success/20 border-success/20">
+          <Card className={`mb-8 border-success/30 ${justCompleted ? 'animate-fade-in' : ''}`}>
             <CardContent className="py-8 text-center">
-              <Trophy className="h-12 w-12 text-success mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-success mb-2">
+              <div className="relative inline-block mb-4">
+                <Trophy className="h-12 w-12 text-success" />
+                {justCompleted && (
+                  <PartyPopper className="h-6 w-6 text-warning absolute -top-1 -right-2 animate-fade-in" />
+                )}
+              </div>
+              <h2 className="text-xl font-semibold mb-2">
                 Checklist Complete!
               </h2>
-              <p className="text-success/80 mb-4">
+              <p className="text-muted-foreground mb-6">
                 You've completed all {totalItems} items in this checklist.
               </p>
-              <div className="flex gap-4 justify-center">
+              <div className="flex gap-3 justify-center">
                 <Button onClick={handleRestart} variant="outline">
                   <RotateCcw className="mr-2 h-4 w-4" />
                   Run Again
@@ -296,12 +308,12 @@ export function RunMode() {
         {/* Run info */}
         {run && (
           <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1.5">
               <Clock className="h-4 w-4" />
               Started {formatRelativeTime(run.started_at)}
             </span>
             {run.completed_at && (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="h-4 w-4 text-success" />
                 Completed {formatRelativeTime(run.completed_at)}
               </span>
@@ -311,9 +323,9 @@ export function RunMode() {
 
         {/* Checklist items */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <ListChecks className="h-5 w-5" />
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <ListChecks className="h-5 w-5 text-primary" />
               Checklist Items
             </CardTitle>
           </CardHeader>
@@ -331,4 +343,3 @@ export function RunMode() {
     </div>
   )
 }
-

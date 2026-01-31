@@ -5,11 +5,13 @@ import { Input } from '@/components/ui/input'
 import { ChecklistEditor } from '@/components/ChecklistEditor'
 import { VersionHistory } from '@/components/VersionHistory'
 import { DiffView } from '@/components/DiffView'
+import { KeyboardShortcuts } from '@/components/KeyboardShortcuts'
+import { ErrorBanner } from '@/components/ErrorBanner'
 import { useChecklistStore } from '@/stores/checklist-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useDebounce } from '@/hooks/useDebounce'
 import { AUTO_SAVE } from '@/lib/constants'
-import { ArrowLeft, Save, Play, Globe, Lock, Loader2, Check, History, Pencil } from 'lucide-react'
+import { ArrowLeft, Save, Play, Globe, Lock, Loader2, Check, History, Pencil, Keyboard } from 'lucide-react'
 import type { ChecklistContent, Repository, Commit } from '@/types/database'
 import {
   createRepositoryWithCommit,
@@ -41,6 +43,9 @@ export function Editor() {
   // Version history state
   const [historyOpen, setHistoryOpen] = useState(false)
   const [compareCommits, setCompareCommits] = useState<{ commit1: Commit; commit2: Commit } | null>(null)
+
+  // Keyboard shortcuts state
+  const [showShortcuts, setShowShortcuts] = useState(false)
 
   // Input ref for title
   const titleInputRef = useRef<HTMLInputElement>(null)
@@ -242,6 +247,32 @@ export function Editor() {
     setHistoryOpen(false)
   }
 
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Show shortcuts on "?"
+      if (e.key === '?' && !e.metaKey && !e.ctrlKey) {
+        // Only if not focused on an input
+        const target = e.target as HTMLElement
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          e.preventDefault()
+          setShowShortcuts(true)
+        }
+      }
+
+      // Save on Cmd/Ctrl + S
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault()
+        if (!saving && (isDirty || hasMetadataChanges)) {
+          handleSave(false)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [saving, isDirty, hasMetadataChanges, handleSave])
+
   // Loading state
   if (loading) {
     return (
@@ -334,6 +365,18 @@ export function Editor() {
               )}
             </Button>
 
+            {/* Keyboard Shortcuts Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowShortcuts(true)}
+              className="gap-2"
+              title="Keyboard shortcuts (?)"
+            >
+              <Keyboard className="h-4 w-4" />
+              <span className="hidden lg:inline">Shortcuts</span>
+            </Button>
+
             {/* Version History Button */}
             {!isNew && repository && (
               <Button
@@ -370,18 +413,8 @@ export function Editor() {
         </div>
       </header>
 
-      {/* Error banner */}
-      {error && (
-        <div className="bg-destructive/10 border-b border-destructive/20 px-4 py-2 text-center text-sm text-destructive">
-          {error}
-          <button
-            onClick={() => setError(null)}
-            className="ml-2 underline"
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
+      {/* Error banner - Now with ARIA live region */}
+      <ErrorBanner error={error} onDismiss={() => setError(null)} priority="polite" />
 
       {/* Editor */}
       <main className="container mx-auto px-4 py-8 max-w-3xl">
@@ -410,6 +443,9 @@ export function Editor() {
           onClose={() => setCompareCommits(null)}
         />
       )}
+
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcuts open={showShortcuts} onClose={() => setShowShortcuts(false)} />
     </div>
   )
 }

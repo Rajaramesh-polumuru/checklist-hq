@@ -3,14 +3,16 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { SkeletonCard } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
 import {
   GitFork,
   Search,
   TrendingUp,
   Clock,
-  Loader2,
   Eye,
   ListChecks,
+  Plus,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import {
@@ -18,6 +20,7 @@ import {
   searchPublicRepositories,
   forkRepository,
 } from '@/services/repository'
+import { formatRelativeTime } from '@/lib/date-utils'
 import type { Repository } from '@/types/database'
 
 type SortOption = 'fork_count' | 'created_at' | 'updated_at'
@@ -85,7 +88,6 @@ export function Explore() {
     e.stopPropagation()
 
     if (!user) {
-      // Redirect to home to sign in
       navigate('/', { state: { returnTo: '/explore' } })
       return
     }
@@ -105,17 +107,23 @@ export function Explore() {
     }
   }
 
+  const sortOptions: { value: SortOption; label: string; icon: typeof TrendingUp }[] = [
+    { value: 'fork_count', label: 'Most Forked', icon: TrendingUp },
+    { value: 'created_at', label: 'Newest', icon: Clock },
+    { value: 'updated_at', label: 'Recently Updated', icon: Clock },
+  ]
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="max-w-2xl mx-auto text-center mb-12">
-        <h1 className="text-3xl font-bold mb-4">Explore Templates</h1>
+      <div className="max-w-2xl mx-auto text-center mb-10">
+        <h1 className="text-2xl font-bold tracking-tight mb-3">Explore Templates</h1>
         <p className="text-muted-foreground mb-6">
           Discover proven checklists from the community. Fork, customize, and make them yours.
         </p>
 
         {/* Search */}
-        <div className="relative">
+        <div className="relative max-w-md mx-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search templates..."
@@ -128,27 +136,18 @@ export function Explore() {
 
       {/* Sort Tabs */}
       <div className="flex justify-center gap-2 mb-8">
-        <Button
-          variant={activeSort === 'fork_count' ? 'default' : 'ghost'}
-          onClick={() => setActiveSort('fork_count')}
-        >
-          <TrendingUp className="mr-2 h-4 w-4" />
-          Most Forked
-        </Button>
-        <Button
-          variant={activeSort === 'created_at' ? 'default' : 'ghost'}
-          onClick={() => setActiveSort('created_at')}
-        >
-          <Clock className="mr-2 h-4 w-4" />
-          Newest
-        </Button>
-        <Button
-          variant={activeSort === 'updated_at' ? 'default' : 'ghost'}
-          onClick={() => setActiveSort('updated_at')}
-        >
-          <Clock className="mr-2 h-4 w-4" />
-          Recently Updated
-        </Button>
+        {sortOptions.map((option) => (
+          <Button
+            key={option.value}
+            variant={activeSort === option.value ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveSort(option.value)}
+            className="gap-2"
+          >
+            <option.icon className="h-4 w-4" />
+            {option.label}
+          </Button>
+        ))}
       </div>
 
       {/* Error */}
@@ -163,11 +162,13 @@ export function Explore() {
 
       {/* Loading */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
       ) : repositories.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-16">
           {searchQuery ? (
             <>
               <p className="text-muted-foreground mb-4">
@@ -179,13 +180,18 @@ export function Explore() {
             </>
           ) : (
             <>
-              <ListChecks className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                <ListChecks className="h-8 w-8 text-muted-foreground" />
+              </div>
               <p className="text-muted-foreground mb-4">
                 No public templates yet. Be the first to share!
               </p>
               {user && (
                 <Button asChild>
-                  <Link to="/app/new">Create a Template</Link>
+                  <Link to="/app/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create a Template
+                  </Link>
                 </Button>
               )}
             </>
@@ -194,14 +200,24 @@ export function Explore() {
       ) : (
         /* Template Grid */
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {repositories.map((repo) => (
+          {repositories.map((repo, index) => (
             <Link key={repo.id} to={`/repo/${repo.id}`}>
-              <Card className="h-full hover:shadow-lg transition-shadow">
-                <CardHeader>
+              <Card
+                hoverable
+                className="h-full animate-fade-in"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-lg truncate">{repo.title}</CardTitle>
                     </div>
+                    {repo.fork_count > 0 && (
+                      <Badge variant="secondary" className="ml-2 shrink-0">
+                        <GitFork className="h-3 w-3 mr-1" />
+                        {repo.fork_count}
+                      </Badge>
+                    )}
                   </div>
                   {repo.description && (
                     <CardDescription className="line-clamp-2 mt-2">
@@ -211,16 +227,10 @@ export function Explore() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <GitFork className="h-4 w-4" />
-                        {repo.fork_count}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {formatDate(repo.updated_at)}
-                      </span>
-                    </div>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {formatRelativeTime(repo.updated_at)}
+                    </span>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
@@ -231,19 +241,16 @@ export function Explore() {
                           navigate(`/repo/${repo.id}`)
                         }}
                       >
-                        <Eye className="mr-1 h-4 w-4" />
+                        <Eye className="mr-1 h-3 w-3" />
                         View
                       </Button>
                       <Button
                         size="sm"
                         onClick={(e) => handleFork(repo, e)}
                         disabled={forkingId === repo.id}
+                        loading={forkingId === repo.id}
                       >
-                        {forkingId === repo.id ? (
-                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-                        ) : (
-                          <GitFork className="mr-1 h-4 w-4" />
-                        )}
+                        <GitFork className="mr-1 h-3 w-3" />
                         Fork
                       </Button>
                     </div>
@@ -263,18 +270,4 @@ export function Explore() {
       )}
     </div>
   )
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffDays === 0) return 'today'
-  if (diffDays === 1) return 'yesterday'
-  if (diffDays < 7) return `${diffDays}d ago`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`
-
-  return date.toLocaleDateString()
 }
