@@ -12,6 +12,51 @@ npm run lint         # Run ESLint
 npm run preview      # Preview production build
 ```
 
+## Features & Capabilities
+
+### Repository Management
+- Create, edit, and delete checklist repositories
+- Public/private visibility settings
+- Fork repositories with linked lineage tracking
+- View fork network and upstream relationships
+- Version history with commit browsing
+
+### Checklist Editor
+- **Rich Editing**: Hierarchical checklist items with unlimited nesting
+- **Keyboard Shortcuts**: Full keyboard navigation (Tab/Shift+Tab for indent/outdent, arrows for navigation)
+- **Auto-Save**: Silent, debounced saving with visual status indicators (Saving, Saved, Unsaved, Error)
+- **Drag & Drop**: Reorder items with visual feedback
+- **Empty State**: Helpful tips and quick start guide for new checklists
+- **Unsaved Changes**: Clear indicators before leaving with unsaved work
+- **Metadata Editing**: Update title and visibility without creating new commits
+
+### Run Mode (Execution)
+- Execute checklists with progress tracking
+- Check off items as you complete them
+- Save progress and resume later
+- Run history with completed/archived runs
+- Visual progress indicators
+
+### Version Control
+- Immutable commit history
+- View and restore previous versions
+- Time-travel through checklist changes
+- Commit metadata (timestamp, author)
+
+### Activity & Discovery
+- Activity feed showing recent changes
+- Explore public repositories
+- Search and filter repositories
+- User profiles with repository listings
+
+### Accessibility Features
+- WCAG AAA compliant (44px touch targets)
+- Full keyboard navigation support
+- Screen reader optimized with ARIA labels
+- Respects `prefers-reduced-motion` preference
+- Skip-to-content navigation
+- High contrast, readable color palette
+
 ## Tech Stack
 
 - **Frontend**: React 19, TypeScript, Vite, Tailwind CSS 4
@@ -83,6 +128,18 @@ supabase/
 - **Colors**: CSS variables for background, primary (teal), status colors, shadows
 - Respects `prefers-reduced-motion` for accessibility
 
+#### Color System
+- **Background**: Warm slate (hsl 30° 20% 99%) - soft, warm white
+- **Foreground**: Dark slate (hsl 220° 12% lightness) - readable text
+- **Primary**: Teal (hsl 172° 66% 36%) - brand accent color
+- **Status Colors**:
+  - Success: Green for completed actions
+  - Warning: Orange for caution states
+  - Destructive: Red for errors/deletions
+  - Info: Blue for informational messages
+- **Shadows**: 5-level elevation system with progressive opacity
+- All colors defined as CSS variables for consistency and easy theming
+
 ## Key Concepts
 
 - **Repositories**: Process containers with fork lineage (upstream_repo_id, origin_repo_id)
@@ -125,6 +182,26 @@ Items stored as normalized map for O(1) lookups:
 - Row Level Security (RLS) on all tables
 - Public repos viewable by all; users can only modify their own
 - Runs visible only to their owner
+
+## Keyboard Shortcuts
+
+All shortcuts are documented in the [KeyboardShortcuts.tsx](src/components/KeyboardShortcuts.tsx) component and accessible via `?` key:
+
+### Editor Shortcuts
+- **Enter** - Create new item below current
+- **Tab** - Indent current item (increase nesting)
+- **Shift + Tab** - Outdent current item (decrease nesting)
+- **Backspace** - Delete empty item (or remove last character)
+- **↑/↓ Arrows** - Navigate between items
+- **Cmd/Ctrl + S** - Save changes manually
+- **Escape** - Close modal/dialog
+
+### Global Shortcuts
+- **?** - Show keyboard shortcuts help
+- **Tab / Shift + Tab** - Navigate between interactive elements
+
+### Navigation
+All pages and modals support keyboard navigation with focus management.
 
 ## Path Alias
 
