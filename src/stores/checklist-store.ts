@@ -319,22 +319,83 @@ export const useChecklistStore = create<ChecklistStore>((set, get) => ({
     }
   },
 
-  moveItem: (activeId, parentId, order) => {
-    set((state) => ({
-      ...saveToHistory(state),
-      content: {
-        ...state.content,
-        items: {
-          ...state.content.items,
-          [activeId]: {
-            ...state.content.items[activeId],
-            parent: parentId,
-            order: order,
-          },
-        },
-      },
-      isDirty: true,
-    }));
+  moveItem: (activeId, newParentId, targetOrder) => {
+    set((state) => {
+      const items = state.content.items;
+      const activeItem = items[activeId];
+
+      if (!activeItem) return state;
+
+      const oldParentId = activeItem.parent;
+      const newItems = { ...items };
+
+      // If moving within the same parent
+      if (oldParentId === newParentId) {
+        // Get all siblings (including the active item)
+        const siblings = Object.values(newItems)
+          .filter((item) => item.parent === newParentId)
+          .sort((a, b) => a.order - b.order);
+
+        // Remove the active item from its current position
+        const oldIndex = siblings.findIndex((s) => s.id === activeId);
+        if (oldIndex !== -1) {
+          siblings.splice(oldIndex, 1);
+        }
+
+        // Calculate new index (adjust for removal if moving down)
+        let newIndex = targetOrder;
+        if (oldIndex < targetOrder) {
+          newIndex = Math.max(0, targetOrder - 1);
+        }
+        newIndex = Math.min(newIndex, siblings.length);
+
+        // Insert at new position
+        siblings.splice(newIndex, 0, activeItem);
+
+        // Reassign orders to all siblings
+        siblings.forEach((sibling, index) => {
+          newItems[sibling.id] = { ...newItems[sibling.id], order: index };
+        });
+      } else {
+        // Moving to a different parent
+
+        // 1. Update orders in the old parent (close the gap)
+        const oldSiblings = Object.values(newItems)
+          .filter((item) => item.parent === oldParentId && item.id !== activeId)
+          .sort((a, b) => a.order - b.order);
+
+        oldSiblings.forEach((sibling, index) => {
+          newItems[sibling.id] = { ...newItems[sibling.id], order: index };
+        });
+
+        // 2. Insert into new parent at the target position
+        const newSiblings = Object.values(newItems)
+          .filter((item) => item.parent === newParentId)
+          .sort((a, b) => a.order - b.order);
+
+        const insertIndex = Math.min(targetOrder, newSiblings.length);
+
+        // Shift items at and after insert position
+        newSiblings.forEach((sibling, index) => {
+          if (index >= insertIndex) {
+            newItems[sibling.id] = { ...newItems[sibling.id], order: index + 1 };
+          }
+        });
+
+        // Update the active item with new parent and order
+        newItems[activeId] = {
+          ...activeItem,
+          parent: newParentId,
+          order: insertIndex,
+        };
+      }
+
+      return {
+        ...saveToHistory(state),
+        content: { ...state.content, items: newItems },
+        isDirty: true,
+      };
+    });
   },
 
   undo: () => {

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import type { DragEndEvent } from '@dnd-kit/core'
+import type { DragEndEvent, DragStartEvent, DragOverEvent } from '@dnd-kit/core'
 import {
   DndContext,
   closestCenter,
@@ -8,6 +8,8 @@ import {
   TouchSensor,
   useSensor,
   useSensors,
+  DragOverlay,
+  defaultDropAnimationSideEffects,
 } from '@dnd-kit/core'
 import {
   SortableContext,
@@ -15,7 +17,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { useChecklistStore } from '@/stores/checklist-store'
-import { ChecklistItem } from './ChecklistItem'
+import { ChecklistItem, DragOverlayItem } from './ChecklistItem'
 import { Card } from '@/components/ui/card'
 import { Plus, ListChecks, Undo2, Redo2, Hand, Trash2, MoreVertical } from 'lucide-react'
 import type { ChecklistItem as ChecklistItemType } from '@/types/database'
@@ -29,6 +31,17 @@ const PLACEHOLDERS = [
   "Add a task...",
   "Type to add...",
 ]
+
+// Custom drop animation for smooth transitions
+const dropAnimation = {
+  sideEffects: defaultDropAnimationSideEffects({
+    styles: {
+      active: {
+        opacity: '0.4',
+      },
+    },
+  }),
+}
 
 export function ChecklistEditor() {
   const {
@@ -53,6 +66,8 @@ export function ChecklistEditor() {
 
   const [quickAddValue, setQuickAddValue] = useState('')
   const [placeholderIndex, setPlaceholderIndex] = useState(0)
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const [overId, setOverId] = useState<string | null>(null)
   const quickAddRef = useRef<HTMLInputElement>(null)
 
   // Rotate placeholder
@@ -63,17 +78,17 @@ export function ChecklistEditor() {
     return () => clearInterval(interval)
   }, [])
 
-  // Configure sensors - add TouchSensor for mobile
+  // Configure sensors with better activation constraints
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 10, // Increased to prevent accidental drags
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 200,
-        tolerance: 5,
+        delay: 250, // Longer delay to distinguish from scroll
+        tolerance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -81,8 +96,20 @@ export function ChecklistEditor() {
     })
   )
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string)
+  }
+
+  const handleDragOver = (event: DragOverEvent) => {
+    setOverId(event.over?.id as string || null)
+  }
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
+
+    setActiveId(null)
+    setOverId(null)
+
     if (!over || active.id === over.id) return
 
     const activeItem = content.items[active.id as string]
@@ -90,11 +117,19 @@ export function ChecklistEditor() {
 
     if (!activeItem || !overItem) return
 
+    // Calculate the target order based on drop position
+    const targetOrder = overItem.order + (activeItem.order > overItem.order ? 0 : 1)
+
     moveItem(
       active.id as string,
       overItem.parent,
-      overItem.order + (activeItem.order > overItem.order ? 0 : 1)
+      targetOrder
     )
+  }
+
+  const handleDragCancel = () => {
+    setActiveId(null)
+    setOverId(null)
   }
 
   const handleQuickAdd = (text: string = quickAddValue) => {
@@ -156,11 +191,16 @@ export function ChecklistEditor() {
     return result
   }
 
+  // Get the active item for the drag overlay
+  const activeItem = activeId ? content.items[activeId] : null
+
   const renderItems = (items: ChecklistItemType[], depth = 0, parentHasMoreSiblings: boolean[] = []): React.ReactNode[] => {
     return items.flatMap((item, index) => {
       const children = getItemsAtLevel(item.id)
       const isLast = index === items.length - 1
       const currentParentHasMoreSiblings = [...parentHasMoreSiblings, !isLast]
+      const isDragging = activeId === item.id
+      const isOver = overId === item.id
 
       return [
         <ChecklistItem
@@ -169,6 +209,8 @@ export function ChecklistEditor() {
           depth={depth}
           isLast={isLast}
           parentHasMoreSiblings={parentHasMoreSiblings}
+          isDragging={isDragging}
+          isDropTarget={isOver && !isDragging}
         />,
         ...renderItems(children, depth + 1, currentParentHasMoreSiblings),
       ]
@@ -248,7 +290,10 @@ export function ChecklistEditor() {
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
       >
         <SortableContext items={allItemIds} strategy={verticalListSortingStrategy}>
           {rootItems.length === 0 ? (
@@ -363,6 +408,13 @@ export function ChecklistEditor() {
             </Card>
           )}
         </SortableContext>
+
+        {/* Drag Overlay - floating preview of dragged item */}
+        <DragOverlay dropAnimation={dropAnimation}>
+          {activeItem ? (
+            <DragOverlayItem item={activeItem} />
+          ) : null}
+        </DragOverlay>
       </DndContext>
 
       {/* Quick add box when items exist - mobile optimized */}

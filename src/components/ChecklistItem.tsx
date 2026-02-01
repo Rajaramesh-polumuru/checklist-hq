@@ -13,6 +13,8 @@ interface ChecklistItemProps {
   depth: number
   isLast?: boolean
   parentHasMoreSiblings?: boolean[]
+  isDragging?: boolean
+  isDropTarget?: boolean
 }
 
 // Numbering helpers
@@ -30,7 +32,9 @@ export const ChecklistItem = memo(function ChecklistItem({
   item,
   depth,
   isLast = false,
-  parentHasMoreSiblings = []
+  parentHasMoreSiblings = [],
+  isDragging: isDraggingProp = false,
+  isDropTarget = false,
 }: ChecklistItemProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -252,16 +256,20 @@ export const ChecklistItem = memo(function ChecklistItem({
     }
   }, [showContextMenu])
 
+  // Use prop isDragging if passed, otherwise use sortable isDragging
+  const isCurrentlyDragging = isDraggingProp || isDragging
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
         'group relative flex items-center transition-all duration-200',
-        isDragging && 'opacity-60 bg-accent shadow-lg rounded-lg z-50',
-        !isDragging && 'hover:bg-accent/40',
-        focusedItemId === item.id && !isDragging && 'bg-primary/5 ring-1 ring-primary/20',
-        isAnimatingIn && 'animate-fade-in'
+        isCurrentlyDragging && 'opacity-40 scale-[0.98] bg-accent/20',
+        !isCurrentlyDragging && 'hover:bg-accent/40',
+        focusedItemId === item.id && !isCurrentlyDragging && 'bg-primary/5 ring-1 ring-primary/20',
+        isAnimatingIn && 'animate-fade-in',
+        isDropTarget && 'ring-2 ring-primary ring-offset-2'
       )}
       onMouseEnter={() => !isMobile && setIsHovered(true)}
       onMouseLeave={() => !isMobile && setIsHovered(false)}
@@ -269,6 +277,10 @@ export const ChecklistItem = memo(function ChecklistItem({
       onTouchEnd={handleTouchEnd}
       onTouchMove={handleTouchMove}
     >
+      {/* Drop zone indicator line */}
+      {isDropTarget && (
+        <div className="absolute -top-0.5 left-0 right-0 h-1 bg-primary rounded-full animate-pulse z-50" />
+      )}
       {/* Tree connector lines */}
       {depth > 0 && (
         <div className="absolute left-0 top-0 bottom-0 flex" aria-hidden="true">
@@ -476,6 +488,20 @@ export const ChecklistItem = memo(function ChecklistItem({
     prevProps.item.parent === nextProps.item.parent &&
     prevProps.depth === nextProps.depth &&
     prevProps.isLast === nextProps.isLast &&
+    prevProps.isDragging === nextProps.isDragging &&
+    prevProps.isDropTarget === nextProps.isDropTarget &&
     JSON.stringify(prevProps.parentHasMoreSiblings) === JSON.stringify(nextProps.parentHasMoreSiblings)
   )
 })
+
+// Drag overlay item - floating preview during drag
+export function DragOverlayItem({ item }: { item: ChecklistItemType }) {
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 bg-card border-2 border-primary/30 rounded-xl shadow-2xl shadow-primary/20">
+      <GripVertical className="h-4 w-4 text-primary" />
+      <span className="text-base font-medium text-foreground">
+        {item.text || <span className="text-muted-foreground italic">Empty item</span>}
+      </span>
+    </div>
+  )
+}
