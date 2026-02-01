@@ -1,11 +1,28 @@
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { GitFork, List, Users, Zap, ArrowRight, Sparkles } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 
 export function Home() {
-  const { user, signInWithGoogle } = useAuthStore()
+  const { user, initialized, signInWithGoogle } = useAuthStore()
+
+  // Auto-redirect authenticated users to dashboard
+  if (initialized && user) {
+    return <Navigate to="/app" replace />
+  }
+
+  // Show loading state while checking auth status
+  if (!initialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">

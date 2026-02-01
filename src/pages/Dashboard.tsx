@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { SkeletonCard } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { SearchInput } from '@/components/SearchInput'
+import { useMobile } from '@/hooks/useMobile'
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ import type { Repository } from '@/types/database'
 export function Dashboard() {
   const { user } = useAuthStore()
   const navigate = useNavigate()
+  const { isMobile, isTablet, isDesktop, isTouchDevice } = useMobile()
   const [repositories, setRepositories] = useState<Repository[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -163,28 +165,28 @@ export function Dashboard() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             {/* Greeting */}
             <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-xl font-bold shadow-lg shadow-primary/25">
+              <div className={`${isMobile ? 'h-12 w-12' : 'h-14 w-14'} rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-xl font-bold shadow-lg shadow-primary/25`}>
                 {user?.email?.charAt(0).toUpperCase() || 'U'}
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
                   Welcome back, {user?.email?.split('@')[0]}
                 </h1>
-                <p className="text-muted-foreground mt-1">
+                <p className={`text-muted-foreground mt-1 ${isMobile ? 'text-sm' : ''}`}>
                   Manage your checklists and track your progress
                 </p>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-3">
-              <Button variant="outline" asChild>
+            <div className={`flex ${isMobile ? 'flex-col w-full' : 'items-center'} gap-3`}>
+              <Button variant="outline" asChild className={isMobile ? 'w-full' : ''}>
                 <Link to="/explore">
                   <GitFork className="mr-2 h-4 w-4" />
                   Browse Templates
                 </Link>
               </Button>
-              <Button asChild className="shadow-lg shadow-primary/25">
+              <Button asChild className={`shadow-lg shadow-primary/25 ${isMobile ? 'w-full' : ''}`}>
                 <Link to="/app/new">
                   <Plus className="mr-2 h-4 w-4" />
                   New Checklist
@@ -197,44 +199,44 @@ export function Dashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
             <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 border shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <ListChecks className="h-5 w-5 text-primary" />
+                <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-primary/10 flex items-center justify-center`}>
+                  <ListChecks className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-primary`} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{loading ? '—' : repositories.length}</p>
+                  <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>{loading ? '—' : repositories.length}</p>
                   <p className="text-xs text-muted-foreground">Total Checklists</p>
                 </div>
               </div>
             </div>
             <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 border shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <Play className="h-5 w-5 text-emerald-500" />
+                <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-emerald-500/10 flex items-center justify-center`}>
+                  <Play className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-emerald-500`} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">—</p>
+                  <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>—</p>
                   <p className="text-xs text-muted-foreground">Active Runs</p>
                 </div>
               </div>
             </div>
             <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 border shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <Globe className="h-5 w-5 text-blue-500" />
+                <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-blue-500/10 flex items-center justify-center`}>
+                  <Globe className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-blue-500`} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{loading ? '—' : repositories.filter(r => r.is_public).length}</p>
+                  <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>{loading ? '—' : repositories.filter(r => r.is_public).length}</p>
                   <p className="text-xs text-muted-foreground">Public</p>
                 </div>
               </div>
             </div>
             <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 border shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <GitFork className="h-5 w-5 text-amber-500" />
+                <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-amber-500/10 flex items-center justify-center`}>
+                  <GitFork className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-amber-500`} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{loading ? '—' : repositories.filter(r => r.upstream_repo_id).length}</p>
+                  <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>{loading ? '—' : repositories.filter(r => r.upstream_repo_id).length}</p>
                   <p className="text-xs text-muted-foreground">Forked</p>
                 </div>
               </div>
@@ -259,14 +261,14 @@ export function Dashboard() {
               }
             </p>
           </div>
-          <div className="max-w-xs w-full">
+          <div className={`w-full ${!isMobile ? 'max-w-xs' : ''}`}>
             <SearchInput
               ref={searchInputRef}
               value={searchQuery}
               onChange={setSearchQuery}
               placeholder="Search checklists..."
               resultCount={searchQuery.trim() ? filteredRepositories.length : undefined}
-              size="default"
+              size={isMobile ? 'large' : 'default'}
               ariaLabel="Search your checklists"
             />
           </div>
@@ -292,34 +294,34 @@ export function Dashboard() {
         ) : filteredRepositories.length === 0 ? (
           /* Empty state */
           <Card className="border-dashed">
-            <CardContent className="py-16 text-center">
-              <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                <ListChecks className="h-8 w-8 text-primary" />
+            <CardContent className={`${isMobile ? 'py-12' : 'py-16'} text-center`}>
+              <div className={`mx-auto ${isMobile ? 'w-14 h-14' : 'w-16 h-16'} bg-primary/10 rounded-full flex items-center justify-center mb-4`}>
+                <ListChecks className={`${isMobile ? 'h-7 w-7' : 'h-8 w-8'} text-primary`} />
               </div>
               {searchQuery.trim() ? (
                 <>
-                  <h2 className="text-xl font-semibold mb-2">No checklists found</h2>
-                  <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                  <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-2`}>No checklists found</h2>
+                  <p className={`text-muted-foreground mb-6 max-w-sm mx-auto ${isMobile ? 'text-sm px-4' : ''}`}>
                     No checklists match <strong>"{searchQuery}"</strong>. Try different keywords or clear your search.
                   </p>
-                  <Button variant="outline" onClick={() => setSearchQuery('')}>
+                  <Button variant="outline" onClick={() => setSearchQuery('')} className={isMobile ? 'w-full max-w-xs' : ''}>
                     Clear search
                   </Button>
                 </>
               ) : (
                 <>
-                  <h2 className="text-xl font-semibold mb-2">No checklists yet</h2>
-                  <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                  <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-2`}>No checklists yet</h2>
+                  <p className={`text-muted-foreground mb-6 max-w-sm mx-auto ${isMobile ? 'text-sm px-4' : ''}`}>
                     Create your first checklist or fork one from the community to get started.
                   </p>
-                  <div className="flex gap-3 justify-center">
-                    <Button asChild>
+                  <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-3 justify-center ${isMobile ? 'px-4' : ''}`}>
+                    <Button asChild className={isMobile ? 'w-full' : ''}>
                       <Link to="/app/new">
                         <Plus className="mr-2 h-4 w-4" />
                         Create New
                       </Link>
                     </Button>
-                    <Button variant="outline" asChild>
+                    <Button variant="outline" asChild className={isMobile ? 'w-full' : ''}>
                       <Link to="/explore">
                         <GitFork className="mr-2 h-4 w-4" />
                         Explore Templates
@@ -357,7 +359,7 @@ export function Dashboard() {
                           <ListChecks className={`h-5 w-5 ${accentColor.replace('bg-', 'text-')}`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <CardTitle className="text-lg truncate">{repo.title}</CardTitle>
+                          <CardTitle className={`${isMobile ? 'text-base' : 'text-lg'} truncate`}>{repo.title}</CardTitle>
                           <div className="flex items-center gap-2 mt-2">
                             <Badge variant={repo.is_public ? "default" : "secondary"} className="text-xs">
                               {repo.is_public ? (
@@ -382,7 +384,7 @@ export function Dashboard() {
                         </div>
                       </div>
                       {repo.description && (
-                        <CardDescription className="mt-3 line-clamp-2">
+                        <CardDescription className={`mt-3 line-clamp-2 ${isMobile ? 'text-sm' : ''}`}>
                           {repo.description}
                         </CardDescription>
                       )}
@@ -407,11 +409,15 @@ export function Dashboard() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
-                        className="absolute top-3 right-3 p-2 rounded-md bg-card/90 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 shadow-sm"
+                        className={`absolute top-3 right-3 ${
+                          isMobile
+                            ? 'p-3 opacity-100' // Mobile: Always visible, 44px touch target
+                            : 'p-2 opacity-0 group-hover:opacity-100 focus:opacity-100' // Desktop: Hover reveal
+                        } rounded-md bg-card/90 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shadow-sm`}
                         onClick={(e) => e.preventDefault()}
                         aria-label="Actions"
                       >
-                        <MoreVertical className="h-4 w-4" />
+                        <MoreVertical className={isMobile ? 'h-5 w-5' : 'h-4 w-4'} />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
