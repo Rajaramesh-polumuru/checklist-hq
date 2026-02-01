@@ -1,6 +1,7 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth-store'
+import { DevColorPicker } from '@/components/DevColorPicker'
 import { GitFork, LogOut, Plus } from 'lucide-react'
 
 export function Layout() {
@@ -36,7 +37,7 @@ export function Layout() {
               to="/"
               className="flex items-center gap-2.5 font-semibold text-lg hover:opacity-80 transition-all group"
             >
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow">
                 <GitFork className="h-5 w-5 text-white" />
               </div>
               <span className="hidden sm:inline font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
@@ -113,6 +114,9 @@ export function Layout() {
       <div id="main-content">
         <Outlet />
       </div>
+
+      {/* Dev Color Picker - Remove before production */}
+      {/* <DevColorPicker /> */}
     </div>
   )
 }

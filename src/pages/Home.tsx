@@ -56,7 +56,7 @@ export function Home() {
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 animate-slide-up">
               Don't write checklists.
               <br />
-              <span className="bg-gradient-to-r from-primary via-primary to-emerald-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary via-primary to-orange-400 bg-clip-text text-transparent">
                 Fork them.
               </span>
             </h1>
@@ -120,7 +120,7 @@ export function Home() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5">
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/80 to-emerald-300" />
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/80 to-orange-300" />
             <CardHeader className="pt-6">
               <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <GitFork className="h-6 w-6 text-primary" />

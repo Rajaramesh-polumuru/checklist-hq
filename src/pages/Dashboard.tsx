@@ -97,9 +97,9 @@ const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     priority: 4, // Shows learning/origin
   },
   'recently-used': {
-    bg: 'bg-emerald-300',
-    text: 'text-emerald-500',
-    gradient: 'from-emerald-300 to-green-200',
+    bg: 'bg-red-300',
+    text: 'text-red-500',
+    gradient: 'from-red-300 to-orange-200',
     label: 'Active',
     description: '⚡ Used in the last 7 days',
     icon: Zap,
@@ -447,8 +447,8 @@ export function Dashboard() {
             </div>
             <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 border shadow-sm">
               <div className="flex items-center gap-3">
-                <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-emerald-300/20 flex items-center justify-center`}>
-                  <Play className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-emerald-400`} />
+                <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-red-400/20 flex items-center justify-center`}>
+                  <Play className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-red-500`} />
                 </div>
                 <div>
                   <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>—</p>
@@ -514,16 +514,16 @@ export function Dashboard() {
               </div>
 
               {/* New This Week */}
-              <div className="bg-gradient-to-br from-emerald-300/15 to-green-200/10 backdrop-blur-sm rounded-xl p-4 border border-emerald-300/30">
+              <div className="bg-gradient-to-br from-red-400/15 to-orange-300/10 backdrop-blur-sm rounded-xl p-4 border border-red-400/30">
                 <div className="flex items-center gap-3">
-                  <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-emerald-300/30 flex items-center justify-center`}>
-                    <Plus className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-emerald-400`} />
+                  <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-red-400/30 flex items-center justify-center`}>
+                    <Plus className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-red-500`} />
                   </div>
                   <div>
-                    <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-emerald-500`}>
+                    <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-red-500`}>
                       {animatedNewThisWeek}
                     </p>
-                    <p className="text-xs text-emerald-400/80">New This Week</p>
+                    <p className="text-xs text-red-400/80">New This Week</p>
                   </div>
                 </div>
               </div>
@@ -799,11 +799,11 @@ export function Dashboard() {
             {/* Active Runs */}
             <Link to="/app/runs">
               <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5">
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-300 to-green-200" />
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-400 to-orange-300" />
                 <CardHeader className="pb-4 pt-5">
                   <div className="flex items-center justify-between">
-                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-emerald-300/30 to-emerald-200/15 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Play className="h-5 w-5 text-emerald-400" />
+                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-red-400/30 to-orange-300/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Play className="h-5 w-5 text-red-500" />
                     </div>
                     <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                   </div>
