@@ -187,7 +187,7 @@ export function Explore() {
               <p className="text-xs text-muted-foreground">Total Forks</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-emerald-500">Free</p>
+              <p className="text-2xl font-bold text-emerald-400">Free</p>
               <p className="text-xs text-muted-foreground">Forever</p>
             </div>
           </div>
@@ -280,8 +280,8 @@ export function Explore() {
           /* Template Grid */
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {repositories.map((repo, index) => {
-              // Generate consistent color based on title
-              const colors = ['bg-primary', 'bg-emerald-500', 'bg-blue-500', 'bg-violet-500', 'bg-amber-500', 'bg-rose-500']
+              // Generate consistent color based on title - using pastel colors
+              const colors = ['bg-primary/80', 'bg-emerald-300', 'bg-sky-300', 'bg-violet-300', 'bg-amber-300', 'bg-pink-300']
               const colorIndex = repo.title.length % colors.length
               const accentColor = colors[colorIndex]
 
@@ -289,11 +289,11 @@ export function Explore() {
                 <Link key={repo.id} to={`/repo/${repo.id}`}>
                   <Card
                     hoverable
-                    className="h-full animate-fade-in relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5"
+                    className="h-full animate-fade-in relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     {/* Colored accent bar */}
-                    <div className={`absolute top-0 left-0 right-0 h-1 ${accentColor} opacity-80`} />
+                    <div className={`absolute top-0 left-0 right-0 h-0.5 ${accentColor}`} />
 
                     <CardHeader className="pb-3 pt-5">
                       <div className="flex items-start gap-3">

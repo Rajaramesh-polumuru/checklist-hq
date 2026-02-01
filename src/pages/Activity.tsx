@@ -32,10 +32,10 @@ export function Activity() {
 
     const getIcon = (type: ActivityItem['type']) => {
         switch (type) {
-            case 'run_started': return <Play className="h-4 w-4 text-blue-500" />
-            case 'run_completed': return <CheckCircle2 className="h-4 w-4 text-green-500" />
-            case 'repo_forked': return <GitFork className="h-4 w-4 text-purple-500" />
-            case 'repo_created': return <Plus className="h-4 w-4 text-yellow-500" />
+            case 'run_started': return <Play className="h-4 w-4 text-sky-400" />
+            case 'run_completed': return <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            case 'repo_forked': return <GitFork className="h-4 w-4 text-violet-400" />
+            case 'repo_created': return <Plus className="h-4 w-4 text-amber-400" />
         }
     }
 

@@ -7,8 +7,10 @@ import { SkeletonCard } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { SearchInput } from '@/components/SearchInput'
 import { FilterBar } from '@/components/FilterBar'
+import { ToastContainer } from '@/components/Toast'
 import { useMobile } from '@/hooks/useMobile'
 import { useCountUp } from '@/hooks/useCountUp'
+import { useToast } from '@/hooks/useToast'
 import {
   Dialog,
   DialogContent,
@@ -25,7 +27,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ShareSettingsModal } from '@/components/ShareSettingsModal'
-import { Plus, GitFork, Play, Clock, Loader2, Globe, Lock, Trash2, Pencil, ArrowRight, ListChecks, MoreVertical, Share2, Copy, Sparkles, TrendingUp } from 'lucide-react'
+import { Plus, GitFork, Play, Clock, Loader2, Globe, Lock, Trash2, Pencil, ArrowRight, ListChecks, MoreVertical, Share2, Copy, Sparkles, TrendingUp, Info, ChevronDown, ChevronUp, Zap, Star, Eye, AlertCircle } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { getUserRepositories, deleteRepository, updateRepository, forkRepository } from '@/services/repository'
@@ -44,10 +46,173 @@ import {
 } from '@/lib/dashboard-utils'
 import type { Repository } from '@/types/database'
 
+// Color strategy types for meaningful visual communication
+type ColorStatus = 'recently-used' | 'new' | 'popular' | 'forked' | 'public' | 'dormant' | 'default'
+
+interface ColorConfig {
+  bg: string
+  text: string
+  gradient: string
+  label: string
+  description: string
+  icon: typeof Zap
+  priority: number
+}
+
+const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
+  'dormant': {
+    bg: 'bg-slate-300',
+    text: 'text-slate-500',
+    gradient: 'from-slate-300 to-gray-300',
+    label: 'Needs Attention',
+    description: '⚠️ Inactive for 30+ days',
+    icon: AlertCircle,
+    priority: 1, // Highest priority - warnings bubble up
+  },
+  'new': {
+    bg: 'bg-pink-300',
+    text: 'text-pink-400',
+    gradient: 'from-pink-300 to-rose-200',
+    label: 'New',
+    description: '✨ Created this week',
+    icon: Sparkles,
+    priority: 2, // Fresh content needs setup
+  },
+  'popular': {
+    bg: 'bg-amber-300',
+    text: 'text-amber-500',
+    gradient: 'from-amber-300 to-yellow-200',
+    label: 'Popular',
+    description: '🔥 Community validated (3+ forks)',
+    icon: Star,
+    priority: 3, // High-value content
+  },
+  'forked': {
+    bg: 'bg-violet-300',
+    text: 'text-violet-400',
+    gradient: 'from-violet-300 to-purple-200',
+    label: 'Template',
+    description: '📂 Forked from community',
+    icon: GitFork,
+    priority: 4, // Shows learning/origin
+  },
+  'recently-used': {
+    bg: 'bg-emerald-300',
+    text: 'text-emerald-500',
+    gradient: 'from-emerald-300 to-green-200',
+    label: 'Active',
+    description: '⚡ Used in the last 7 days',
+    icon: Zap,
+    priority: 5, // Engaged but not urgent
+  },
+  'public': {
+    bg: 'bg-sky-300',
+    text: 'text-sky-500',
+    gradient: 'from-sky-300 to-cyan-200',
+    label: 'Shared',
+    description: '🌐 Public & visible to all',
+    icon: Eye,
+    priority: 6, // Informational status
+  },
+  'default': {
+    bg: 'bg-indigo-200',
+    text: 'text-indigo-500',
+    gradient: 'from-indigo-200 to-indigo-100',
+    label: 'Private',
+    description: '🔒 Standard private checklist',
+    icon: ListChecks,
+    priority: 7, // Base state
+  },
+}
+
+// Determine the most relevant color status for a repository
+// Strategic hierarchy: Warnings > Visibility > Origin > Valuable > Fresh > Engagement
+function getRepoColorStatus(repo: Repository): ColorStatus {
+  // 1. Dormant items surface first (needs attention - warning state)
+  if (isStale(repo)) return 'dormant'
+
+  // 2. Public items (visibility status - important to know what's shared)
+  if (repo.is_public) return 'public'
+
+  // 3. Forked items (template-based, shows origin)
+  if (repo.upstream_repo_id) return 'forked'
+
+  // 4. Popular items (high-value, community validated)
+  if (isPopular(repo)) return 'popular'
+
+  // 5. New items (fresh content, may need completion)
+  if (isNew(repo)) return 'new'
+
+  // 6. Recently used (actively engaged)
+  if (isRecentlyUsed(repo)) return 'recently-used'
+
+  // 7. Default private checklist
+  return 'default'
+}
+
+// Color Legend Component - ordered by priority (most actionable first)
+function ColorLegend({ isExpanded, onToggle }: { isExpanded: boolean; onToggle: () => void }) {
+  const visibleStatuses: ColorStatus[] = ['dormant', 'public', 'forked', 'popular', 'new', 'recently-used']
+
+  return (
+    <div className="mb-6">
+      <button
+        onClick={onToggle}
+        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+        aria-expanded={isExpanded}
+        aria-controls="color-legend"
+      >
+        <Info className="h-4 w-4" />
+        <span>Color Guide</span>
+        {isExpanded ? (
+          <ChevronUp className="h-4 w-4 opacity-60 group-hover:opacity-100" />
+        ) : (
+          <ChevronDown className="h-4 w-4 opacity-60 group-hover:opacity-100" />
+        )}
+      </button>
+
+      {isExpanded && (
+        <div
+          id="color-legend"
+          className="mt-3 p-4 rounded-xl bg-card/80 backdrop-blur-sm border shadow-sm animate-fade-in"
+        >
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            {visibleStatuses.map((status) => {
+              const config = COLOR_LEGEND[status]
+              const Icon = config.icon
+              return (
+                <div
+                  key={status}
+                  className="flex items-start gap-2 p-2 rounded-lg hover:bg-accent/50 transition-colors"
+                >
+                  <div className={`w-3 h-3 rounded-full ${config.bg} shrink-0 mt-0.5 ring-2 ring-offset-2 ring-offset-background ${config.bg}/30`} />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <Icon className={`h-3 w-3 ${config.text}`} />
+                      <span className="text-xs font-medium">{config.label}</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">
+                      {config.description}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground mt-3 pt-3 border-t">
+            💡 <span className="font-medium">Tip:</span> Colors help you quickly identify checklist status. Active items appear first for easy access.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function Dashboard() {
   const { user } = useAuthStore()
   const navigate = useNavigate()
   const { isMobile, isTablet, isDesktop, isTouchDevice } = useMobile()
+  const { toasts, dismissToast, success, error: showError } = useToast()
   const [repositories, setRepositories] = useState<Repository[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -75,6 +240,17 @@ export function Dashboard() {
 
   // Share modal state
   const [shareRepo, setShareRepo] = useState<Repository | null>(null)
+
+  // Color legend state (persisted)
+  const [legendExpanded, setLegendExpanded] = useState(() => {
+    const saved = localStorage.getItem('dashboard-legend-expanded')
+    return saved ? JSON.parse(saved) : true // Show by default for first-time users
+  })
+
+  // Persist legend state
+  useEffect(() => {
+    localStorage.setItem('dashboard-legend-expanded', JSON.stringify(legendExpanded))
+  }, [legendExpanded])
 
   // Persist filter and sort state to localStorage
   useEffect(() => {
@@ -155,13 +331,19 @@ export function Dashboard() {
     const confirmDelete = window.confirm(`Are you sure you want to delete "${title}"? This cannot be undone.`)
     if (!confirmDelete) return
 
+    // Optimistic UI: Remove immediately
+    const previousRepos = [...repositories]
+    setRepositories(repos => repos.filter(r => r.id !== repoId))
+
     try {
       setDeletingId(repoId)
       await deleteRepository(repoId)
-      setRepositories(repos => repos.filter(r => r.id !== repoId))
+      success(`"${title}" deleted successfully`)
     } catch (err) {
       console.error('Error deleting repository:', err)
-      setError('Failed to delete checklist')
+      // Rollback on error
+      setRepositories(previousRepos)
+      showError('Failed to delete checklist')
     } finally {
       setDeletingId(null)
     }
@@ -199,9 +381,10 @@ export function Dashboard() {
       // Reload repos to show the new one
       const repos = await getUserRepositories(user.id)
       setRepositories(repos)
+      success(`"${repo.title}" duplicated successfully`)
     } catch (err) {
       console.error('Error duplicating repository:', err)
-      setError('Failed to duplicate checklist')
+      showError('Failed to duplicate checklist')
     } finally {
       setDuplicatingId(null)
     }
@@ -264,8 +447,8 @@ export function Dashboard() {
             </div>
             <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 border shadow-sm">
               <div className="flex items-center gap-3">
-                <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-emerald-500/10 flex items-center justify-center`}>
-                  <Play className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-emerald-500`} />
+                <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-emerald-300/20 flex items-center justify-center`}>
+                  <Play className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-emerald-400`} />
                 </div>
                 <div>
                   <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>—</p>
@@ -275,8 +458,8 @@ export function Dashboard() {
             </div>
             <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 border shadow-sm">
               <div className="flex items-center gap-3">
-                <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-blue-500/10 flex items-center justify-center`}>
-                  <Globe className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-blue-500`} />
+                <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-sky-300/20 flex items-center justify-center`}>
+                  <Globe className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-sky-400`} />
                 </div>
                 <div>
                   <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>{loading ? '—' : animatedPublic}</p>
@@ -286,8 +469,8 @@ export function Dashboard() {
             </div>
             <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 border shadow-sm">
               <div className="flex items-center gap-3">
-                <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-amber-500/10 flex items-center justify-center`}>
-                  <GitFork className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-amber-500`} />
+                <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-amber-300/20 flex items-center justify-center`}>
+                  <GitFork className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-amber-400`} />
                 </div>
                 <div>
                   <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>{loading ? '—' : animatedForked}</p>
@@ -301,46 +484,46 @@ export function Dashboard() {
           {!loading && repositories.length > 0 && (
             <div className="grid md:grid-cols-3 gap-4 mt-4">
               {/* Updated Today */}
-              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm rounded-xl p-4 border border-blue-500/20">
+              <div className="bg-gradient-to-br from-sky-300/15 to-cyan-200/10 backdrop-blur-sm rounded-xl p-4 border border-sky-300/30">
                 <div className="flex items-center gap-3">
-                  <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-blue-500/20 flex items-center justify-center`}>
-                    <Sparkles className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-blue-600`} />
+                  <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-sky-300/30 flex items-center justify-center`}>
+                    <Sparkles className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-sky-500`} />
                   </div>
                   <div>
-                    <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-blue-700`}>
+                    <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-sky-500`}>
                       {animatedUpdatedToday}
                     </p>
-                    <p className="text-xs text-blue-600/80">Updated Today</p>
+                    <p className="text-xs text-sky-400/80">Updated Today</p>
                   </div>
                 </div>
               </div>
 
               {/* Total Impact (Forks) */}
-              <div className="bg-gradient-to-br from-violet-500/10 to-purple-500/5 backdrop-blur-sm rounded-xl p-4 border border-violet-500/20">
+              <div className="bg-gradient-to-br from-violet-300/15 to-purple-200/10 backdrop-blur-sm rounded-xl p-4 border border-violet-300/30">
                 <div className="flex items-center gap-3">
-                  <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-violet-500/20 flex items-center justify-center`}>
-                    <TrendingUp className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-violet-600`} />
+                  <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-violet-300/30 flex items-center justify-center`}>
+                    <TrendingUp className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-violet-400`} />
                   </div>
                   <div>
-                    <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-violet-700`}>
+                    <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-violet-500`}>
                       {animatedTotalForks}
                     </p>
-                    <p className="text-xs text-violet-600/80">Total Forks</p>
+                    <p className="text-xs text-violet-400/80">Total Forks</p>
                   </div>
                 </div>
               </div>
 
               {/* New This Week */}
-              <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/5 backdrop-blur-sm rounded-xl p-4 border border-emerald-500/20">
+              <div className="bg-gradient-to-br from-emerald-300/15 to-green-200/10 backdrop-blur-sm rounded-xl p-4 border border-emerald-300/30">
                 <div className="flex items-center gap-3">
-                  <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-emerald-500/20 flex items-center justify-center`}>
-                    <Plus className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-emerald-600`} />
+                  <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-emerald-300/30 flex items-center justify-center`}>
+                    <Plus className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-emerald-400`} />
                   </div>
                   <div>
-                    <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-emerald-700`}>
+                    <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-emerald-500`}>
                       {animatedNewThisWeek}
                     </p>
-                    <p className="text-xs text-emerald-600/80">New This Week</p>
+                    <p className="text-xs text-emerald-400/80">New This Week</p>
                   </div>
                 </div>
               </div>
@@ -360,8 +543,8 @@ export function Dashboard() {
               {loading
                 ? 'Loading...'
                 : searchQuery.trim() || filters.visibility !== 'all' || filters.type !== 'all' || filters.status !== 'all'
-                ? `${filteredRepositories.length} of ${repositories.length} checklist${repositories.length !== 1 ? 's' : ''}`
-                : `${repositories.length} checklist${repositories.length !== 1 ? 's' : ''}`
+                  ? `${filteredRepositories.length} of ${repositories.length} checklist${repositories.length !== 1 ? 's' : ''}`
+                  : `${repositories.length} checklist${repositories.length !== 1 ? 's' : ''}`
               }
             </p>
           </div>
@@ -386,6 +569,14 @@ export function Dashboard() {
             onFiltersChange={setFilters}
             onSortChange={setSortBy}
             onClearFilters={() => setFilters(getDefaultFilters())}
+          />
+        )}
+
+        {/* Color Legend */}
+        {!loading && repositories.length > 0 && (
+          <ColorLegend
+            isExpanded={legendExpanded}
+            onToggle={() => setLegendExpanded(!legendExpanded)}
           />
         )}
 
@@ -451,41 +642,50 @@ export function Dashboard() {
           /* Repository grid */
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredRepositories.map((repo, index) => {
-              // Generate a consistent color based on repo title
-              const colors = ['bg-primary', 'bg-emerald-500', 'bg-blue-500', 'bg-amber-500', 'bg-violet-500', 'bg-rose-500']
-              const colorIndex = repo.title.length % colors.length
-              const accentColor = colors[colorIndex]
+              // Meaningful color based on repository status
+              const colorStatus = getRepoColorStatus(repo)
+              const colorConfig = COLOR_LEGEND[colorStatus]
 
               // Visual weight based on status
               const recentlyUsed = isRecentlyUsed(repo)
               const stale = isStale(repo)
+              const StatusIcon = colorConfig.icon
 
               return (
                 <Card
                   key={repo.id}
                   hoverable
-                  className={`group relative animate-fade-in overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 ${
-                    recentlyUsed
-                      ? 'ring-2 ring-primary/20 shadow-lg shadow-primary/10' // Recently used: enhanced shadow, subtle ring
-                      : stale
-                      ? 'opacity-75' // Stale: reduced opacity
+                  className={`group relative animate-fade-in overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5 ${recentlyUsed
+                    ? 'shadow-sm' // Recently used: subtle elevation
+                    : stale
+                      ? 'opacity-60' // Stale: reduced opacity
                       : ''
-                  }`}
+                    }`}
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  {/* Colored accent bar */}
-                  <div className={`absolute top-0 left-0 right-0 h-1 ${accentColor} opacity-80`} />
+                  {/* Colored accent bar with gradient for visual polish */}
+                  <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${colorConfig.gradient}`} />
 
                   <Link to={`/app/repo/${repo.id}`}>
                     <CardHeader className="pb-3 pt-5">
                       <div className="flex items-start justify-between gap-3">
-                        {/* Icon */}
-                        <div className={`h-10 w-10 rounded-lg ${accentColor}/10 flex items-center justify-center shrink-0`}>
-                          <ListChecks className={`h-5 w-5 ${accentColor.replace('bg-', 'text-')}`} />
+                        {/* Icon with status-based color */}
+                        <div className={`h-10 w-10 rounded-lg ${colorConfig.bg}/10 flex items-center justify-center shrink-0 relative`}>
+                          <StatusIcon className={`h-5 w-5 ${colorConfig.text}`} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <CardTitle className={`${isMobile ? 'text-base' : 'text-lg'} truncate`}>{repo.title}</CardTitle>
                           <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            {/* Primary status badge based on color */}
+                            {colorStatus !== 'default' && colorStatus !== 'public' && (
+                              <Badge
+                                variant="outline"
+                                className={`text-xs ${colorConfig.bg}/10 ${colorConfig.text} border-current/20`}
+                              >
+                                <StatusIcon className="h-3 w-3 mr-1" />
+                                {colorConfig.label}
+                              </Badge>
+                            )}
                             <Badge variant={repo.is_public ? "default" : "secondary"} className="text-xs">
                               {repo.is_public ? (
                                 <>
@@ -499,20 +699,10 @@ export function Dashboard() {
                                 </>
                               )}
                             </Badge>
-                            {repo.upstream_repo_id && (
-                              <Badge variant="outline" className="text-xs">
+                            {repo.upstream_repo_id && colorStatus !== 'forked' && (
+                              <Badge variant="outline" className="text-xs text-violet-400 border-violet-300/30">
                                 <GitFork className="h-3 w-3 mr-1" />
                                 Forked
-                              </Badge>
-                            )}
-                            {isNew(repo) && (
-                              <Badge variant="success" className="text-xs bg-emerald-500/10 text-emerald-700 border-emerald-500/20">
-                                ✨ New
-                              </Badge>
-                            )}
-                            {isPopular(repo) && (
-                              <Badge variant="secondary" className="text-xs bg-amber-500/10 text-amber-700 border-amber-500/20">
-                                🔥 Popular
                               </Badge>
                             )}
                           </div>
@@ -544,11 +734,10 @@ export function Dashboard() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
-                        className={`absolute top-3 right-3 ${
-                          isMobile
-                            ? 'p-3 opacity-100' // Mobile: Always visible, 44px touch target
-                            : 'p-2 opacity-0 group-hover:opacity-100 focus:opacity-100' // Desktop: Hover reveal
-                        } rounded-md bg-card/90 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shadow-sm`}
+                        className={`absolute top-3 right-3 ${isMobile
+                          ? 'p-3 opacity-100' // Mobile: Always visible, 44px touch target
+                          : 'p-2 opacity-0 group-hover:opacity-100 focus:opacity-100' // Desktop: Hover reveal
+                          } rounded-md bg-card/90 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shadow-sm`}
                         onClick={(e) => e.preventDefault()}
                         aria-label="Actions"
                       >
@@ -609,12 +798,12 @@ export function Dashboard() {
           <div className="grid md:grid-cols-3 gap-5">
             {/* Active Runs */}
             <Link to="/app/runs">
-              <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/5">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-green-500" />
+              <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-300 to-green-200" />
                 <CardHeader className="pb-4 pt-5">
                   <div className="flex items-center justify-between">
-                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Play className="h-5 w-5 text-emerald-500" />
+                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-emerald-300/30 to-emerald-200/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Play className="h-5 w-5 text-emerald-400" />
                     </div>
                     <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                   </div>
@@ -628,12 +817,12 @@ export function Dashboard() {
 
             {/* Recent Activity */}
             <Link to="/app/activity">
-              <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-500" />
+              <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-sky-300 to-cyan-200" />
                 <CardHeader className="pb-4 pt-5">
                   <div className="flex items-center justify-between">
-                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Clock className="h-5 w-5 text-blue-500" />
+                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-sky-300/30 to-sky-200/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Clock className="h-5 w-5 text-sky-400" />
                     </div>
                     <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                   </div>
@@ -647,12 +836,12 @@ export function Dashboard() {
 
             {/* Browse Templates */}
             <Link to="/explore">
-              <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-violet-500/5">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500" />
+              <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-violet-300 to-purple-200" />
                 <CardHeader className="pb-4 pt-5">
                   <div className="flex items-center justify-between">
-                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <GitFork className="h-5 w-5 text-violet-500" />
+                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-violet-300/30 to-violet-200/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <GitFork className="h-5 w-5 text-violet-400" />
                     </div>
                     <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                   </div>
@@ -732,6 +921,9 @@ export function Dashboard() {
           />
         )}
       </div>
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </main>
   )
 }

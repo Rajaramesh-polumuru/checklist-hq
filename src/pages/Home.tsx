@@ -119,10 +119,10 @@ export function Home() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-emerald-500" />
+          <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/80 to-emerald-300" />
             <CardHeader className="pt-6">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <GitFork className="h-6 w-6 text-primary" />
               </div>
               <CardTitle className="text-lg">Fork & Customize</CardTitle>
@@ -132,11 +132,11 @@ export function Home() {
             </CardHeader>
           </Card>
 
-          <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-500" />
+          <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-sky-300 to-cyan-200" />
             <CardHeader className="pt-6">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <List className="h-6 w-6 text-blue-500" />
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-sky-300/30 to-sky-200/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <List className="h-6 w-6 text-sky-400" />
               </div>
               <CardTitle className="text-lg">Version Control</CardTitle>
               <CardDescription className="text-sm leading-relaxed">
@@ -145,11 +145,11 @@ export function Home() {
             </CardHeader>
           </Card>
 
-          <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-violet-500/5">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500" />
+          <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-violet-300 to-purple-200" />
             <CardHeader className="pt-6">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Users className="h-6 w-6 text-violet-500" />
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-300/30 to-violet-200/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Users className="h-6 w-6 text-violet-400" />
               </div>
               <CardTitle className="text-lg">Community Driven</CardTitle>
               <CardDescription className="text-sm leading-relaxed">
@@ -158,11 +158,11 @@ export function Home() {
             </CardHeader>
           </Card>
 
-          <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/5">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+          <Card hoverable className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-300 to-yellow-200" />
             <CardHeader className="pt-6">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-500/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Zap className="h-6 w-6 text-amber-500" />
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-300/30 to-amber-200/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Zap className="h-6 w-6 text-amber-400" />
               </div>
               <CardTitle className="text-lg">Execute with Confidence</CardTitle>
               <CardDescription className="text-sm leading-relaxed">

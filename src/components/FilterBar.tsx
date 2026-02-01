@@ -53,10 +53,14 @@ export function FilterBar({
             <Button
               variant="outline"
               size="sm"
-              className={`${isMobile ? 'w-full' : ''} ${filters.visibility !== 'all' ? 'bg-primary/10 border-primary/30' : ''}`}
+              className={`${isMobile ? 'w-full' : ''} transition-all duration-200 ${
+                filters.visibility !== 'all'
+                  ? 'bg-primary/10 border-primary/30 shadow-sm scale-105'
+                  : 'hover:border-border/60'
+              }`}
             >
               Visibility: {filters.visibility === 'all' ? 'All' : filters.visibility.charAt(0).toUpperCase() + filters.visibility.slice(1)}
-              <ChevronDown className="ml-2 h-3 w-3" />
+              <ChevronDown className="ml-2 h-3 w-3 transition-transform group-hover:rotate-180" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
@@ -78,10 +82,14 @@ export function FilterBar({
             <Button
               variant="outline"
               size="sm"
-              className={`${isMobile ? 'w-full' : ''} ${filters.type !== 'all' ? 'bg-primary/10 border-primary/30' : ''}`}
+              className={`${isMobile ? 'w-full' : ''} transition-all duration-200 ${
+                filters.type !== 'all'
+                  ? 'bg-primary/10 border-primary/30 shadow-sm scale-105'
+                  : 'hover:border-border/60'
+              }`}
             >
               Type: {filters.type === 'all' ? 'All' : filters.type.charAt(0).toUpperCase() + filters.type.slice(1)}
-              <ChevronDown className="ml-2 h-3 w-3" />
+              <ChevronDown className="ml-2 h-3 w-3 transition-transform group-hover:rotate-180" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
@@ -103,10 +111,14 @@ export function FilterBar({
             <Button
               variant="outline"
               size="sm"
-              className={`${isMobile ? 'w-full' : ''} ${filters.status !== 'all' ? 'bg-primary/10 border-primary/30' : ''}`}
+              className={`${isMobile ? 'w-full' : ''} transition-all duration-200 ${
+                filters.status !== 'all'
+                  ? 'bg-primary/10 border-primary/30 shadow-sm scale-105'
+                  : 'hover:border-border/60'
+              }`}
             >
               Status: {filters.status === 'all' ? 'All' : filters.status === 'recent' ? 'Recently Updated' : 'Stale'}
-              <ChevronDown className="ml-2 h-3 w-3" />
+              <ChevronDown className="ml-2 h-3 w-3 transition-transform group-hover:rotate-180" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
@@ -128,7 +140,7 @@ export function FilterBar({
             variant="ghost"
             size="sm"
             onClick={onClearFilters}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground animate-fade-in transition-all hover:scale-105"
           >
             <X className="mr-1 h-3 w-3" />
             Clear {activeFilterCount > 1 ? `(${activeFilterCount})` : ''}

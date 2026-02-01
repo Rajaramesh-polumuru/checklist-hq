@@ -31,7 +31,7 @@ export function RunCard({ run }: RunCardProps) {
                             </span>
                         </div>
                         {run.status === 'completed' && (
-                            <div className="flex items-center gap-1 text-green-600">
+                            <div className="flex items-center gap-1 text-emerald-400">
                                 <CheckCircle2 className="h-3 w-3" />
                                 <span>Completed</span>
                             </div>
