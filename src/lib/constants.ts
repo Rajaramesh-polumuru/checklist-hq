@@ -133,3 +133,42 @@ export const API = {
   /** Request timeout in milliseconds */
   timeoutMs: 30000,
 } as const
+
+/**
+ * Dashboard configuration
+ */
+export const DASHBOARD = {
+  /** Stats update animation duration (ms) */
+  statCountUpDuration: 800,
+
+  /** Card stagger delay per item (ms) */
+  cardStaggerDelay: 50,
+
+  /** Thresholds for badge logic */
+  badges: {
+    /** Days to consider a repository "new" */
+    newThresholdDays: 7,
+
+    /** Days to consider a repository "stale" */
+    staleThresholdDays: 60,
+
+    /** Fork count to consider a repository "popular" */
+    popularForkCount: 10,
+
+    /** Hours to consider a repository "recently used" */
+    recentlyUsedHours: 24,
+  },
+
+  /** Filter options */
+  filters: {
+    visibility: ['all', 'public', 'private'] as const,
+    type: ['all', 'original', 'forked'] as const,
+    status: ['all', 'recent', 'stale'] as const,
+  },
+
+  /** Sort options */
+  sortOptions: ['updated', 'created', 'alpha', 'forks'] as const,
+
+  /** Activity timeline batch size */
+  activityBatchSize: 20,
+} as const

@@ -1,0 +1,170 @@
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { X, ChevronDown, ArrowUpDown } from 'lucide-react'
+import { useMobile } from '@/hooks/useMobile'
+import type { FilterState, SortOption } from '@/lib/dashboard-utils'
+import { getActiveFilterCount, getDefaultFilters } from '@/lib/dashboard-utils'
+
+interface FilterBarProps {
+  filters: FilterState
+  sortBy: SortOption
+  onFiltersChange: (filters: FilterState) => void
+  onSortChange: (sortBy: SortOption) => void
+  onClearFilters: () => void
+}
+
+export function FilterBar({
+  filters,
+  sortBy,
+  onFiltersChange,
+  onSortChange,
+  onClearFilters,
+}: FilterBarProps) {
+  const { isMobile } = useMobile()
+  const activeFilterCount = getActiveFilterCount(filters)
+
+  const handleVisibilityChange = (visibility: FilterState['visibility']) => {
+    onFiltersChange({ ...filters, visibility })
+  }
+
+  const handleTypeChange = (type: FilterState['type']) => {
+    onFiltersChange({ ...filters, type })
+  }
+
+  const handleStatusChange = (status: FilterState['status']) => {
+    onFiltersChange({ ...filters, status })
+  }
+
+  return (
+    <div className={`flex ${isMobile ? 'flex-col' : 'flex-row items-center justify-between'} gap-4 mb-6`}>
+      {/* Filter Pills */}
+      <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-start ${isMobile ? '' : 'items-center'} gap-3 flex-wrap`}>
+        <span className="text-sm font-medium text-muted-foreground">Filters:</span>
+
+        {/* Visibility Filter */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className={`${isMobile ? 'w-full' : ''} ${filters.visibility !== 'all' ? 'bg-primary/10 border-primary/30' : ''}`}
+            >
+              Visibility: {filters.visibility === 'all' ? 'All' : filters.visibility.charAt(0).toUpperCase() + filters.visibility.slice(1)}
+              <ChevronDown className="ml-2 h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => handleVisibilityChange('all')}>
+              All
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleVisibilityChange('public')}>
+              Public
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleVisibilityChange('private')}>
+              Private
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Type Filter */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className={`${isMobile ? 'w-full' : ''} ${filters.type !== 'all' ? 'bg-primary/10 border-primary/30' : ''}`}
+            >
+              Type: {filters.type === 'all' ? 'All' : filters.type.charAt(0).toUpperCase() + filters.type.slice(1)}
+              <ChevronDown className="ml-2 h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => handleTypeChange('all')}>
+              All
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleTypeChange('original')}>
+              Original
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleTypeChange('forked')}>
+              Forked
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Status Filter */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className={`${isMobile ? 'w-full' : ''} ${filters.status !== 'all' ? 'bg-primary/10 border-primary/30' : ''}`}
+            >
+              Status: {filters.status === 'all' ? 'All' : filters.status === 'recent' ? 'Recently Updated' : 'Stale'}
+              <ChevronDown className="ml-2 h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => handleStatusChange('all')}>
+              All
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleStatusChange('recent')}>
+              Recently Updated
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleStatusChange('stale')}>
+              Stale (60+ days)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Clear Filters Button */}
+        {activeFilterCount > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClearFilters}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <X className="mr-1 h-3 w-3" />
+            Clear {activeFilterCount > 1 ? `(${activeFilterCount})` : ''}
+          </Button>
+        )}
+      </div>
+
+      {/* Sort Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className={isMobile ? 'w-full' : ''}>
+            <ArrowUpDown className="mr-2 h-4 w-4" />
+            Sort: {
+              sortBy === 'updated' ? 'Recently Updated' :
+              sortBy === 'created' ? 'Recently Created' :
+              sortBy === 'alpha' ? 'Alphabetical' :
+              'Most Forked'
+            }
+            <ChevronDown className="ml-2 h-3 w-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => onSortChange('updated')}>
+            Recently Updated
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSortChange('created')}>
+            Recently Created
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSortChange('alpha')}>
+            Alphabetical (A-Z)
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSortChange('forks')}>
+            Most Forked
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  )
+}

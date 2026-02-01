@@ -6,7 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { SkeletonCard } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { SearchInput } from '@/components/SearchInput'
+import { FilterBar } from '@/components/FilterBar'
 import { useMobile } from '@/hooks/useMobile'
+import { useCountUp } from '@/hooks/useCountUp'
 import {
   Dialog,
   DialogContent,
@@ -23,11 +25,23 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ShareSettingsModal } from '@/components/ShareSettingsModal'
-import { Plus, GitFork, Play, Clock, Loader2, Globe, Lock, Trash2, Pencil, ArrowRight, ListChecks, MoreVertical, Share2, Copy } from 'lucide-react'
+import { Plus, GitFork, Play, Clock, Loader2, Globe, Lock, Trash2, Pencil, ArrowRight, ListChecks, MoreVertical, Share2, Copy, Sparkles, TrendingUp } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { getUserRepositories, deleteRepository, updateRepository, forkRepository } from '@/services/repository'
 import { KEYBOARD_SHORTCUTS } from '@/lib/constants'
+import {
+  isNew,
+  isPopular,
+  isStale,
+  isRecentlyUsed,
+  calculateStats,
+  applyFilters,
+  sortRepositories,
+  getDefaultFilters,
+  type FilterState,
+  type SortOption,
+} from '@/lib/dashboard-utils'
 import type { Repository } from '@/types/database'
 
 export function Dashboard() {
@@ -44,6 +58,16 @@ export function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
+  // Filter and sort state (with localStorage persistence)
+  const [filters, setFilters] = useState<FilterState>(() => {
+    const saved = localStorage.getItem('dashboard-filters')
+    return saved ? JSON.parse(saved) : getDefaultFilters()
+  })
+  const [sortBy, setSortBy] = useState<SortOption>(() => {
+    const saved = localStorage.getItem('dashboard-sort')
+    return (saved as SortOption) || 'updated'
+  })
+
   // Rename state
   const [renamingRepo, setRenamingRepo] = useState<Repository | null>(null)
   const [newName, setNewName] = useState('')
@@ -52,17 +76,47 @@ export function Dashboard() {
   // Share modal state
   const [shareRepo, setShareRepo] = useState<Repository | null>(null)
 
-  // Filter repositories based on search query (client-side filtering)
-  const filteredRepositories = useMemo(() => {
-    if (!searchQuery.trim()) return repositories
+  // Persist filter and sort state to localStorage
+  useEffect(() => {
+    localStorage.setItem('dashboard-filters', JSON.stringify(filters))
+  }, [filters])
 
-    const query = searchQuery.toLowerCase()
-    return repositories.filter((repo) => {
-      const titleMatch = repo.title.toLowerCase().includes(query)
-      const descriptionMatch = repo.description?.toLowerCase().includes(query)
-      return titleMatch || descriptionMatch
-    })
-  }, [repositories, searchQuery])
+  useEffect(() => {
+    localStorage.setItem('dashboard-sort', sortBy)
+  }, [sortBy])
+
+  // Filter and sort repositories (client-side)
+  const filteredRepositories = useMemo(() => {
+    // First apply search filter
+    let filtered = repositories
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      filtered = repositories.filter((repo) => {
+        const titleMatch = repo.title.toLowerCase().includes(query)
+        const descriptionMatch = repo.description?.toLowerCase().includes(query)
+        return titleMatch || descriptionMatch
+      })
+    }
+
+    // Then apply filters
+    filtered = applyFilters(filtered, filters)
+
+    // Finally apply sorting
+    filtered = sortRepositories(filtered, sortBy)
+
+    return filtered
+  }, [repositories, searchQuery, filters, sortBy])
+
+  // Calculate dashboard stats
+  const stats = useMemo(() => calculateStats(repositories), [repositories])
+
+  // Count-up animations for stats (only when not loading)
+  const animatedTotal = useCountUp(stats.total, 800, !loading)
+  const animatedPublic = useCountUp(stats.public, 800, !loading)
+  const animatedForked = useCountUp(stats.forked, 800, !loading)
+  const animatedUpdatedToday = useCountUp(stats.updatedToday, 800, !loading)
+  const animatedTotalForks = useCountUp(stats.totalForks, 800, !loading)
+  const animatedNewThisWeek = useCountUp(repositories.filter(r => isNew(r)).length, 800, !loading)
 
   useEffect(() => {
     async function loadRepositories() {
@@ -203,7 +257,7 @@ export function Dashboard() {
                   <ListChecks className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-primary`} />
                 </div>
                 <div>
-                  <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>{loading ? '—' : repositories.length}</p>
+                  <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>{loading ? '—' : animatedTotal}</p>
                   <p className="text-xs text-muted-foreground">Total Checklists</p>
                 </div>
               </div>
@@ -225,7 +279,7 @@ export function Dashboard() {
                   <Globe className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-blue-500`} />
                 </div>
                 <div>
-                  <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>{loading ? '—' : repositories.filter(r => r.is_public).length}</p>
+                  <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>{loading ? '—' : animatedPublic}</p>
                   <p className="text-xs text-muted-foreground">Public</p>
                 </div>
               </div>
@@ -236,12 +290,62 @@ export function Dashboard() {
                   <GitFork className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-amber-500`} />
                 </div>
                 <div>
-                  <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>{loading ? '—' : repositories.filter(r => r.upstream_repo_id).length}</p>
+                  <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>{loading ? '—' : animatedForked}</p>
                   <p className="text-xs text-muted-foreground">Forked</p>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Insights Row */}
+          {!loading && repositories.length > 0 && (
+            <div className="grid md:grid-cols-3 gap-4 mt-4">
+              {/* Updated Today */}
+              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm rounded-xl p-4 border border-blue-500/20">
+                <div className="flex items-center gap-3">
+                  <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-blue-500/20 flex items-center justify-center`}>
+                    <Sparkles className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-blue-600`} />
+                  </div>
+                  <div>
+                    <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-blue-700`}>
+                      {animatedUpdatedToday}
+                    </p>
+                    <p className="text-xs text-blue-600/80">Updated Today</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Total Impact (Forks) */}
+              <div className="bg-gradient-to-br from-violet-500/10 to-purple-500/5 backdrop-blur-sm rounded-xl p-4 border border-violet-500/20">
+                <div className="flex items-center gap-3">
+                  <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-violet-500/20 flex items-center justify-center`}>
+                    <TrendingUp className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-violet-600`} />
+                  </div>
+                  <div>
+                    <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-violet-700`}>
+                      {animatedTotalForks}
+                    </p>
+                    <p className="text-xs text-violet-600/80">Total Forks</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* New This Week */}
+              <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/5 backdrop-blur-sm rounded-xl p-4 border border-emerald-500/20">
+                <div className="flex items-center gap-3">
+                  <div className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} rounded-lg bg-emerald-500/20 flex items-center justify-center`}>
+                    <Plus className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-emerald-600`} />
+                  </div>
+                  <div>
+                    <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-emerald-700`}>
+                      {animatedNewThisWeek}
+                    </p>
+                    <p className="text-xs text-emerald-600/80">New This Week</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -255,7 +359,7 @@ export function Dashboard() {
             <p className="text-sm text-muted-foreground">
               {loading
                 ? 'Loading...'
-                : searchQuery.trim()
+                : searchQuery.trim() || filters.visibility !== 'all' || filters.type !== 'all' || filters.status !== 'all'
                 ? `${filteredRepositories.length} of ${repositories.length} checklist${repositories.length !== 1 ? 's' : ''}`
                 : `${repositories.length} checklist${repositories.length !== 1 ? 's' : ''}`
               }
@@ -273,6 +377,17 @@ export function Dashboard() {
             />
           </div>
         </div>
+
+        {/* Filter and Sort Bar */}
+        {!loading && repositories.length > 0 && (
+          <FilterBar
+            filters={filters}
+            sortBy={sortBy}
+            onFiltersChange={setFilters}
+            onSortChange={setSortBy}
+            onClearFilters={() => setFilters(getDefaultFilters())}
+          />
+        )}
 
         {/* Error banner */}
         {error && (
@@ -341,11 +456,21 @@ export function Dashboard() {
               const colorIndex = repo.title.length % colors.length
               const accentColor = colors[colorIndex]
 
+              // Visual weight based on status
+              const recentlyUsed = isRecentlyUsed(repo)
+              const stale = isStale(repo)
+
               return (
                 <Card
                   key={repo.id}
                   hoverable
-                  className="group relative animate-fade-in overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1"
+                  className={`group relative animate-fade-in overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 ${
+                    recentlyUsed
+                      ? 'ring-2 ring-primary/20 shadow-lg shadow-primary/10' // Recently used: enhanced shadow, subtle ring
+                      : stale
+                      ? 'opacity-75' // Stale: reduced opacity
+                      : ''
+                  }`}
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   {/* Colored accent bar */}
@@ -360,7 +485,7 @@ export function Dashboard() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <CardTitle className={`${isMobile ? 'text-base' : 'text-lg'} truncate`}>{repo.title}</CardTitle>
-                          <div className="flex items-center gap-2 mt-2">
+                          <div className="flex items-center gap-2 mt-2 flex-wrap">
                             <Badge variant={repo.is_public ? "default" : "secondary"} className="text-xs">
                               {repo.is_public ? (
                                 <>
@@ -378,6 +503,16 @@ export function Dashboard() {
                               <Badge variant="outline" className="text-xs">
                                 <GitFork className="h-3 w-3 mr-1" />
                                 Forked
+                              </Badge>
+                            )}
+                            {isNew(repo) && (
+                              <Badge variant="success" className="text-xs bg-emerald-500/10 text-emerald-700 border-emerald-500/20">
+                                ✨ New
+                              </Badge>
+                            )}
+                            {isPopular(repo) && (
+                              <Badge variant="secondary" className="text-xs bg-amber-500/10 text-amber-700 border-amber-500/20">
+                                🔥 Popular
                               </Badge>
                             )}
                           </div>
