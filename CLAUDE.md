@@ -45,8 +45,12 @@ npm run preview      # Preview production build
 
 ### Activity & Discovery
 - Activity feed showing recent changes
-- Explore public repositories
-- Search and filter repositories
+- Explore public repositories with powerful search
+- **Smart Search**: Debounced search with loading states, result counts, and clear buttons
+- **Keyboard Shortcut**: Cmd/Ctrl+K to focus search from anywhere
+- Search across titles and descriptions
+- Real-time client-side filtering on Dashboard
+- Server-side search on Explore page
 - User profiles with repository listings
 
 ### Accessibility Features
@@ -75,6 +79,7 @@ src/
 │   ├── ui/          # shadcn/ui base components (dialog, badge, skeleton, progress, etc.)
 │   ├── ErrorBanner.tsx       # Accessible error/success notifications
 │   ├── KeyboardShortcuts.tsx # Keyboard shortcut help modal
+│   ├── SearchInput.tsx       # Professional search component with loading states
 │   └── ShareSettingsModal.tsx # Repository sharing settings
 ├── stores/          # Zustand stores (auth-store, checklist-store)
 ├── services/        # Supabase API layer (repository, run, activity)
@@ -97,7 +102,8 @@ supabase/
 
 ### Feature Components
 - **ErrorBanner/SuccessBanner**: Accessible notifications with ARIA live regions and dismissible UI
-- **KeyboardShortcuts**: Help modal documenting 12+ keyboard shortcuts (Editor, Global, Navigation)
+- **KeyboardShortcuts**: Help modal documenting 13+ keyboard shortcuts (Editor, Global, Navigation, Search)
+- **SearchInput**: Professional search component with loading states, clear button, result count, and size variants
 - **ChecklistEditor**: Enhanced with empty state, interactive styling, and keyboard navigation
 - **ChecklistItem**: Hover/focus states, drag indicators, smooth transitions
 
@@ -113,7 +119,8 @@ supabase/
 - **Animation**: Duration constants (fast:100ms, default:200ms, slow:300ms)
 - **Touch Targets**: WCAG AAA compliance (44px minimum)
 - **Auto-Save Config**: Debounce (2000ms), throttle (5000ms)
-- **Keyboard Shortcuts Config**: Mapped shortcuts for all operations
+- **Search Config**: Debounce (400ms), min characters (1), result limits (20/50)
+- **Keyboard Shortcuts Config**: Mapped shortcuts for all operations including search (Cmd/Ctrl+K)
 
 #### Date Utilities (`src/lib/date-utils.ts`)
 - `formatRelativeTime()` - "2 hours ago", "yesterday"
@@ -197,6 +204,7 @@ All shortcuts are documented in the [KeyboardShortcuts.tsx](src/components/Keybo
 - **Escape** - Close modal/dialog
 
 ### Global Shortcuts
+- **Cmd/Ctrl + K** - Focus search (Dashboard, Explore)
 - **?** - Show keyboard shortcuts help
 - **Tab / Shift + Tab** - Navigate between interactive elements
 
@@ -226,7 +234,8 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 ### Key Pages
 - [src/pages/Editor.tsx](src/pages/Editor.tsx) - Main editor with auto-save, unsaved changes UI, keyboard shortcuts
-- [src/pages/Dashboard.tsx](src/pages/Dashboard.tsx) - Repository dashboard with skeleton loading
+- [src/pages/Dashboard.tsx](src/pages/Dashboard.tsx) - Repository dashboard with client-side search filtering
+- [src/pages/Explore.tsx](src/pages/Explore.tsx) - Public templates with server-side search and debouncing
 - [src/pages/RunMode.tsx](src/pages/RunMode.tsx) - Interactive checklist execution mode
 - [src/App.tsx](src/App.tsx) - Route configuration with lazy loading and protected routes
 
@@ -234,10 +243,11 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 - [src/components/ChecklistEditor.tsx](src/components/ChecklistEditor.tsx) - Enhanced empty state with tips and keyboard shortcuts
 - [src/components/ChecklistItem.tsx](src/components/ChecklistItem.tsx) - Interactive item with hover/focus states
 - [src/components/KeyboardShortcuts.tsx](src/components/KeyboardShortcuts.tsx) - Keyboard shortcut help modal
+- [src/components/SearchInput.tsx](src/components/SearchInput.tsx) - Professional search with loading states and result count
 - [src/components/ErrorBanner.tsx](src/components/ErrorBanner.tsx) - Accessible notification system
 
 ### Utilities & Config
-- [src/lib/constants.ts](src/lib/constants.ts) - Design tokens, spacing, animation, auto-save config
+- [src/lib/constants.ts](src/lib/constants.ts) - Design tokens, spacing, animation, auto-save, search config
 - [src/lib/date-utils.ts](src/lib/date-utils.ts) - Date formatting utilities (relative, compact, full)
 - [src/index.css](src/index.css) - Global styles, animations, accessibility utilities, color system
 

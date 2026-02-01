@@ -1,13 +1,12 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
+import { SearchInput } from '@/components/SearchInput'
 import {
   GitFork,
-  Search,
   TrendingUp,
   Clock,
   Eye,
@@ -21,6 +20,8 @@ import {
   forkRepository,
 } from '@/services/repository'
 import { formatRelativeTime } from '@/lib/date-utils'
+import { useDebounce } from '@/hooks/useDebounce'
+import { SEARCH, KEYBOARD_SHORTCUTS } from '@/lib/constants'
 import type { Repository } from '@/types/database'
 
 type SortOption = 'fork_count' | 'created_at' | 'updated_at'
@@ -37,19 +38,30 @@ export function Explore() {
   // Filter state
   const [searchQuery, setSearchQuery] = useState('')
   const [activeSort, setActiveSort] = useState<SortOption>('fork_count')
+  const [searchLoading, setSearchLoading] = useState(false)
+
+  // Debounced search query
+  const debouncedSearchQuery = useDebounce(searchQuery, SEARCH.debounceMs)
 
   // Fork state
   const [forkingId, setForkingId] = useState<string | null>(null)
 
+  // Search input ref for keyboard shortcut
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
   // Load repositories
-  const loadRepositories = useCallback(async () => {
+  const loadRepositories = useCallback(async (isSearch = false) => {
     try {
-      setLoading(true)
+      if (isSearch) {
+        setSearchLoading(true)
+      } else {
+        setLoading(true)
+      }
       setError(null)
 
       let repos: Repository[]
-      if (searchQuery.trim()) {
-        repos = await searchPublicRepositories(searchQuery)
+      if (debouncedSearchQuery.trim()) {
+        repos = await searchPublicRepositories(debouncedSearchQuery)
       } else {
         repos = await getPublicRepositories({
           limit: 30,
@@ -63,24 +75,40 @@ export function Explore() {
       setError('Failed to load templates')
     } finally {
       setLoading(false)
+      setSearchLoading(false)
     }
-  }, [searchQuery, activeSort])
+  }, [debouncedSearchQuery, activeSort])
 
   // Initial load
   useEffect(() => {
-    loadRepositories()
+    loadRepositories(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSort])
 
-  // Debounced search
+  // Debounced search effect
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchQuery !== '') {
-        loadRepositories()
-      }
-    }, 300)
+    if (debouncedSearchQuery !== searchQuery) return // Still typing
+    if (searchQuery.trim()) {
+      loadRepositories(true)
+    } else if (debouncedSearchQuery === '' && searchQuery === '') {
+      // Search was cleared, reload default view
+      loadRepositories(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchQuery, searchQuery])
 
-    return () => clearTimeout(timer)
-  }, [searchQuery])
+  // Keyboard shortcut: Cmd/Ctrl+K to focus search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === KEYBOARD_SHORTCUTS.search.key) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // Handle fork
   const handleFork = async (repo: Repository, e: React.MouseEvent) => {
@@ -131,14 +159,20 @@ export function Explore() {
             </p>
 
             {/* Search */}
-            <div className="relative max-w-md mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                placeholder="Search templates..."
+            <div className="max-w-md mx-auto">
+              <SearchInput
+                ref={searchInputRef}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-12 text-base rounded-xl border-2 focus:border-primary/50"
+                onChange={setSearchQuery}
+                placeholder="Search templates..."
+                loading={searchLoading}
+                resultCount={searchQuery.trim() ? repositories.length : undefined}
+                size="large"
+                ariaLabel="Search templates"
               />
+              <div className="text-center mt-3 text-xs text-muted-foreground">
+                Press <kbd className="px-2 py-0.5 bg-muted rounded border">⌘K</kbd> to focus search
+              </div>
             </div>
           </div>
 
@@ -181,9 +215,9 @@ export function Explore() {
 
         {/* Error */}
         {error && (
-          <div className="text-center py-4 text-destructive mb-6">
-            {error}
-            <button onClick={() => setError(null)} className="ml-2 underline">
+          <div className="text-center py-4 text-destructive mb-6 bg-destructive/10 rounded-lg px-4">
+            <p className="font-medium">{error}</p>
+            <button onClick={() => setError(null)} className="mt-2 underline text-sm">
               Dismiss
             </button>
           </div>
@@ -198,15 +232,27 @@ export function Explore() {
           </div>
         ) : repositories.length === 0 ? (
           <div className="text-center py-16">
-            {searchQuery ? (
-              <>
-                <p className="text-muted-foreground mb-4">
-                  No templates found matching "{searchQuery}"
+            {searchQuery.trim() ? (
+              <div className="max-w-md mx-auto">
+                <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <ListChecks className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No templates found</h3>
+                <p className="text-muted-foreground mb-6">
+                  We couldn't find any templates matching <strong>"{searchQuery}"</strong>
                 </p>
-                <Button variant="outline" onClick={() => setSearchQuery('')}>
-                  Clear search
-                </Button>
-              </>
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">Try:</p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Using different keywords</li>
+                    <li>• Checking for typos</li>
+                    <li>• Using more general terms</li>
+                  </ul>
+                  <Button variant="outline" onClick={() => setSearchQuery('')} className="mt-4">
+                    Clear search and browse all
+                  </Button>
+                </div>
+              </div>
             ) : (
               <>
                 <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">

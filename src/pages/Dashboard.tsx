@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
+import { SearchInput } from '@/components/SearchInput'
 import {
   Dialog,
   DialogContent,
@@ -21,10 +22,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ShareSettingsModal } from '@/components/ShareSettingsModal'
-import { Plus, GitFork, Play, Clock, Loader2, Globe, Lock, Trash2, Pencil, ArrowRight, ListChecks, MoreVertical, Share2, Copy, Search } from 'lucide-react'
+import { Plus, GitFork, Play, Clock, Loader2, Globe, Lock, Trash2, Pencil, ArrowRight, ListChecks, MoreVertical, Share2, Copy } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { getUserRepositories, deleteRepository, updateRepository, forkRepository } from '@/services/repository'
+import { KEYBOARD_SHORTCUTS } from '@/lib/constants'
 import type { Repository } from '@/types/database'
 
 export function Dashboard() {
@@ -36,6 +38,10 @@ export function Dashboard() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
 
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('')
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
   // Rename state
   const [renamingRepo, setRenamingRepo] = useState<Repository | null>(null)
   const [newName, setNewName] = useState('')
@@ -43,6 +49,18 @@ export function Dashboard() {
 
   // Share modal state
   const [shareRepo, setShareRepo] = useState<Repository | null>(null)
+
+  // Filter repositories based on search query (client-side filtering)
+  const filteredRepositories = useMemo(() => {
+    if (!searchQuery.trim()) return repositories
+
+    const query = searchQuery.toLowerCase()
+    return repositories.filter((repo) => {
+      const titleMatch = repo.title.toLowerCase().includes(query)
+      const descriptionMatch = repo.description?.toLowerCase().includes(query)
+      return titleMatch || descriptionMatch
+    })
+  }, [repositories, searchQuery])
 
   useEffect(() => {
     async function loadRepositories() {
@@ -63,6 +81,19 @@ export function Dashboard() {
 
     loadRepositories()
   }, [user])
+
+  // Keyboard shortcut: Cmd/Ctrl+K to focus search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === KEYBOARD_SHORTCUTS.search.key) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const handleDelete = async (repoId: string, title: string) => {
     const confirmDelete = window.confirm(`Are you sure you want to delete "${title}"? This cannot be undone.`)
@@ -220,14 +251,23 @@ export function Dashboard() {
           <div>
             <h2 className="text-xl font-semibold">Your Checklists</h2>
             <p className="text-sm text-muted-foreground">
-              {loading ? 'Loading...' : `${repositories.length} checklist${repositories.length !== 1 ? 's' : ''}`}
+              {loading
+                ? 'Loading...'
+                : searchQuery.trim()
+                ? `${filteredRepositories.length} of ${repositories.length} checklist${repositories.length !== 1 ? 's' : ''}`
+                : `${repositories.length} checklist${repositories.length !== 1 ? 's' : ''}`
+              }
             </p>
           </div>
-          <div className="relative max-w-xs w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
+          <div className="max-w-xs w-full">
+            <SearchInput
+              ref={searchInputRef}
+              value={searchQuery}
+              onChange={setSearchQuery}
               placeholder="Search checklists..."
-              className="pl-9"
+              resultCount={searchQuery.trim() ? filteredRepositories.length : undefined}
+              size="default"
+              ariaLabel="Search your checklists"
             />
           </div>
         </div>
@@ -249,37 +289,51 @@ export function Dashboard() {
               <SkeletonCard key={i} />
             ))}
           </div>
-        ) : repositories.length === 0 ? (
+        ) : filteredRepositories.length === 0 ? (
           /* Empty state */
           <Card className="border-dashed">
             <CardContent className="py-16 text-center">
               <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                 <ListChecks className="h-8 w-8 text-primary" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">No checklists yet</h2>
-              <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                Create your first checklist or fork one from the community to get started.
-              </p>
-              <div className="flex gap-3 justify-center">
-                <Button asChild>
-                  <Link to="/app/new">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create New
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link to="/explore">
-                    <GitFork className="mr-2 h-4 w-4" />
-                    Explore Templates
-                  </Link>
-                </Button>
-              </div>
+              {searchQuery.trim() ? (
+                <>
+                  <h2 className="text-xl font-semibold mb-2">No checklists found</h2>
+                  <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                    No checklists match <strong>"{searchQuery}"</strong>. Try different keywords or clear your search.
+                  </p>
+                  <Button variant="outline" onClick={() => setSearchQuery('')}>
+                    Clear search
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-xl font-semibold mb-2">No checklists yet</h2>
+                  <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                    Create your first checklist or fork one from the community to get started.
+                  </p>
+                  <div className="flex gap-3 justify-center">
+                    <Button asChild>
+                      <Link to="/app/new">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create New
+                      </Link>
+                    </Button>
+                    <Button variant="outline" asChild>
+                      <Link to="/explore">
+                        <GitFork className="mr-2 h-4 w-4" />
+                        Explore Templates
+                      </Link>
+                    </Button>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         ) : (
           /* Repository grid */
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {repositories.map((repo, index) => {
+            {filteredRepositories.map((repo, index) => {
               // Generate a consistent color based on repo title
               const colors = ['bg-primary', 'bg-emerald-500', 'bg-blue-500', 'bg-amber-500', 'bg-violet-500', 'bg-rose-500']
               const colorIndex = repo.title.length % colors.length

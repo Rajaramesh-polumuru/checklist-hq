@@ -27,6 +27,7 @@ const shortcuts: Shortcut[] = [
   { keys: ['↓'], description: 'Navigate to next item', context: 'Editor' },
 
   // Global shortcuts
+  { keys: ['⌘/Ctrl', 'K'], description: 'Focus search', context: 'Global' },
   { keys: ['⌘/Ctrl', 'S'], description: 'Save checklist', context: 'Global' },
   { keys: ['Esc'], description: 'Close modal/dialog', context: 'Global' },
   { keys: ['?'], description: 'Show keyboard shortcuts', context: 'Global' },

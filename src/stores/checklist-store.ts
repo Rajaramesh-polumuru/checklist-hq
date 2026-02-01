@@ -2,10 +2,19 @@ import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 import type { ChecklistContent, ChecklistItem as ChecklistItemType } from '../types/database';
 
+interface HistoryEntry {
+  content: ChecklistContent;
+  timestamp: number;
+}
+
 interface ChecklistStore {
   content: ChecklistContent;
   isDirty: boolean;
   focusedItemId: string | null;
+
+  // Undo/Redo
+  undoStack: HistoryEntry[];
+  redoStack: HistoryEntry[];
 
   // Actions
   setContent: (content: ChecklistContent) => void;
@@ -15,16 +24,42 @@ interface ChecklistStore {
   addItem: (text: string, parentId?: string | null) => void;
   updateItem: (id: string, updates: Partial<ChecklistItemType>) => void;
   deleteItem: (id: string) => void;
+  duplicateItem: (id: string) => void;
+  moveItemUp: (id: string) => void;
+  moveItemDown: (id: string) => void;
 
   indentItem: (id: string) => void;
   outdentItem: (id: string) => void;
   moveItem: (activeId: string, parentId: string | null, order: number) => void;
 
+  // Undo/Redo
+  undo: () => void;
+  redo: () => void;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
+
   // Selectors/Helpers
   getItemsAtLevel: (parentId: string | null) => ChecklistItemType[];
   getParent: (id: string) => ChecklistItemType | null;
   getPreviousSibling: (id: string) => ChecklistItemType | null;
+  getNextSibling: (id: string) => ChecklistItemType | null;
+  getItemCount: () => number;
+  getFilledItemCount: () => number;
 }
+
+const MAX_HISTORY = 50;
+
+// Helper to save state to history
+const saveToHistory = (state: ChecklistStore): Partial<ChecklistStore> => {
+  const entry: HistoryEntry = {
+    content: JSON.parse(JSON.stringify(state.content)),
+    timestamp: Date.now(),
+  };
+  return {
+    undoStack: [...state.undoStack.slice(-MAX_HISTORY + 1), entry],
+    redoStack: [], // Clear redo on new action
+  };
+};
 
 export const useChecklistStore = create<ChecklistStore>((set, get) => ({
   content: {
@@ -33,15 +68,17 @@ export const useChecklistStore = create<ChecklistStore>((set, get) => ({
   },
   isDirty: false,
   focusedItemId: null,
+  undoStack: [],
+  redoStack: [],
 
-  setContent: (content) => set({ content, isDirty: false }),
+  setContent: (content) => set({ content, isDirty: false, undoStack: [], redoStack: [] }),
   resetDirty: () => set({ isDirty: false }),
   setFocusedItem: (id) => set({ focusedItemId: id }),
 
   getItemsAtLevel: (parentId) => {
     const items = get().content.items;
     return Object.values(items)
-      .filter((item) => item.parent === (parentId || null)) // Handle 'null' vs undefined
+      .filter((item) => item.parent === (parentId || null))
       .sort((a, b) => a.order - b.order);
   },
 
@@ -66,6 +103,24 @@ export const useChecklistStore = create<ChecklistStore>((set, get) => ({
     return null;
   },
 
+  getNextSibling: (id) => {
+    const items = get().content.items;
+    const item = items[id];
+    if (!item) return null;
+
+    const siblings = Object.values(items)
+      .filter((i) => i.parent === item.parent)
+      .sort((a, b) => a.order - b.order);
+
+    const index = siblings.findIndex((s) => s.id === id);
+    if (index < siblings.length - 1) return siblings[index + 1];
+    return null;
+  },
+
+  getItemCount: () => Object.keys(get().content.items).length,
+
+  getFilledItemCount: () => Object.values(get().content.items).filter(i => i.text.trim() !== '').length,
+
   addItem: (text, parentId = null) => {
     const newItemId = uuidv4();
     set((state) => {
@@ -76,10 +131,11 @@ export const useChecklistStore = create<ChecklistStore>((set, get) => ({
         id: newItemId,
         text,
         parent: parentId,
-        order: siblings.length, // Append to end
+        order: siblings.length,
       };
 
       return {
+        ...saveToHistory(state),
         content: {
           ...state.content,
           items: {
@@ -88,7 +144,7 @@ export const useChecklistStore = create<ChecklistStore>((set, get) => ({
           },
         },
         isDirty: true,
-        focusedItemId: newItemId, // Focus new item
+        focusedItemId: newItemId,
       };
     });
   },
@@ -110,8 +166,7 @@ export const useChecklistStore = create<ChecklistStore>((set, get) => ({
     set((state) => {
       const newItems = { ...state.content.items };
       delete newItems[id];
-      // Also delete children? Or promote them?
-      // For MVP, recursive delete is safer to avoid orphans
+
       const deleteRecursive = (itemId: string) => {
         const children = Object.values(state.content.items).filter(i => i.parent === itemId);
         children.forEach(c => {
@@ -122,10 +177,92 @@ export const useChecklistStore = create<ChecklistStore>((set, get) => ({
       deleteRecursive(id);
 
       return {
+        ...saveToHistory(state),
         content: { ...state.content, items: newItems },
         isDirty: true,
       };
     });
+  },
+
+  duplicateItem: (id) => {
+    const items = get().content.items;
+    const item = items[id];
+    if (!item) return;
+
+    const newItemId = uuidv4();
+    const siblings = get().getItemsAtLevel(item.parent);
+
+    set((state) => {
+      // Shift orders of siblings after the current item
+      const updatedItems = { ...state.content.items };
+      siblings.forEach(s => {
+        if (s.order > item.order) {
+          updatedItems[s.id] = { ...s, order: s.order + 1 };
+        }
+      });
+
+      const newItem: ChecklistItemType = {
+        id: newItemId,
+        text: item.text,
+        parent: item.parent,
+        order: item.order + 1,
+      };
+
+      return {
+        ...saveToHistory(state),
+        content: {
+          ...state.content,
+          items: {
+            ...updatedItems,
+            [newItemId]: newItem,
+          },
+        },
+        isDirty: true,
+        focusedItemId: newItemId,
+      };
+    });
+  },
+
+  moveItemUp: (id) => {
+    const items = get().content.items;
+    const item = items[id];
+    const prevSibling = get().getPreviousSibling(id);
+
+    if (!prevSibling) return;
+
+    set((state) => ({
+      ...saveToHistory(state),
+      content: {
+        ...state.content,
+        items: {
+          ...state.content.items,
+          [id]: { ...item, order: prevSibling.order },
+          [prevSibling.id]: { ...prevSibling, order: item.order },
+        },
+      },
+      isDirty: true,
+    }));
+  },
+
+  moveItemDown: (id) => {
+    const items = get().content.items;
+    const item = items[id];
+    const nextSibling = get().getNextSibling(id);
+
+    if (!nextSibling) return;
+
+    set((state) => ({
+      ...saveToHistory(state),
+      content: {
+        ...state.content,
+        items: {
+          ...state.content.items,
+          [id]: { ...item, order: nextSibling.order },
+          [nextSibling.id]: { ...nextSibling, order: item.order },
+        },
+      },
+      isDirty: true,
+    }));
   },
 
   indentItem: (id) => {
@@ -134,11 +271,11 @@ export const useChecklistStore = create<ChecklistStore>((set, get) => ({
     const prevSibling = get().getPreviousSibling(id);
 
     if (prevSibling) {
-      // Become child of previous sibling
       const newParentId = prevSibling.id;
       const newParentChildren = get().getItemsAtLevel(newParentId);
 
       set((state) => ({
+        ...saveToHistory(state),
         content: {
           ...state.content,
           items: {
@@ -161,17 +298,11 @@ export const useChecklistStore = create<ChecklistStore>((set, get) => ({
 
     if (item.parent) {
       const parent = items[item.parent];
-      const grandparent = parent.parent; // can be null
-
-      // We need to insert after the parent in the grandparent's list
-      // This requires shifting orders of subsequent items, but for MVP appending is safest?
-      // Or we can try to be smart.
-      // Let's just append to grandparent for now to avoid order collision logic complexity in MVP.
-      // Ideally we should use fractional indexing or re-sort.
-
+      const grandparent = parent.parent;
       const newSiblings = get().getItemsAtLevel(grandparent || null);
 
       set((state) => ({
+        ...saveToHistory(state),
         content: {
           ...state.content,
           items: {
@@ -179,7 +310,7 @@ export const useChecklistStore = create<ChecklistStore>((set, get) => ({
             [id]: {
               ...item,
               parent: grandparent || null,
-              order: newSiblings.length, // Append to end of new level
+              order: newSiblings.length,
             },
           },
         },
@@ -190,6 +321,7 @@ export const useChecklistStore = create<ChecklistStore>((set, get) => ({
 
   moveItem: (activeId, parentId, order) => {
     set((state) => ({
+      ...saveToHistory(state),
       content: {
         ...state.content,
         items: {
@@ -197,12 +329,48 @@ export const useChecklistStore = create<ChecklistStore>((set, get) => ({
           [activeId]: {
             ...state.content.items[activeId],
             parent: parentId,
-            order: order, // Note: In a real app we need to shift others, but dnd-kit sortable might handle visual order.
-            // Ideally we need to re-index the whole list at that level.
+            order: order,
           },
         },
       },
       isDirty: true,
     }));
-  }
+  },
+
+  undo: () => {
+    const { undoStack, content } = get();
+    if (undoStack.length === 0) return;
+
+    const previousState = undoStack[undoStack.length - 1];
+
+    set((state) => ({
+      content: previousState.content,
+      undoStack: undoStack.slice(0, -1),
+      redoStack: [
+        ...state.redoStack,
+        { content: JSON.parse(JSON.stringify(content)), timestamp: Date.now() }
+      ],
+      isDirty: true,
+    }));
+  },
+
+  redo: () => {
+    const { redoStack, content } = get();
+    if (redoStack.length === 0) return;
+
+    const nextState = redoStack[redoStack.length - 1];
+
+    set((state) => ({
+      content: nextState.content,
+      redoStack: redoStack.slice(0, -1),
+      undoStack: [
+        ...state.undoStack,
+        { content: JSON.parse(JSON.stringify(content)), timestamp: Date.now() }
+      ],
+      isDirty: true,
+    }));
+  },
+
+  canUndo: () => get().undoStack.length > 0,
+  canRedo: () => get().redoStack.length > 0,
 }));

@@ -88,6 +88,23 @@ export const AUTO_SAVE = {
 } as const
 
 /**
+ * Search configuration
+ */
+export const SEARCH = {
+  /** Debounce delay for search input (ms) */
+  debounceMs: 400,
+
+  /** Minimum characters before triggering search */
+  minCharacters: 1,
+
+  /** Default results limit */
+  defaultLimit: 20,
+
+  /** Maximum results to show */
+  maxResults: 50,
+} as const
+
+/**
  * Keyboard shortcuts
  */
 export const KEYBOARD_SHORTCUTS = {
@@ -100,6 +117,7 @@ export const KEYBOARD_SHORTCUTS = {
   delete: { key: 'Backspace' },
   navigateUp: { key: 'ArrowUp' },
   navigateDown: { key: 'ArrowDown' },
+  search: { key: 'k', modifiers: ['meta', 'ctrl'] },
 } as const
 
 /**
