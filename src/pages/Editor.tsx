@@ -12,6 +12,7 @@ import { ErrorBanner } from '@/components/ErrorBanner'
 import { useChecklistStore } from '@/stores/checklist-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useDebounce } from '@/hooks/useDebounce'
+import { useIsMobile } from '@/hooks/useMobile'
 import { AUTO_SAVE } from '@/lib/constants'
 import {
   ArrowLeft,
@@ -27,7 +28,8 @@ import {
   ListChecks,
   Cloud,
   CloudOff,
-  Share2
+  Share2,
+  MoreVertical
 } from 'lucide-react'
 import type { ChecklistContent, Repository, Commit } from '@/types/database'
 import {
@@ -45,6 +47,10 @@ export function Editor() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const { content, setContent, isDirty, resetDirty } = useChecklistStore()
+  const isMobile = useIsMobile()
+
+  // Mobile menu state
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Repository state
   const [repository, setRepository] = useState<Repository | null>(null)
@@ -326,160 +332,236 @@ export function Editor() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      {/* Header - Mobile optimized */}
       <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          {/* Left side: Back, Logo, Title */}
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={handleBack} className="shrink-0">
-              <ArrowLeft className="h-4 w-4" />
+        <div className={`container mx-auto px-4 flex items-center justify-between ${isMobile ? 'h-12' : 'h-14'}`}>
+          {/* Left side: Back + Title */}
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBack}
+              className={`shrink-0 ${isMobile ? 'h-10 w-10' : ''}`}
+            >
+              <ArrowLeft className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
             </Button>
 
-            {/* Brand */}
-            <Link to="/app" className="hidden sm:flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-              <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                <GitFork className="h-3.5 w-3.5 text-primary" />
-              </div>
-            </Link>
+            {/* Brand - hide on mobile */}
+            {!isMobile && (
+              <>
+                <Link to="/app" className="hidden sm:flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                  <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <GitFork className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                </Link>
+                <div className="h-4 w-px bg-border hidden sm:block" />
+              </>
+            )}
 
-            <div className="h-4 w-px bg-border hidden sm:block" />
-
-            {/* Title with edit */}
-            <div className="group flex items-center gap-1">
+            {/* Title - wider on mobile */}
+            <div className="group flex items-center gap-1 flex-1 min-w-0">
               <Input
                 ref={titleInputRef}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="text-base font-semibold border-none bg-transparent h-auto p-0 focus-visible:ring-0 w-44 sm:w-56 px-2 py-1 rounded hover:bg-accent/50 transition-colors"
+                className={`font-semibold border-none bg-transparent h-auto p-0 focus-visible:ring-0 px-2 py-1 rounded hover:bg-accent/50 transition-colors min-w-0 ${isMobile ? 'text-base flex-1' : 'text-base w-44 sm:w-56'
+                  }`}
                 placeholder="Checklist title..."
               />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground"
-                onClick={() => titleInputRef.current?.focus()}
-                title="Rename checklist"
-              >
-                <Pencil className="h-3 w-3" />
-              </Button>
+              {!isMobile && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground shrink-0"
+                  onClick={() => titleInputRef.current?.focus()}
+                  title="Rename checklist"
+                >
+                  <Pencil className="h-3 w-3" />
+                </Button>
+              )}
             </div>
 
-            {/* Status indicators */}
-            <div className="hidden md:flex items-center gap-2">
-              {saveStatus === 'saved' && (
-                <Badge variant="success" className="gap-1 text-xs animate-fade-in">
-                  <Cloud className="h-3 w-3" />
-                  Saved
-                </Badge>
-              )}
-              {saveStatus === 'saving' && (
-                <Badge variant="secondary" className="gap-1 text-xs">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Saving...
-                </Badge>
-              )}
-              {saveStatus === 'error' && (
-                <Badge variant="destructive" className="gap-1 text-xs">
-                  <CloudOff className="h-3 w-3" />
-                  Error
-                </Badge>
-              )}
-              {!isNew && !loading && !saving && saveStatus === 'idle' && (isDirty || hasMetadataChanges) && (
-                <Badge variant="warning" className="text-xs">
-                  Unsaved
-                </Badge>
-              )}
-            </div>
+            {/* Status indicators - desktop only */}
+            {!isMobile && (
+              <div className="hidden md:flex items-center gap-2 shrink-0">
+                {saveStatus === 'saved' && (
+                  <Badge variant="success" className="gap-1 text-xs animate-fade-in">
+                    <Cloud className="h-3 w-3" />
+                    Saved
+                  </Badge>
+                )}
+                {saveStatus === 'saving' && (
+                  <Badge variant="secondary" className="gap-1 text-xs">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Saving...
+                  </Badge>
+                )}
+                {saveStatus === 'error' && (
+                  <Badge variant="destructive" className="gap-1 text-xs">
+                    <CloudOff className="h-3 w-3" />
+                    Error
+                  </Badge>
+                )}
+                {!isNew && !loading && !saving && saveStatus === 'idle' && (isDirty || hasMetadataChanges) && (
+                  <Badge variant="warning" className="text-xs">
+                    Unsaved
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right side: Actions */}
-          <div className="flex items-center gap-1 sm:gap-2">
-            {/* Item count */}
-            <span className="hidden lg:flex items-center gap-1.5 text-xs text-muted-foreground mr-2">
-              <ListChecks className="h-3.5 w-3.5" />
-              {itemCount} {itemCount === 1 ? 'item' : 'items'}
-            </span>
+          <div className="flex items-center gap-1 shrink-0">
+            {/* Desktop-only actions */}
+            {!isMobile && (
+              <>
+                {/* Item count */}
+                <span className="hidden lg:flex items-center gap-1.5 text-xs text-muted-foreground mr-2">
+                  <ListChecks className="h-3.5 w-3.5" />
+                  {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                </span>
 
-            {/* Share Button (for existing checklists) */}
-            {!isNew && repository && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShareOpen(true)}
-                className="gap-1.5 text-muted-foreground hover:text-foreground"
-              >
-                <Share2 className="h-4 w-4" />
-                <span className="hidden sm:inline text-xs">Share</span>
-              </Button>
+                {/* Share Button */}
+                {!isNew && repository && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShareOpen(true)}
+                    className="gap-1.5 text-muted-foreground hover:text-foreground"
+                  >
+                    <Share2 className="h-4 w-4" />
+                    <span className="hidden sm:inline text-xs">Share</span>
+                  </Button>
+                )}
+
+                {/* Privacy toggle */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsPublic(!isPublic)}
+                  className="gap-1.5 text-muted-foreground hover:text-foreground"
+                  title={isPublic ? 'Public: Anyone can view' : 'Private: Only you can access'}
+                >
+                  {isPublic ? (
+                    <>
+                      <Globe className="h-4 w-4 text-success" />
+                      <span className="hidden sm:inline text-xs">Public</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-4 w-4" />
+                      <span className="hidden sm:inline text-xs">Private</span>
+                    </>
+                  )}
+                </Button>
+
+                {/* Keyboard Shortcuts */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowShortcuts(true)}
+                  className="text-muted-foreground hover:text-foreground"
+                  title="Keyboard shortcuts (?)"
+                >
+                  <Keyboard className="h-4 w-4" />
+                </Button>
+
+                {/* Version History */}
+                {!isNew && repository && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setHistoryOpen(true)}
+                    className="text-muted-foreground hover:text-foreground"
+                    title="Version history"
+                  >
+                    <History className="h-4 w-4" />
+                  </Button>
+                )}
+
+                <div className="h-4 w-px bg-border mx-1" />
+              </>
             )}
 
-            {/* Privacy indicator (for new checklists or quick toggle) */}
+            {/* Mobile overflow menu */}
+            {isMobile && (
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="h-10 w-10 text-muted-foreground"
+                >
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
+
+                {/* Mobile dropdown menu */}
+                {mobileMenuOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setMobileMenuOpen(false)}
+                    />
+                    <div className="absolute right-0 top-full mt-1 z-50 bg-popover border rounded-xl shadow-lg py-2 min-w-[180px] animate-fade-in">
+                      <button
+                        onClick={() => { setIsPublic(!isPublic); setMobileMenuOpen(false) }}
+                        className="w-full px-4 py-3 text-left text-base hover:bg-accent flex items-center gap-3"
+                      >
+                        {isPublic ? <Globe className="h-5 w-5 text-success" /> : <Lock className="h-5 w-5" />}
+                        {isPublic ? 'Make Private' : 'Make Public'}
+                      </button>
+                      {!isNew && repository && (
+                        <>
+                          <button
+                            onClick={() => { setShareOpen(true); setMobileMenuOpen(false) }}
+                            className="w-full px-4 py-3 text-left text-base hover:bg-accent flex items-center gap-3"
+                          >
+                            <Share2 className="h-5 w-5" />
+                            Share
+                          </button>
+                          <button
+                            onClick={() => { setHistoryOpen(true); setMobileMenuOpen(false) }}
+                            className="w-full px-4 py-3 text-left text-base hover:bg-accent flex items-center gap-3"
+                          >
+                            <History className="h-5 w-5" />
+                            Version History
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Save button - always visible but compact on mobile */}
             <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsPublic(!isPublic)}
-              className="gap-1.5 text-muted-foreground hover:text-foreground"
-              title={isPublic ? 'Public: Anyone can view' : 'Private: Only you can access'}
+              variant="outline"
+              size={isMobile ? "icon" : "sm"}
+              onClick={() => handleSave(false)}
+              disabled={saving || (!isNew && !isDirty && !hasMetadataChanges)}
+              className={`${isMobile ? 'h-10 w-10' : ''} ${isDirty || hasMetadataChanges ? "border-primary text-primary hover:bg-primary/5" : ""}`}
             >
-              {isPublic ? (
-                <>
-                  <Globe className="h-4 w-4 text-success" />
-                  <span className="hidden sm:inline text-xs">Public</span>
-                </>
+              {saving ? (
+                <Loader2 className={`animate-spin ${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
               ) : (
                 <>
-                  <Lock className="h-4 w-4" />
-                  <span className="hidden sm:inline text-xs">Private</span>
+                  <Save className={isMobile ? "h-5 w-5" : "mr-1.5 h-4 w-4"} />
+                  {!isMobile && <span className="hidden sm:inline">{isNew ? 'Create' : 'Save'}</span>}
                 </>
               )}
             </Button>
 
-            {/* Keyboard Shortcuts Button */}
+            {/* Run button - always visible */}
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowShortcuts(true)}
-              className="text-muted-foreground hover:text-foreground"
-              title="Keyboard shortcuts (?)"
-            >
-              <Keyboard className="h-4 w-4" />
-            </Button>
-
-            {/* Version History Button */}
-            {!isNew && repository && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setHistoryOpen(true)}
-                className="text-muted-foreground hover:text-foreground"
-                title="Version history"
-              >
-                <History className="h-4 w-4" />
-              </Button>
-            )}
-
-            <div className="h-4 w-px bg-border mx-1" />
-
-            {/* Save button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleSave(false)}
-              disabled={saving || (!isNew && !isDirty && !hasMetadataChanges)}
-              className={isDirty || hasMetadataChanges ? "border-primary text-primary hover:bg-primary/5" : ""}
-            >
-              <Save className="mr-1.5 h-4 w-4" />
-              <span className="hidden sm:inline">{isNew ? 'Create' : 'Save'}</span>
-            </Button>
-
-            {/* Run button */}
-            <Button
-              size="sm"
+              size={isMobile ? "icon" : "sm"}
               onClick={handleStartRun}
               disabled={itemCount === 0}
+              className={isMobile ? 'h-10 w-10' : ''}
             >
-              <Play className="mr-1.5 h-4 w-4" />
-              <span className="hidden sm:inline">Run</span>
+              <Play className={isMobile ? "h-5 w-5" : "mr-1.5 h-4 w-4"} />
+              {!isMobile && <span className="hidden sm:inline">Run</span>}
             </Button>
           </div>
         </div>

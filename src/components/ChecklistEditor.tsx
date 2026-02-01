@@ -5,6 +5,7 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
@@ -16,16 +17,17 @@ import {
 import { useChecklistStore } from '@/stores/checklist-store'
 import { ChecklistItem } from './ChecklistItem'
 import { Card } from '@/components/ui/card'
-import { Plus, ListChecks, Lightbulb, Undo2, Redo2, ClipboardPaste } from 'lucide-react'
+import { Plus, ListChecks, Undo2, Redo2, Hand, Trash2, MoreVertical } from 'lucide-react'
 import type { ChecklistItem as ChecklistItemType } from '@/types/database'
 import { cn } from '@/lib/utils'
+import { useIsMobile } from '@/hooks/useMobile'
 
 // Rotating placeholder suggestions
 const PLACEHOLDERS = [
   "Add a step...",
   "What's next?",
   "Add a task...",
-  "Type to add item...",
+  "Type to add...",
 ]
 
 export function ChecklistEditor() {
@@ -43,6 +45,7 @@ export function ChecklistEditor() {
     setFocusedItem,
   } = useChecklistStore()
 
+  const isMobile = useIsMobile()
   const rootItems = getItemsAtLevel(null)
   const itemCount = getItemCount()
   const filledCount = getFilledItemCount()
@@ -60,10 +63,17 @@ export function ChecklistEditor() {
     return () => clearInterval(interval)
   }, [])
 
+  // Configure sensors - add TouchSensor for mobile
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -91,7 +101,6 @@ export function ChecklistEditor() {
     if (text.trim()) {
       addItem(text.trim())
       setQuickAddValue('')
-      // Re-focus quick add for continuous entry
       setTimeout(() => quickAddRef.current?.focus(), 50)
     }
   }
@@ -102,7 +111,6 @@ export function ChecklistEditor() {
       handleQuickAdd()
     } else if (e.key === 'Tab' && quickAddValue.trim()) {
       e.preventDefault()
-      // Add as child of last item if it exists
       if (rootItems.length > 0) {
         const lastItem = rootItems[rootItems.length - 1]
         addItem(quickAddValue.trim(), lastItem.id)
@@ -112,7 +120,6 @@ export function ChecklistEditor() {
       }
     } else if (e.key === 'ArrowUp' && rootItems.length > 0) {
       e.preventDefault()
-      // Navigate to last item in list
       const allItems = getAllVisibleItems()
       if (allItems.length > 0) {
         setFocusedItem(allItems[allItems.length - 1].id)
@@ -120,16 +127,13 @@ export function ChecklistEditor() {
     }
   }
 
-  // Handle paste of multi-line content
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {
     const pastedText = e.clipboardData.getData('text')
     const lines = pastedText.split('\n').map(l => l.trim()).filter(l => l)
 
     if (lines.length > 1) {
       e.preventDefault()
-      // Add each line as a separate item
       lines.forEach((line) => {
-        // Remove common list prefixes
         const cleanLine = line.replace(/^[-*•]\s*/, '').replace(/^\d+\.\s*/, '')
         if (cleanLine) {
           addItem(cleanLine)
@@ -139,7 +143,6 @@ export function ChecklistEditor() {
     }
   }, [addItem])
 
-  // Helper to get all items in visual order (DFS)
   const getAllVisibleItems = (): ChecklistItemType[] => {
     const result: ChecklistItemType[] = []
     const traverse = (parentId: string | null) => {
@@ -153,7 +156,6 @@ export function ChecklistEditor() {
     return result
   }
 
-  // Recursively render items with their children
   const renderItems = (items: ChecklistItemType[], depth = 0, parentHasMoreSiblings: boolean[] = []): React.ReactNode[] => {
     return items.flatMap((item, index) => {
       const children = getItemsAtLevel(item.id)
@@ -175,8 +177,10 @@ export function ChecklistEditor() {
 
   const allItemIds = Object.keys(content.items)
 
-  // Global keyboard shortcuts
+  // Global keyboard shortcuts (desktop only)
   useEffect(() => {
+    if (isMobile) return
+
     const handleKeyDown = (e: KeyboardEvent) => {
       const isMod = e.metaKey || e.ctrlKey
 
@@ -194,12 +198,12 @@ export function ChecklistEditor() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [undo, redo])
+  }, [undo, redo, isMobile])
 
   return (
     <div className="space-y-4">
-      {/* Progress bar */}
-      {itemCount > 0 && (
+      {/* Progress bar - hide on mobile to save space */}
+      {itemCount > 0 && !isMobile && (
         <div className="flex items-center gap-3 px-1 animate-fade-in">
           <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
             <div
@@ -213,8 +217,8 @@ export function ChecklistEditor() {
         </div>
       )}
 
-      {/* Undo/Redo toolbar */}
-      {itemCount > 0 && (
+      {/* Undo/Redo toolbar - hide on mobile */}
+      {itemCount > 0 && !isMobile && (
         <div className="flex items-center gap-1 px-1">
           <button
             onClick={undo}
@@ -248,23 +252,43 @@ export function ChecklistEditor() {
       >
         <SortableContext items={allItemIds} strategy={verticalListSortingStrategy}>
           {rootItems.length === 0 ? (
-            /* Enhanced empty state */
+            /* Empty state - optimized for mobile */
             <Card className="border-dashed border-2 bg-gradient-to-b from-muted/30 to-muted/10">
-              <div className="text-center py-16 px-6">
-                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-                  <ListChecks className="h-8 w-8 text-primary" />
+              <div className={cn(
+                "text-center px-4",
+                isMobile ? "py-10" : "py-16 px-6"
+              )}>
+                <div className={cn(
+                  "mx-auto bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl flex items-center justify-center shadow-sm",
+                  isMobile ? "w-14 h-14 mb-4" : "w-16 h-16 mb-6"
+                )}>
+                  <ListChecks className={cn(isMobile ? "h-7 w-7" : "h-8 w-8", "text-primary")} />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Start building your checklist</h3>
-                <p className="text-muted-foreground text-sm mb-8 max-w-md mx-auto leading-relaxed">
-                  Create a reusable process that your team can follow. Just start typing below – press <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded border font-mono">Enter</kbd> to add items.
+                <h3 className={cn(
+                  "font-semibold mb-2",
+                  isMobile ? "text-lg" : "text-xl"
+                )}>
+                  Start building your checklist
+                </h3>
+                <p className={cn(
+                  "text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed",
+                  isMobile ? "text-sm" : "text-sm mb-8"
+                )}>
+                  {isMobile
+                    ? "Tap below to add your first step."
+                    : "Create a reusable process that your team can follow. Just start typing below."
+                  }
                 </p>
 
                 {/* Quick add box for empty state */}
                 <div className="max-w-md mx-auto">
                   <div className="relative group">
                     <div className="absolute inset-0 bg-primary/5 rounded-xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity" />
-                    <div className="relative flex items-center gap-3 bg-card border-2 border-dashed border-primary/30 rounded-xl px-4 py-3 transition-all focus-within:border-primary focus-within:shadow-lg focus-within:shadow-primary/10">
-                      <Plus className="h-5 w-5 text-primary/60" />
+                    <div className={cn(
+                      "relative flex items-center gap-3 bg-card border-2 border-dashed border-primary/30 rounded-xl transition-all focus-within:border-primary focus-within:shadow-lg focus-within:shadow-primary/10",
+                      isMobile ? "px-4 py-4" : "px-4 py-3"
+                    )}>
+                      <Plus className={cn(isMobile ? "h-6 w-6" : "h-5 w-5", "text-primary/60")} />
                       <input
                         ref={quickAddRef}
                         type="text"
@@ -273,41 +297,62 @@ export function ChecklistEditor() {
                         onKeyDown={handleQuickAddKeyDown}
                         onPaste={handlePaste}
                         placeholder={PLACEHOLDERS[placeholderIndex]}
-                        className="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground/50 text-base"
-                        autoFocus
+                        className={cn(
+                          "flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground/50",
+                          isMobile ? "text-base" : "text-base"
+                        )}
+                        autoFocus={!isMobile}
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Quick tips */}
-                <div className="mt-10 pt-6 border-t border-dashed">
-                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mb-4">
-                    <Lightbulb className="h-3.5 w-3.5" />
+                {/* Tips section - different for mobile vs desktop */}
+                <div className={cn(
+                  "pt-6 border-t border-dashed",
+                  isMobile ? "mt-8" : "mt-10"
+                )}>
+                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mb-3">
                     <span className="font-medium">Quick tips</span>
                   </div>
-                  <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5">
-                      <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] font-mono">Tab</kbd>
-                      <span>indent</span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] font-mono">Shift+Tab</kbd>
-                      <span>outdent</span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] font-mono">↑↓</kbd>
-                      <span>navigate</span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] font-mono">⌘Z</kbd>
-                      <span>undo</span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <ClipboardPaste className="h-3 w-3" />
-                      <span>paste list</span>
-                    </span>
-                  </div>
+
+                  {isMobile ? (
+                    /* Mobile-specific touch tips */
+                    <div className="flex flex-col gap-2 text-xs text-muted-foreground">
+                      <span className="flex items-center justify-center gap-2">
+                        <Hand className="h-3.5 w-3.5" />
+                        Long-press for options
+                      </span>
+                      <span className="flex items-center justify-center gap-2">
+                        <MoreVertical className="h-3.5 w-3.5" />
+                        Tap ⋮ to move or delete
+                      </span>
+                      <span className="flex items-center justify-center gap-2">
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Swipe left in context menu to delete
+                      </span>
+                    </div>
+                  ) : (
+                    /* Desktop keyboard tips */
+                    <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1.5">
+                        <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] font-mono">Tab</kbd>
+                        <span>indent</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] font-mono">Shift+Tab</kbd>
+                        <span>outdent</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] font-mono">↑↓</kbd>
+                        <span>navigate</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] font-mono">⌘Z</kbd>
+                        <span>undo</span>
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </Card>
@@ -320,18 +365,22 @@ export function ChecklistEditor() {
         </SortableContext>
       </DndContext>
 
-      {/* Always-visible quick add box when items exist */}
+      {/* Quick add box when items exist - mobile optimized */}
       {rootItems.length > 0 && (
         <div className="relative group animate-fade-in">
           <div className="absolute inset-0 bg-primary/5 rounded-xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity" />
           <div
             className={cn(
-              "relative flex items-center gap-3 bg-card/50 border border-dashed rounded-xl px-4 py-3 transition-all",
+              "relative flex items-center gap-3 bg-card/50 border border-dashed rounded-xl transition-all",
               "border-muted-foreground/20 hover:border-primary/30",
-              "focus-within:border-primary focus-within:bg-card focus-within:shadow-md focus-within:shadow-primary/5"
+              "focus-within:border-primary focus-within:bg-card focus-within:shadow-md focus-within:shadow-primary/5",
+              isMobile ? "px-4 py-4" : "px-4 py-3"
             )}
           >
-            <Plus className="h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
+            <Plus className={cn(
+              "text-muted-foreground/60 group-focus-within:text-primary transition-colors",
+              isMobile ? "h-5 w-5" : "h-4 w-4"
+            )} />
             <input
               ref={quickAddRef}
               type="text"
@@ -340,12 +389,17 @@ export function ChecklistEditor() {
               onKeyDown={handleQuickAddKeyDown}
               onPaste={handlePaste}
               placeholder={PLACEHOLDERS[placeholderIndex]}
-              className="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground/40 text-sm"
+              className={cn(
+                "flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground/40",
+                isMobile ? "text-base" : "text-sm"
+              )}
             />
-            <span className="text-[10px] text-muted-foreground/40 hidden sm:flex items-center gap-1">
-              <kbd className="px-1 py-0.5 bg-muted/50 rounded text-[9px] font-mono">Enter</kbd>
-              to add
-            </span>
+            {!isMobile && (
+              <span className="text-[10px] text-muted-foreground/40 hidden sm:flex items-center gap-1">
+                <kbd className="px-1 py-0.5 bg-muted/50 rounded text-[9px] font-mono">Enter</kbd>
+                to add
+              </span>
+            )}
           </div>
         </div>
       )}

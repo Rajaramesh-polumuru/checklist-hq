@@ -75,7 +75,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     return (
       <div className="relative w-full">
         {/* Search Icon */}
-        <div className="absolute left-0 top-0 h-full flex items-center pl-3 pointer-events-none">
+        <div className="absolute left-0 top-0 h-full flex items-center pl-3 pointer-events-none z-10">
           {loading ? (
             <Loader2
               className="text-muted-foreground animate-spin"
@@ -90,7 +90,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
         {/* Input Field */}
         <Input
           ref={inputRef}
-          type="search"
+          type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
@@ -111,14 +111,15 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
 
         {/* Clear Button */}
         {showClear && (
-          <div className="absolute right-0 top-0 h-full flex items-center pr-2">
+          <div className="absolute right-0 top-0 h-full flex items-center pr-2 z-10">
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={handleClear}
-              className="h-7 w-7 p-0 hover:bg-muted rounded-md"
+              className="h-7 w-7 p-0 hover:bg-muted rounded-md transition-colors"
               aria-label="Clear search"
+              tabIndex={0}
             >
               <X size={16} />
             </Button>
@@ -127,7 +128,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
 
         {/* Result Count */}
         {showResultCount && !loading && (
-          <div className="absolute -bottom-6 left-0 text-xs text-muted-foreground">
+          <div className="absolute -bottom-5 left-0 text-xs text-muted-foreground" role="status" aria-live="polite">
             {resultCount === 0 ? (
               <span>No results found</span>
             ) : (

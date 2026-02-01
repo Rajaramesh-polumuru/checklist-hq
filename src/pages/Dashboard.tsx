@@ -247,7 +247,7 @@ export function Dashboard() {
       <div className="container mx-auto px-4 py-8">
 
         {/* Section Header with Search */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h2 className="text-xl font-semibold">Your Checklists</h2>
             <p className="text-sm text-muted-foreground">

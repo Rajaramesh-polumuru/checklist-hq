@@ -170,8 +170,8 @@ export function Explore() {
                 size="large"
                 ariaLabel="Search templates"
               />
-              <div className="text-center mt-3 text-xs text-muted-foreground">
-                Press <kbd className="px-2 py-0.5 bg-muted rounded border">⌘K</kbd> to focus search
+              <div className="text-center mt-4 text-xs text-muted-foreground">
+                Press <kbd className="px-2 py-0.5 bg-muted rounded border text-foreground font-mono">{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}+K</kbd> to focus search
               </div>
             </div>
           </div>
@@ -215,9 +215,13 @@ export function Explore() {
 
         {/* Error */}
         {error && (
-          <div className="text-center py-4 text-destructive mb-6 bg-destructive/10 rounded-lg px-4">
+          <div className="text-center py-4 text-destructive mb-6 bg-destructive/10 border border-destructive/20 rounded-lg px-4">
             <p className="font-medium">{error}</p>
-            <button onClick={() => setError(null)} className="mt-2 underline text-sm">
+            <button
+              onClick={() => setError(null)}
+              className="mt-2 underline text-sm hover:no-underline transition-all"
+              aria-label="Dismiss error"
+            >
               Dismiss
             </button>
           </div>
