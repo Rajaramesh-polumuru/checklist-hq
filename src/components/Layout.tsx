@@ -1,7 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth-store'
-import { DevColorPicker } from '@/components/DevColorPicker'
 import { GitFork, LogOut, Plus } from 'lucide-react'
 
 export function Layout() {

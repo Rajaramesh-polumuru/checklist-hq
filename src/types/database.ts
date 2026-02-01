@@ -58,6 +58,31 @@ export interface ItemProgress {
 
 export type RunProgress = Record<string, ItemProgress>
 
+// Tags for categorizing repositories
+export interface Tag {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  category: string | null  // e.g., 'engineering', 'health', 'business'
+  color: string  // For UI display
+  icon: string | null  // Lucide icon name
+  created_at: string
+}
+
+// Junction table for repository-tag relationships
+export interface RepositoryTag {
+  id: string
+  repository_id: string
+  tag_id: string
+  created_at: string
+}
+
+// Repository with tags (for display purposes)
+export interface RepositoryWithTags extends Repository {
+  tags?: Tag[]
+}
+
 // Insert types (without auto-generated fields)
 export interface RepositoryInsert {
   owner_id: string
@@ -114,6 +139,16 @@ export interface Database {
         Row: Run
         Insert: RunInsert
         Update: RunUpdate
+      }
+      tags: {
+        Row: Tag
+        Insert: never  // Tags are seeded, not user-created
+        Update: never
+      }
+      repository_tags: {
+        Row: RepositoryTag
+        Insert: { repository_id: string; tag_id: string }
+        Update: never
       }
     }
   }

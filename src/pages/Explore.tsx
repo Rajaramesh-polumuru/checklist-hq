@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/ui/skeleton'
@@ -12,32 +12,38 @@ import {
   Eye,
   ListChecks,
   Plus,
+  Tag as TagIcon,
+  X,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import {
-  getPublicRepositories,
-  searchPublicRepositories,
+  getPublicRepositoriesWithTags,
+  searchPublicRepositoriesWithTags,
+  getAllTags,
   forkRepository,
 } from '@/services/repository'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { useDebounce } from '@/hooks/useDebounce'
 import { SEARCH, KEYBOARD_SHORTCUTS } from '@/lib/constants'
-import type { Repository } from '@/types/database'
+import type { Tag, RepositoryWithTags, Repository } from '@/types/database'
 
 type SortOption = 'fork_count' | 'created_at' | 'updated_at'
 
 export function Explore() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { user } = useAuthStore()
 
   // Data state
-  const [repositories, setRepositories] = useState<Repository[]>([])
+  const [repositories, setRepositories] = useState<RepositoryWithTags[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState('')
   const [activeSort, setActiveSort] = useState<SortOption>('fork_count')
+  const [selectedTag, setSelectedTag] = useState<string | null>(searchParams.get('tag'))
   const [searchLoading, setSearchLoading] = useState(false)
 
   // Debounced search query
@@ -49,6 +55,19 @@ export function Explore() {
   // Search input ref for keyboard shortcut
   const searchInputRef = useRef<HTMLInputElement>(null)
 
+  // Load tags on mount
+  useEffect(() => {
+    async function loadTags() {
+      try {
+        const allTags = await getAllTags()
+        setTags(allTags)
+      } catch (err) {
+        console.error('Error loading tags:', err)
+      }
+    }
+    loadTags()
+  }, [])
+
   // Load repositories
   const loadRepositories = useCallback(async (isSearch = false) => {
     try {
@@ -59,13 +78,18 @@ export function Explore() {
       }
       setError(null)
 
-      let repos: Repository[]
+      let repos: RepositoryWithTags[]
       if (debouncedSearchQuery.trim()) {
-        repos = await searchPublicRepositories(debouncedSearchQuery)
+        repos = await searchPublicRepositoriesWithTags(debouncedSearchQuery)
+        // Client-side filter by tag if both search and tag are active
+        if (selectedTag) {
+          repos = repos.filter(r => r.tags?.some(t => t.slug === selectedTag))
+        }
       } else {
-        repos = await getPublicRepositories({
-          limit: 30,
+        repos = await getPublicRepositoriesWithTags({
+          limit: 50,
           orderBy: activeSort,
+          tagSlug: selectedTag || undefined,
         })
       }
 
@@ -77,13 +101,30 @@ export function Explore() {
       setLoading(false)
       setSearchLoading(false)
     }
-  }, [debouncedSearchQuery, activeSort])
+  }, [debouncedSearchQuery, activeSort, selectedTag])
 
-  // Initial load
+  // Initial load and when filters change
   useEffect(() => {
     loadRepositories(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeSort])
+  }, [activeSort, selectedTag])
+
+  // Handle tag selection
+  const handleTagSelect = (tagSlug: string | null) => {
+    setSelectedTag(tagSlug)
+    if (tagSlug) {
+      setSearchParams({ tag: tagSlug })
+    } else {
+      setSearchParams({})
+    }
+  }
+
+  // Get unique categories from tags
+  const tagCategories = tags.reduce((acc, tag) => {
+    const category = tag.category || 'other'
+    if (!acc.includes(category)) acc.push(category)
+    return acc
+  }, [] as string[])
 
   // Debounced search effect
   useEffect(() => {
@@ -194,8 +235,68 @@ export function Explore() {
         </div>
       </div>
 
+      {/* Tag Filters */}
+      {tags.length > 0 && (
+        <div className="border-b bg-muted/30">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-3 mb-3">
+              <TagIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground">Filter by category:</span>
+              {selectedTag && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleTagSelect(null)}
+                  className="h-6 px-2 text-xs"
+                >
+                  <X className="h-3 w-3 mr-1" />
+                  Clear filter
+                </Button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {tagCategories.map((category) => (
+                <div key={category} className="flex flex-wrap gap-1.5">
+                  {tags
+                    .filter((t) => (t.category || 'other') === category)
+                    .slice(0, 6) // Show first 6 tags per category
+                    .map((tag) => (
+                      <Button
+                        key={tag.id}
+                        variant={selectedTag === tag.slug ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleTagSelect(selectedTag === tag.slug ? null : tag.slug)}
+                        className="h-7 text-xs"
+                      >
+                        {tag.name}
+                      </Button>
+                    ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
+
+        {/* Active filter indicator */}
+        {selectedTag && (
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <Badge variant="secondary" className="px-3 py-1">
+              <TagIcon className="h-3 w-3 mr-1.5" />
+              {tags.find(t => t.slug === selectedTag)?.name || selectedTag}
+              <button
+                onClick={() => handleTagSelect(null)}
+                className="ml-2 hover:text-destructive"
+                aria-label="Clear tag filter"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          </div>
+        )}
 
         {/* Sort Tabs */}
         <div className="flex justify-center gap-2 mb-8">
@@ -320,6 +421,30 @@ export function Explore() {
                         <CardDescription className="line-clamp-2 mt-3">
                           {repo.description}
                         </CardDescription>
+                      )}
+                      {/* Tags */}
+                      {repo.tags && repo.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-3">
+                          {repo.tags.slice(0, 3).map((tag) => (
+                            <Badge
+                              key={tag.id}
+                              variant="outline"
+                              className="text-xs cursor-pointer hover:bg-primary/10"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                handleTagSelect(tag.slug)
+                              }}
+                            >
+                              {tag.name}
+                            </Badge>
+                          ))}
+                          {repo.tags.length > 3 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{repo.tags.length - 3}
+                            </Badge>
+                          )}
+                        </div>
                       )}
                     </CardHeader>
                     <CardContent>

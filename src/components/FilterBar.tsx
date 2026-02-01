@@ -1,4 +1,3 @@
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -9,7 +8,7 @@ import {
 import { X, ChevronDown, ArrowUpDown } from 'lucide-react'
 import { useMobile } from '@/hooks/useMobile'
 import type { FilterState, SortOption } from '@/lib/dashboard-utils'
-import { getActiveFilterCount, getDefaultFilters } from '@/lib/dashboard-utils'
+import { getActiveFilterCount } from '@/lib/dashboard-utils'
 
 interface FilterBarProps {
   filters: FilterState

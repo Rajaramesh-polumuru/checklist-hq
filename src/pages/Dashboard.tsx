@@ -211,7 +211,7 @@ function ColorLegend({ isExpanded, onToggle }: { isExpanded: boolean; onToggle: 
 export function Dashboard() {
   const { user } = useAuthStore()
   const navigate = useNavigate()
-  const { isMobile, isTablet, isDesktop, isTouchDevice } = useMobile()
+  const { isMobile } = useMobile()
   const { toasts, dismissToast, success, error: showError } = useToast()
   const [repositories, setRepositories] = useState<Repository[]>([])
   const [loading, setLoading] = useState(true)
