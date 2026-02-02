@@ -25,7 +25,6 @@ import {
   updateRunProgress,
   completeRun,
   startRunFromLatestCommit,
-  calculateRunProgress,
 } from '@/services/run'
 import type { Repository, Run, Commit, ChecklistItem, RunProgress } from '@/types/database'
 
@@ -112,7 +111,56 @@ function ProgressRing({
   )
 }
 
-// Run item with premium styling
+// Header item component for section headers
+function SectionHeader({
+  item,
+  childCount,
+  completedChildCount,
+}: {
+  item: ChecklistItem
+  childCount: number
+  completedChildCount: number
+}) {
+  const isAllComplete = childCount > 0 && completedChildCount === childCount
+
+  return (
+    <div className={cn(
+      'flex items-center gap-3 px-4 py-3 rounded-xl transition-all',
+      isAllComplete ? 'bg-success/10' : 'bg-muted/30'
+    )}>
+      <div className={cn(
+        'h-8 w-8 rounded-lg flex items-center justify-center shrink-0',
+        isAllComplete ? 'bg-success/20' : 'bg-primary/10'
+      )}>
+        {isAllComplete ? (
+          <CheckCircle2 className="h-4 w-4 text-success" />
+        ) : (
+          <Target className="h-4 w-4 text-primary" />
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className={cn(
+          'font-semibold text-base',
+          isAllComplete ? 'text-success' : 'text-foreground'
+        )}>
+          {item.text || 'Section'}
+        </h3>
+        {childCount > 0 && (
+          <p className="text-xs text-muted-foreground">
+            {completedChildCount} of {childCount} completed
+          </p>
+        )}
+      </div>
+      {isAllComplete && (
+        <Badge variant="success" className="text-xs">
+          Complete
+        </Badge>
+      )}
+    </div>
+  )
+}
+
+// Run item with premium styling - now supports sub-items
 function PremiumRunItem({
   item,
   progress,
@@ -121,6 +169,7 @@ function PremiumRunItem({
   stepNumber,
   isNext,
   totalSteps,
+  showStepNumber = true,
 }: {
   item: ChecklistItem
   progress: { completed: boolean; timestamp?: string } | undefined
@@ -129,6 +178,7 @@ function PremiumRunItem({
   stepNumber: number
   isNext: boolean
   totalSteps: number
+  showStepNumber?: boolean
 }) {
   const isCompleted = progress?.completed ?? false
   const [isAnimating, setIsAnimating] = useState(false)
@@ -142,25 +192,28 @@ function PremiumRunItem({
     onToggle(item.id, !isCompleted)
   }
 
+  // Adjust sizing based on depth
+  const isSubItem = depth > 0
+
   return (
     <button
       onClick={handleToggle}
       className={cn(
-        'w-full text-left group flex items-start gap-4 p-4 rounded-2xl transition-all duration-300',
+        'w-full text-left group flex items-start gap-3 transition-all duration-300',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+        isSubItem ? 'p-3 rounded-xl' : 'p-4 rounded-2xl',
         isCompleted && 'bg-success/10 hover:bg-success/15',
         !isCompleted && isNext && 'bg-primary/5 ring-2 ring-primary/20 hover:bg-primary/10',
-        !isCompleted && !isNext && 'hover:bg-muted/50',
-        depth > 0 && 'ml-8 border-l-2 border-muted'
+        !isCompleted && !isNext && 'hover:bg-muted/50'
       )}
-      style={{ marginLeft: depth > 0 ? `${depth * 32}px` : undefined }}
     >
       {/* Animated checkbox */}
-      <div className="relative pt-0.5">
+      <div className="relative pt-0.5 shrink-0">
         <div
           ref={checkboxRef as any}
           className={cn(
-            'relative h-7 w-7 rounded-full border-2 transition-all duration-300 flex items-center justify-center',
+            'relative rounded-full border-2 transition-all duration-300 flex items-center justify-center',
+            isSubItem ? 'h-5 w-5' : 'h-7 w-7',
             isCompleted && 'bg-success border-success scale-110',
             !isCompleted && isNext && 'border-primary bg-primary/10',
             !isCompleted && !isNext && 'border-muted-foreground/30 group-hover:border-primary/50',
@@ -168,11 +221,11 @@ function PremiumRunItem({
           )}
         >
           {isCompleted ? (
-            <CheckCircle2 className="h-5 w-5 text-white animate-fade-in" />
+            <CheckCircle2 className={cn('text-white animate-fade-in', isSubItem ? 'h-3 w-3' : 'h-5 w-5')} />
           ) : isNext ? (
-            <Play className="h-3 w-3 text-primary" />
+            <Play className={cn('text-primary', isSubItem ? 'h-2 w-2' : 'h-3 w-3')} />
           ) : (
-            <Circle className="h-4 w-4 text-muted-foreground/30" />
+            <Circle className={cn('text-muted-foreground/30', isSubItem ? 'h-3 w-3' : 'h-4 w-4')} />
           )}
         </div>
 
@@ -184,24 +237,34 @@ function PremiumRunItem({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        {/* Step indicator */}
-        <div className="flex items-center gap-2 mb-1">
-          <span className={cn(
-            "text-xs font-medium uppercase tracking-wider",
-            isCompleted ? "text-success" : isNext ? "text-primary" : "text-muted-foreground"
-          )}>
-            Step {stepNumber} of {totalSteps}
-          </span>
-          {isNext && !isCompleted && (
-            <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4 bg-primary/90">
-              NEXT
-            </Badge>
-          )}
-        </div>
+        {/* Step indicator - only for top-level items */}
+        {showStepNumber && !isSubItem && (
+          <div className="flex items-center gap-2 mb-1">
+            <span className={cn(
+              "text-xs font-medium uppercase tracking-wider",
+              isCompleted ? "text-success" : isNext ? "text-primary" : "text-muted-foreground"
+            )}>
+              Step {stepNumber} of {totalSteps}
+            </span>
+            {isNext && !isCompleted && (
+              <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4 bg-primary text-primary-foreground hover:bg-primary/90">
+                NEXT
+              </Badge>
+            )}
+          </div>
+        )}
+
+        {/* Sub-item indicator */}
+        {isSubItem && isNext && !isCompleted && (
+          <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4 bg-primary text-primary-foreground hover:bg-primary/90 mb-1">
+            NEXT
+          </Badge>
+        )}
 
         {/* Item text */}
         <p className={cn(
-          'text-lg font-medium transition-all',
+          'font-medium transition-all',
+          isSubItem ? 'text-base' : 'text-lg',
           isCompleted && 'text-success line-through opacity-70',
           isNext && !isCompleted && 'text-foreground',
           !isNext && !isCompleted && 'text-muted-foreground'
@@ -211,14 +274,14 @@ function PremiumRunItem({
 
         {/* Details */}
         {item.details && (
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className={cn('text-muted-foreground mt-1', isSubItem ? 'text-xs' : 'text-sm')}>
             {item.details}
           </p>
         )}
 
         {/* Completion timestamp */}
         {isCompleted && progress?.timestamp && (
-          <p className="text-xs text-success mt-2 flex items-center gap-1.5 opacity-80">
+          <p className="text-xs text-success mt-1.5 flex items-center gap-1.5 opacity-80">
             <CheckCircle2 className="h-3 w-3" />
             Completed {formatRelativeTime(progress.timestamp)}
           </p>
@@ -226,10 +289,117 @@ function PremiumRunItem({
       </div>
 
       {/* Chevron for next item */}
-      {isNext && !isCompleted && (
+      {isNext && !isCompleted && !isSubItem && (
         <ChevronRight className="h-5 w-5 text-primary shrink-0 mt-1 group-hover:translate-x-1 transition-transform" />
       )}
     </button>
+  )
+}
+
+// Recursive component to render items with their children
+function RecursiveRunItems({
+  items,
+  allItems,
+  progress,
+  onToggle,
+  depth = 0,
+  checkableItems,
+  nextItemId,
+}: {
+  items: ChecklistItem[]
+  allItems: Record<string, ChecklistItem>
+  progress: RunProgress
+  onToggle: (itemId: string, completed: boolean) => void
+  depth?: number
+  checkableItems: ChecklistItem[]
+  nextItemId: string | null
+}) {
+  // Get children for a given parent
+  const getChildren = (parentId: string): ChecklistItem[] => {
+    return Object.values(allItems)
+      .filter(item => item.parent === parentId)
+      .sort((a, b) => a.order - b.order)
+  }
+
+  // Count completed children for a header
+  const getCompletedChildCount = (parentId: string): number => {
+    const children = getChildren(parentId)
+    return children.filter(child => {
+      if (child.type === 'header') {
+        // For nested headers, recursively count
+        return getCompletedChildCount(child.id) === getChildren(child.id).length
+      }
+      return progress[child.id]?.completed
+    }).length
+  }
+
+  // Get step number for an item
+  const getStepNumber = (itemId: string): number => {
+    return checkableItems.findIndex(item => item.id === itemId) + 1
+  }
+
+  return (
+    <>
+      {items.map(item => {
+        const children = getChildren(item.id)
+        const isHeader = item.type === 'header'
+        const isNext = item.id === nextItemId
+
+        if (isHeader && children.length > 0) {
+          // Render as section header with children
+          return (
+            <div key={item.id} className={cn('space-y-2', depth > 0 && 'ml-6')}>
+              <SectionHeader
+                item={item}
+                childCount={children.filter(c => c.type !== 'header').length}
+                completedChildCount={getCompletedChildCount(item.id)}
+              />
+              <div className="ml-4 space-y-2 border-l-2 border-muted/50 pl-4">
+                <RecursiveRunItems
+                  items={children}
+                  allItems={allItems}
+                  progress={progress}
+                  onToggle={onToggle}
+                  depth={depth + 1}
+                  checkableItems={checkableItems}
+                  nextItemId={nextItemId}
+                />
+              </div>
+            </div>
+          )
+        }
+
+        // Render as checkable item
+        return (
+          <div key={item.id} className={cn(depth > 0 && 'ml-2')}>
+            <PremiumRunItem
+              item={item}
+              progress={progress[item.id]}
+              depth={depth}
+              onToggle={onToggle}
+              stepNumber={getStepNumber(item.id)}
+              totalSteps={checkableItems.length}
+              isNext={isNext}
+              showStepNumber={depth === 0}
+            />
+            {/* Render children if this item has any */}
+            {children.length > 0 && (
+              <div className="ml-6 mt-2 space-y-2 border-l-2 border-muted/30 pl-3">
+                <RecursiveRunItems
+                  items={children}
+                  allItems={allItems}
+                  progress={progress}
+                  onToggle={onToggle}
+                  depth={depth + 1}
+                  checkableItems={checkableItems}
+                  nextItemId={nextItemId}
+                />
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </>
   )
 }
 
@@ -374,18 +544,67 @@ export function RunMode() {
     return getSortedItems().filter((item) => !item.parent)
   }
 
-  // Find the next incomplete item
-  const getNextIncompleteIndex = (): number => {
-    const rootItems = getRootItems()
-    return rootItems.findIndex((item) => !progress[item.id]?.completed)
+  // Get all items as a record for easy lookup
+  const getAllItems = (): Record<string, ChecklistItem> => {
+    return commit?.content?.items || {}
   }
 
-  const items = getRootItems()
-  const totalItems = items.length
-  const completedItems = Object.values(progress).filter((p) => p.completed).length
-  const progressPercent = calculateRunProgress(progress, totalItems)
+  // Get children for a given parent
+  const getChildren = (parentId: string): ChecklistItem[] => {
+    const allItems = getAllItems()
+    return Object.values(allItems)
+      .filter(item => item.parent === parentId)
+      .sort((a, b) => a.order - b.order)
+  }
+
+  // Get all checkable items (tasks and notes, not headers with children)
+  const getCheckableItems = (): ChecklistItem[] => {
+    const allItems = getAllItems()
+    const checkable: ChecklistItem[] = []
+
+    // Recursive function to collect checkable items in order
+    const collectCheckable = (items: ChecklistItem[]) => {
+      for (const item of items) {
+        const children = getChildren(item.id)
+        const isHeader = item.type === 'header'
+
+        // A header with children is not checkable itself, but its children might be
+        if (isHeader && children.length > 0) {
+          collectCheckable(children)
+        } else {
+          // This is a checkable item (task, note, or empty header)
+          checkable.push(item)
+          // Also collect any children of this checkable item
+          if (children.length > 0) {
+            collectCheckable(children)
+          }
+        }
+      }
+    }
+
+    // Start from root items
+    const rootItems = Object.values(allItems)
+      .filter(item => !item.parent)
+      .sort((a, b) => a.order - b.order)
+
+    collectCheckable(rootItems)
+    return checkable
+  }
+
+  // Find the next incomplete item (can be at any depth)
+  const getNextIncompleteItemId = (): string | null => {
+    const checkable = getCheckableItems()
+    const nextItem = checkable.find(item => !progress[item.id]?.completed)
+    return nextItem?.id || null
+  }
+
+  const rootItems = getRootItems()
+  const checkableItems = getCheckableItems()
+  const totalItems = checkableItems.length
+  const completedItems = checkableItems.filter(item => progress[item.id]?.completed).length
+  const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0
   const isComplete = run?.status === 'completed' || progressPercent === 100
-  const nextIncompleteIndex = getNextIncompleteIndex()
+  const nextItemId = getNextIncompleteItemId()
 
   // Auto-complete when all items done
   useEffect(() => {
@@ -574,18 +793,15 @@ export function RunMode() {
               </CardContent>
             </Card>
           ) : (
-            items.map((item, index) => (
-              <PremiumRunItem
-                key={item.id}
-                item={item}
-                progress={progress[item.id]}
-                depth={0}
-                onToggle={handleToggle}
-                stepNumber={index + 1}
-                totalSteps={totalItems}
-                isNext={index === nextIncompleteIndex}
-              />
-            ))
+            <RecursiveRunItems
+              items={rootItems}
+              allItems={getAllItems()}
+              progress={progress}
+              onToggle={handleToggle}
+              depth={0}
+              checkableItems={checkableItems}
+              nextItemId={nextItemId}
+            />
           )}
         </div>
       </main>

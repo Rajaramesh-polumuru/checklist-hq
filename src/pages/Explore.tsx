@@ -5,6 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { SkeletonCard } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { SearchInput } from '@/components/SearchInput'
+import { ForkModal } from '@/components/ForkModal'
+import { ToastContainer } from '@/components/Toast'
+import { useToast } from '@/hooks/useToast'
 import {
   GitFork,
   TrendingUp,
@@ -20,7 +23,6 @@ import {
   getPublicRepositoriesWithTags,
   searchPublicRepositoriesWithTags,
   getAllTags,
-  forkRepository,
 } from '@/services/repository'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -50,7 +52,11 @@ export function Explore() {
   const debouncedSearchQuery = useDebounce(searchQuery, SEARCH.debounceMs)
 
   // Fork state
-  const [forkingId, setForkingId] = useState<string | null>(null)
+  const [forkModalOpen, setForkModalOpen] = useState(false)
+  const [selectedRepoForFork, setSelectedRepoForFork] = useState<Repository | null>(null)
+
+  // Toast notifications
+  const { toasts, dismissToast, success } = useToast()
 
   // Search input ref for keyboard shortcut
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -151,8 +157,8 @@ export function Explore() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  // Handle fork
-  const handleFork = async (repo: Repository, e: React.MouseEvent) => {
+  // Handle fork button click
+  const handleForkClick = (repo: Repository, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
 
@@ -161,19 +167,13 @@ export function Explore() {
       return
     }
 
-    setForkingId(repo.id)
-    try {
-      const newRepoId = await forkRepository({
-        sourceRepoId: repo.id,
-        newOwnerId: user.id,
-      })
-      navigate(`/app/repo/${newRepoId}`)
-    } catch (err) {
-      console.error('Error forking repository:', err)
-      setError('Failed to fork template')
-    } finally {
-      setForkingId(null)
-    }
+    setSelectedRepoForFork(repo)
+    setForkModalOpen(true)
+  }
+
+  // Handle successful fork
+  const handleForkSuccess = (_newRepoId: string, itemCount: number) => {
+    success(`Successfully forked ${itemCount} items to your checklist!`, 5000)
   }
 
   const sortOptions: { value: SortOption; label: string; icon: typeof TrendingUp }[] = [
@@ -470,9 +470,7 @@ export function Explore() {
                           <Button
                             size="sm"
                             className="h-8 shadow-sm"
-                            onClick={(e) => handleFork(repo, e)}
-                            disabled={forkingId === repo.id}
-                            loading={forkingId === repo.id}
+                            onClick={(e) => handleForkClick(repo, e)}
                           >
                             <GitFork className="mr-1 h-3.5 w-3.5" />
                             Fork
@@ -494,6 +492,20 @@ export function Explore() {
           </div>
         )}
       </div>
+
+      {/* Fork Modal */}
+      <ForkModal
+        repository={selectedRepoForFork}
+        isOpen={forkModalOpen}
+        onClose={() => {
+          setForkModalOpen(false)
+          setSelectedRepoForFork(null)
+        }}
+        onSuccess={handleForkSuccess}
+      />
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   )
 }

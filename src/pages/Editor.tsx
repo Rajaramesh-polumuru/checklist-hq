@@ -120,10 +120,17 @@ export function Editor() {
 
         // Fetch latest commit
         const commit = await getLatestCommit(repoId!)
+        console.log('[Editor] Loaded commit:', {
+          repoId,
+          commitId: commit?.id,
+          itemCount: commit?.content?.items ? Object.keys(commit.content.items).length : 0,
+          content: commit?.content,
+        })
         if (commit) {
           setLatestCommit(commit)
           setContent(commit.content)
         } else {
+          console.warn('[Editor] No commit found for repo, starting with empty content')
           // No commits yet, start with empty content
           setContent({ version: '1.0', items: {} })
         }

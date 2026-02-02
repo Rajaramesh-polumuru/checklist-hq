@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { ForkModal } from '@/components/ForkModal'
+import { ToastContainer } from '@/components/Toast'
+import { useToast } from '@/hooks/useToast'
 import {
   ArrowLeft,
   GitFork,
@@ -11,9 +14,10 @@ import {
   Clock,
   ListChecks,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
-import { getRepository, getLatestCommit, forkRepository } from '@/services/repository'
+import { getRepository, getLatestCommit } from '@/services/repository'
 import type { Repository, Commit, ChecklistItem } from '@/types/database'
 import { cn } from '@/lib/utils'
 
@@ -28,8 +32,11 @@ export function ViewRepository() {
 
   // UI state
   const [loading, setLoading] = useState(true)
-  const [forking, setForking] = useState(false)
+  const [forkModalOpen, setForkModalOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Toast notifications
+  const { toasts, dismissToast, success } = useToast()
 
   // Load repository
   useEffect(() => {
@@ -72,29 +79,19 @@ export function ViewRepository() {
     loadRepository()
   }, [repoId, user?.id])
 
-  // Handle fork
-  const handleFork = async () => {
+  // Handle fork button click
+  const handleForkClick = () => {
     if (!user) {
       // Redirect to home to sign in
       navigate('/', { state: { returnTo: `/repo/${repoId}` } })
       return
     }
+    setForkModalOpen(true)
+  }
 
-    if (!repository) return
-
-    setForking(true)
-    try {
-      const newRepoId = await forkRepository({
-        sourceRepoId: repository.id,
-        newOwnerId: user.id,
-      })
-      navigate(`/app/repo/${newRepoId}`)
-    } catch (err) {
-      console.error('Error forking repository:', err)
-      setError('Failed to fork repository')
-    } finally {
-      setForking(false)
-    }
+  // Handle successful fork
+  const handleForkSuccess = (_newRepoId: string, itemCount: number) => {
+    success(`Successfully forked ${itemCount} items to your checklist!`, 5000)
   }
 
   // Get sorted items
@@ -196,12 +193,8 @@ export function ViewRepository() {
                   </Link>
                 </Button>
               ) : (
-                <Button onClick={handleFork} disabled={forking}>
-                  {forking ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <GitFork className="mr-2 h-4 w-4" />
-                  )}
+                <Button onClick={handleForkClick} className="gap-2">
+                  <GitFork className="h-4 w-4" />
                   {user ? 'Fork to My Checklists' : 'Sign in to Fork'}
                 </Button>
               )}
@@ -250,25 +243,40 @@ export function ViewRepository() {
 
         {/* Fork CTA */}
         {!isOwner && (
-          <Card className="mt-6">
-            <CardContent className="py-6 text-center">
-              <GitFork className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">Use this checklist</h3>
-              <p className="text-muted-foreground text-sm mb-4">
+          <Card className="mt-6 relative overflow-hidden">
+            {/* Gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
+            <CardContent className="py-8 text-center relative">
+              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <GitFork className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Use this checklist</h3>
+              <p className="text-muted-foreground text-sm mb-2">
                 Fork this checklist to your account to customize and run it.
               </p>
-              <Button onClick={handleFork} disabled={forking}>
-                {forking ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <GitFork className="mr-2 h-4 w-4" />
-                )}
+              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mb-6">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <span>All {items.length} items will be copied</span>
+              </div>
+              <Button onClick={handleForkClick} size="lg" className="gap-2">
+                <GitFork className="h-4 w-4" />
                 {user ? 'Fork Checklist' : 'Sign in to Fork'}
               </Button>
             </CardContent>
           </Card>
         )}
       </main>
+
+      {/* Fork Modal */}
+      <ForkModal
+        repository={repository}
+        isOpen={forkModalOpen}
+        onClose={() => setForkModalOpen(false)}
+        onSuccess={handleForkSuccess}
+      />
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   )
 }
