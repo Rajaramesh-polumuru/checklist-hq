@@ -28,9 +28,28 @@ export interface Run {
   commit_id: string  // Links to the VERSION used
   user_id?: string // Who started the run
   progress: RunProgress  // Status of each item
-  status: 'active' | 'completed' | 'archived'
+  status: 'active' | 'paused' | 'completed' | 'archived'
   started_at: string
   completed_at: string | null
+  // Phase 1 enhancements
+  name?: string | null  // User-defined run name
+  description?: string | null  // Optional description
+  paused_at?: string | null  // When the run was paused
+  total_active_time_seconds?: number  // Accumulated active time
+  last_activity_at?: string  // Last user interaction
+  notes?: string | null  // Notes taken during the run
+  device_id?: string | null  // Current device identifier
+  device_name?: string | null  // Human-readable device name
+}
+
+// Time segment for accurate duration tracking
+export interface RunTimeSegment {
+  id: string
+  run_id: string
+  started_at: string
+  ended_at: string | null
+  device_id?: string | null
+  device_name?: string | null
 }
 
 // The normalized JSON structure for checklist content
@@ -105,7 +124,11 @@ export interface RunInsert {
   commit_id: string
   user_id?: string
   progress?: RunProgress
-  status?: 'active' | 'completed' | 'archived'
+  status?: 'active' | 'paused' | 'completed' | 'archived'
+  name?: string | null
+  description?: string | null
+  device_id?: string | null
+  device_name?: string | null
 }
 
 // Update types
@@ -117,8 +140,23 @@ export interface RepositoryUpdate {
 
 export interface RunUpdate {
   progress?: RunProgress
-  status?: 'active' | 'completed' | 'archived'
+  status?: 'active' | 'paused' | 'completed' | 'archived'
   completed_at?: string | null
+  name?: string | null
+  description?: string | null
+  paused_at?: string | null
+  total_active_time_seconds?: number
+  last_activity_at?: string
+  notes?: string | null
+  device_id?: string | null
+  device_name?: string | null
+}
+
+export interface RunTimeSegmentInsert {
+  run_id: string
+  started_at?: string
+  device_id?: string | null
+  device_name?: string | null
 }
 
 // Supabase database schema type
@@ -139,6 +177,11 @@ export interface Database {
         Row: Run
         Insert: RunInsert
         Update: RunUpdate
+      }
+      run_time_segments: {
+        Row: RunTimeSegment
+        Insert: RunTimeSegmentInsert
+        Update: { ended_at?: string | null }
       }
       tags: {
         Row: Tag

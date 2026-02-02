@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Play,
   Target,
+  Pause,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
@@ -25,7 +26,11 @@ import {
   updateRunProgress,
   completeRun,
   startRunFromLatestCommit,
+  pauseRun,
+  resumeRun,
+  calculateRunDuration,
 } from '@/services/run'
+import { RunTimer } from '@/components/RunTimer'
 import type { Repository, Run, Commit, ChecklistItem, RunProgress } from '@/types/database'
 
 // Confetti effect component
@@ -420,6 +425,8 @@ export function RunMode() {
   const [completing, setCompleting] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
   const [justCompleted, setJustCompleted] = useState(false)
+  const [durationMs, setDurationMs] = useState(0)
+  const [isPauseLoading, setIsPauseLoading] = useState(false)
 
   // Load run data
   useEffect(() => {
@@ -439,6 +446,10 @@ export function RunMode() {
           setCommit(runData.commit)
           setProgress(runData.run.progress)
 
+          // Load duration from time segments
+          const duration = await calculateRunDuration(runId)
+          setDurationMs(duration)
+
           const repo = await getRepository(runData.run.repo_id)
           setRepository(repo)
         } else if (repoId) {
@@ -455,6 +466,7 @@ export function RunMode() {
             setRun(runData.run)
             setCommit(runData.commit)
             setProgress(runData.run.progress)
+            setDurationMs(0) // New run starts at 0
           }
 
           navigate(`/app/run/${newRun.id}`, { replace: true })
@@ -469,6 +481,41 @@ export function RunMode() {
 
     loadData()
   }, [runId, repoId, navigate, user?.id])
+
+  // Handle pause
+  const handlePause = useCallback(async () => {
+    if (!run || isPauseLoading) return
+
+    setIsPauseLoading(true)
+    try {
+      const updatedRun = await pauseRun(run.id)
+      setRun(updatedRun)
+      // Update duration when pausing
+      const duration = await calculateRunDuration(run.id)
+      setDurationMs(duration)
+    } catch (err) {
+      console.error('Error pausing run:', err)
+      setError('Failed to pause run')
+    } finally {
+      setIsPauseLoading(false)
+    }
+  }, [run, isPauseLoading])
+
+  // Handle resume
+  const handleResume = useCallback(async () => {
+    if (!run || isPauseLoading) return
+
+    setIsPauseLoading(true)
+    try {
+      const updatedRun = await resumeRun(run.id)
+      setRun(updatedRun)
+    } catch (err) {
+      console.error('Error resuming run:', err)
+      setError('Failed to resume run')
+    } finally {
+      setIsPauseLoading(false)
+    }
+  }, [run, isPauseLoading])
 
   // Toggle item completion
   const handleToggle = useCallback(async (itemId: string, completed: boolean) => {
@@ -657,25 +704,74 @@ export function RunMode() {
               </Link>
             </Button>
             <div>
-              <h1 className="font-semibold text-base">{repository?.title || 'Checklist Run'}</h1>
+              <h1 className="font-semibold text-base truncate max-w-[200px] sm:max-w-none">
+                {run?.name || repository?.title || 'Checklist Run'}
+              </h1>
               <div className="flex items-center gap-2">
                 <Badge
-                  variant={isComplete ? 'success' : 'default'}
+                  variant={isComplete ? 'success' : run?.status === 'paused' ? 'warning' : 'default'}
                   className={cn("text-xs", isComplete && "animate-pulse")}
                 >
-                  {isComplete ? '✓ Complete' : 'In Progress'}
+                  {isComplete ? '✓ Complete' : run?.status === 'paused' ? '⏸ Paused' : 'In Progress'}
                 </Badge>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Timer */}
+            {run && !isComplete && (
+              <RunTimer
+                run={run}
+                initialDurationMs={durationMs}
+                onPause={handlePause}
+                onResume={handleResume}
+                compact
+                showControls={false}
+              />
+            )}
+
             {/* Compact progress */}
             <div className="hidden sm:flex items-center gap-2 text-sm">
               <span className="font-bold text-primary tabular-nums">{completedItems}</span>
               <span className="text-muted-foreground">/</span>
               <span className="text-muted-foreground tabular-nums">{totalItems}</span>
             </div>
+
+            {/* Pause/Resume button */}
+            {run && !isComplete && (
+              run.status === 'paused' ? (
+                <Button
+                  onClick={handleResume}
+                  disabled={isPauseLoading}
+                  variant="default"
+                  size="sm"
+                  className="gap-2"
+                >
+                  {isPauseLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Play className="h-4 w-4" />
+                  )}
+                  <span className="hidden sm:inline">Resume</span>
+                </Button>
+              ) : (
+                <Button
+                  onClick={handlePause}
+                  disabled={isPauseLoading}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  {isPauseLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Pause className="h-4 w-4" />
+                  )}
+                  <span className="hidden sm:inline">Pause</span>
+                </Button>
+              )
+            )}
 
             {isComplete ? (
               <Button onClick={handleRestart} variant="outline" size="sm" className="gap-2">
