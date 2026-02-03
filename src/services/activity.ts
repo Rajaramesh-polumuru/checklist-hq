@@ -30,12 +30,18 @@ export async function getUserActivity(userId: string): Promise<ActivityItem[]> {
     if (runsError) throw runsError
 
     // Process runs
-    runs?.forEach((run: any) => {
+    runs?.forEach((run) => {
+        // Supabase returns related data - handle both array and object formats
+        const repos = run.repositories as { title: string }[] | { title: string } | null
+        const repoTitle = repos
+            ? (Array.isArray(repos) ? repos[0]?.title : repos.title)
+            : 'Unknown'
+
         // Run Started
         activities.push({
             id: `run_started_${run.id}`,
             type: 'run_started',
-            title: `Started "${run.repositories?.title}"`,
+            title: `Started "${repoTitle}"`,
             timestamp: run.started_at,
             link: `/app/run/${run.id}`,
         })
@@ -45,9 +51,9 @@ export async function getUserActivity(userId: string): Promise<ActivityItem[]> {
             activities.push({
                 id: `run_completed_${run.id}`,
                 type: 'run_completed',
-                title: `Completed "${run.repositories?.title}"`,
+                title: `Completed "${repoTitle}"`,
                 timestamp: run.completed_at,
-                link: `/app/run/${run.id}`, // Or history?
+                link: `/app/run/${run.id}`,
             })
         }
     })
