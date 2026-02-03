@@ -2,6 +2,7 @@ import { useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { Layout } from '@/components/Layout'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { useAuthStore } from '@/stores/auth-store'
 
 // Lazy load all pages for code splitting
@@ -61,9 +62,10 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Suspense fallback={<PageLoader />}><Login /></Suspense>} />
-        <Route path="/signup" element={<Suspense fallback={<PageLoader />}><Signup /></Suspense>} />
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/login" element={<Suspense fallback={<PageLoader />}><Login /></Suspense>} />
+          <Route path="/signup" element={<Suspense fallback={<PageLoader />}><Signup /></Suspense>} />
 
         <Route path="/" element={<Layout />}>
           {/* Public routes */}
@@ -197,6 +199,7 @@ function App() {
           <Route path="repo/:repoId" element={<Suspense fallback={<PageLoader />}><ViewRepository /></Suspense>} />
         </Route>
       </Routes>
+      </ErrorBoundary>
     </BrowserRouter>
   )
 }
