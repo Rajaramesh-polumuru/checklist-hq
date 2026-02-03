@@ -173,8 +173,9 @@ export async function createRepositoryWithCommit(params: {
   description?: string
   isPublic?: boolean
   content: ChecklistContent
+  message?: string
 }): Promise<{ repository: Repository; commit: Commit }> {
-  const { ownerId, title, description, isPublic = false, content } = params
+  const { ownerId, title, description, isPublic = false, content, message = 'Initial commit' } = params
 
   // Create the repository
   const repository = await createRepository({
@@ -188,7 +189,7 @@ export async function createRepositoryWithCommit(params: {
   const commit = await createCommit({
     repo_id: repository.id,
     content,
-    message: 'Initial commit',
+    message,
   })
 
   return { repository, commit }
