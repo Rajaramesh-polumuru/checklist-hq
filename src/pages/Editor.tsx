@@ -9,10 +9,13 @@ import { DiffView } from '@/components/DiffView'
 import { KeyboardShortcuts } from '@/components/KeyboardShortcuts'
 import { ShareSettingsModal } from '@/components/ShareSettingsModal'
 import { ErrorBanner } from '@/components/ErrorBanner'
+import { ToastContainer } from '@/components/Toast'
+import { CommitMessageModal } from '@/components/CommitMessageModal'
 import { useChecklistStore } from '@/stores/checklist-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useIsMobile } from '@/hooks/useMobile'
+import { useToast } from '@/hooks/useToast'
 import { AUTO_SAVE } from '@/lib/constants'
 import {
   ArrowLeft,
@@ -48,6 +51,7 @@ export function Editor() {
   const { user } = useAuthStore()
   const { content, setContent, isDirty, resetDirty } = useChecklistStore()
   const isMobile = useIsMobile()
+  const { toasts, dismissToast, success: showSuccessToast } = useToast()
 
   // Mobile menu state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -73,6 +77,9 @@ export function Editor() {
 
   // Share modal state
   const [shareOpen, setShareOpen] = useState(false)
+
+  // Commit message modal state
+  const [commitModalOpen, setCommitModalOpen] = useState(false)
 
   // Input ref for title
   const titleInputRef = useRef<HTMLInputElement>(null)
@@ -153,7 +160,7 @@ export function Editor() {
     handleSave(true) // true = auto-save (silent)
   }, [debouncedContent]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSave = useCallback(async (isAutoSave = false) => {
+  const handleSave = useCallback(async (isAutoSave = false, commitMessage?: string) => {
     if (!user) {
       setError('You must be logged in to save')
       return
@@ -173,6 +180,7 @@ export function Editor() {
           title,
           isPublic,
           content,
+          message: commitMessage || 'Initial commit',
         })
 
         setRepository(newRepo)
@@ -198,11 +206,12 @@ export function Editor() {
 
         // 2. Create new commit if content changed
         if (isDirty) {
+          const message = isAutoSave ? 'Auto-save' : (commitMessage || 'Manual save')
           updates.push(
             saveRepositoryChanges({
               repoId: repository.id,
               content,
-              message: isAutoSave ? 'Auto-save' : 'Manual save',
+              message,
               parentCommitId: latestCommit?.id,
             }).then(commit => {
               setLatestCommit(commit)
@@ -215,6 +224,11 @@ export function Editor() {
         setSaveStatus('saved')
       }
 
+      // Show toast for manual saves only
+      if (!isAutoSave) {
+        showSuccessToast('Changes saved successfully')
+      }
+
       // Reset save status after 2 seconds
       setTimeout(() => setSaveStatus('idle'), 2000)
     } catch (err) {
@@ -224,7 +238,7 @@ export function Editor() {
     } finally {
       setSaving(false)
     }
-  }, [user, isNew, title, isPublic, content, repository, latestCommit, navigate, resetDirty, isDirty])
+  }, [user, isNew, title, isPublic, content, repository, latestCommit, navigate, resetDirty, isDirty, showSuccessToast])
 
   const handleStartRun = async () => {
     if (!repository) {
@@ -284,6 +298,24 @@ export function Editor() {
     setHistoryOpen(false)
   }
 
+  // Handler for manual save request (opens modal for existing repos with changes)
+  const handleManualSaveRequest = useCallback(() => {
+    if (saving) return
+
+    // For new repos or if only metadata changed, save directly
+    if (isNew || (hasMetadataChanges && !isDirty)) {
+      handleSave(false)
+    } else if (isDirty || hasMetadataChanges) {
+      // For existing repos with content changes, show commit message modal
+      setCommitModalOpen(true)
+    }
+  }, [saving, isNew, isDirty, hasMetadataChanges, handleSave])
+
+  // Handler for commit modal save
+  const handleCommitSave = useCallback(async (message: string) => {
+    await handleSave(false, message)
+  }, [handleSave])
+
   // Global keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -300,15 +332,13 @@ export function Editor() {
       // Save on Cmd/Ctrl + S
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault()
-        if (!saving && (isDirty || hasMetadataChanges)) {
-          handleSave(false)
-        }
+        handleManualSaveRequest()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [saving, isDirty, hasMetadataChanges, handleSave])
+  }, [handleManualSaveRequest])
 
   // Loading state
   if (loading) {
@@ -546,7 +576,7 @@ export function Editor() {
             <Button
               variant="outline"
               size={isMobile ? "icon" : "sm"}
-              onClick={() => handleSave(false)}
+              onClick={handleManualSaveRequest}
               disabled={saving || (!isNew && !isDirty && !hasMetadataChanges)}
               className={`${isMobile ? 'h-10 w-10' : ''} ${isDirty || hasMetadataChanges ? "border-primary text-primary hover:bg-primary/5" : ""}`}
             >
@@ -608,6 +638,13 @@ export function Editor() {
       {/* Keyboard Shortcuts Modal */}
       <KeyboardShortcuts open={showShortcuts} onClose={() => setShowShortcuts(false)} />
 
+      {/* Commit Message Modal */}
+      <CommitMessageModal
+        isOpen={commitModalOpen}
+        onClose={() => setCommitModalOpen(false)}
+        onSave={handleCommitSave}
+      />
+
       {/* Share Settings Modal */}
       {repository && (
         <ShareSettingsModal
@@ -625,6 +662,9 @@ export function Editor() {
           }}
         />
       )}
+
+      {/* Toast notifications */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   )
 }
