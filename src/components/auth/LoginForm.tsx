@@ -1,0 +1,139 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { AlertCircle, Loader2 } from 'lucide-react'
+import { useAuthStore } from '@/stores/auth-store'
+
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+
+export function LoginForm() {
+    const navigate = useNavigate()
+    const { signInWithPassword, signInWithGoogle, loading: authLoading } = useAuthStore()
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+    })
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setLoading(true)
+        setError(null)
+
+        try {
+            await signInWithPassword(formData.email, formData.password)
+            navigate('/app')
+        } catch (err: any) {
+            setError(err.message || 'Failed to sign in')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleGoogleSignIn = async () => {
+        try {
+            setLoading(true)
+            await signInWithGoogle()
+        } catch (err) {
+            setError('Failed to sign in with Google')
+            setLoading(false)
+        }
+    }
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-6"
+        >
+            {error && (
+                <div className="p-3 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-md flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    {error}
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email">
+                        Email
+                    </label>
+                    <Input
+                        id="email"
+                        type="email"
+                        placeholder="name@example.com"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        required
+                        className="h-11"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="password">
+                        Password
+                    </label>
+                    <Input
+                        id="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        required
+                        className="h-11"
+                    />
+                </div>
+
+                <Button
+                    type="submit"
+                    className="w-full h-11 text-base font-medium"
+                    disabled={loading || authLoading}
+                >
+                    {loading ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Signing in...
+                        </>
+                    ) : (
+                        'Sign In'
+                    )}
+                </Button>
+            </form>
+
+            <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-zinc-200 dark:border-zinc-800" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                        Or continue with
+                    </span>
+                </div>
+            </div>
+
+            <Button
+                variant="outline"
+                type="button"
+                className="w-full h-11"
+                onClick={handleGoogleSignIn}
+                disabled={loading || authLoading}
+            >
+                <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                    <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
+                </svg>
+                Google
+            </Button>
+
+            <p className="text-center text-sm text-muted-foreground">
+                Don&apos;t have an account?{' '}
+                <Link
+                    to="/signup"
+                    className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                    Sign up
+                </Link>
+            </p>
+        </motion.div>
+    )
+}

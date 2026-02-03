@@ -17,6 +17,9 @@ const AuthCallback = lazy(() => import('@/pages/AuthCallback').then(m => ({ defa
 const RunMode = lazy(() => import('@/pages/RunMode').then(m => ({ default: m.RunMode })))
 const ViewRepository = lazy(() => import('@/pages/ViewRepository').then(m => ({ default: m.ViewRepository })))
 const ViewVersion = lazy(() => import('@/pages/ViewVersion').then(m => ({ default: m.ViewVersion })))
+const RunAnalytics = lazy(() => import('@/pages/RunAnalytics'))
+const Login = lazy(() => import('@/pages/Login').then(m => ({ default: m.Login })))
+const Signup = lazy(() => import('@/pages/Signup').then(m => ({ default: m.Signup })))
 
 // Loading fallback component
 function PageLoader() {
@@ -43,7 +46,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
-    return <Navigate to="/" replace />
+    return <Navigate to="/login" replace />
   }
 
   return <>{children}</>
@@ -59,11 +62,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<Suspense fallback={<PageLoader />}><Login /></Suspense>} />
+        <Route path="/signup" element={<Suspense fallback={<PageLoader />}><Signup /></Suspense>} />
+
         <Route path="/" element={<Layout />}>
-            {/* Public routes */}
-            <Route index element={<Suspense fallback={<PageLoader />}><Home /></Suspense>} />
-            <Route path="explore" element={<Suspense fallback={<PageLoader />}><Explore /></Suspense>} />
-            <Route path="auth/callback" element={<Suspense fallback={<PageLoader />}><AuthCallback /></Suspense>} />
+          {/* Public routes */}
+          <Route index element={<Suspense fallback={<PageLoader />}><Home /></Suspense>} />
+          <Route path="explore" element={<Suspense fallback={<PageLoader />}><Explore /></Suspense>} />
+          <Route path="auth/callback" element={<Suspense fallback={<PageLoader />}><AuthCallback /></Suspense>} />
 
           {/* Protected routes */}
           <Route
@@ -162,6 +168,26 @@ function App() {
               <ProtectedRoute>
                 <Suspense fallback={<PageLoader />}>
                   <ViewVersion />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="app/analytics"
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <RunAnalytics />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="app/repo/:repoId/analytics"
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <RunAnalytics />
                 </Suspense>
               </ProtectedRoute>
             }

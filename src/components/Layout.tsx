@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { GitFork, LogOut, Plus } from 'lucide-react'
 
 export function Layout() {
-  const { user, signInWithGoogle, signOut } = useAuthStore()
+  const { user, signOut } = useAuthStore()
   const location = useLocation()
 
   const isEditor = location.pathname.includes('/app/repo/') || location.pathname === '/app/new'
@@ -101,8 +101,8 @@ export function Layout() {
                 </div>
               </>
             ) : (
-              <Button size="sm" onClick={signInWithGoogle} className="shadow-md">
-                Sign In
+              <Button size="sm" asChild className="shadow-md">
+                <Link to="/login">Sign In</Link>
               </Button>
             )}
           </div>

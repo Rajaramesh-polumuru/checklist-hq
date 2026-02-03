@@ -5,7 +5,7 @@ import { GitFork, List, Users, Zap, ArrowRight, Sparkles } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 
 export function Home() {
-  const { user, initialized, signInWithGoogle } = useAuthStore()
+  const { user, initialized } = useAuthStore()
 
   // Auto-redirect authenticated users to dashboard
   if (initialized && user) {
@@ -77,9 +77,11 @@ export function Home() {
                 </Button>
               ) : (
                 <>
-                  <Button size="lg" onClick={signInWithGoogle} className="text-lg px-8 py-6 shadow-xl shadow-primary/25">
-                    Get Started Free
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                  <Button size="lg" asChild className="text-lg px-8 py-6 shadow-xl shadow-primary/25">
+                    <Link to="/signup">
+                      Get Started Free
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
                   </Button>
                   <Button variant="outline" size="lg" asChild className="text-lg px-8 py-6">
                     <Link to="/explore">Explore Templates</Link>
@@ -187,11 +189,13 @@ export function Home() {
               <Button
                 size="lg"
                 variant="secondary"
-                onClick={signInWithGoogle}
+                asChild
                 className="bg-white text-primary hover:bg-white/90"
               >
-                Start for Free
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <Link to="/signup">
+                  Start for Free
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             )}
           </CardContent>

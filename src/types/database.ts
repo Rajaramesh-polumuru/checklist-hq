@@ -40,6 +40,13 @@ export interface Run {
   notes?: string | null  // Notes taken during the run
   device_id?: string | null  // Current device identifier
   device_name?: string | null  // Human-readable device name
+  // Phase 2 enhancements
+  sync_version?: number  // For conflict detection
+  last_synced_at?: string  // Last sync timestamp
+  // Phase 3 enhancements
+  is_collaborative?: boolean  // Multi-user mode enabled
+  share_token?: string | null  // Shareable link token
+  share_expires_at?: string | null  // When share link expires
 }
 
 // Time segment for accurate duration tracking

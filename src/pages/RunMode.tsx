@@ -31,6 +31,8 @@ import {
   calculateRunDuration,
 } from '@/services/run'
 import { RunTimer } from '@/components/RunTimer'
+import { SyncIndicator } from '@/components/SyncIndicator'
+import { useRunSync } from '@/hooks/useRunSync'
 import type { Repository, Run, Commit, ChecklistItem, RunProgress } from '@/types/database'
 
 // Confetti effect component
@@ -428,6 +430,26 @@ export function RunMode() {
   const [durationMs, setDurationMs] = useState(0)
   const [isPauseLoading, setIsPauseLoading] = useState(false)
 
+  // Real-time sync
+  const {
+    isConnected: syncConnected,
+    otherDevices,
+    syncError,
+    lastSyncedAt,
+  } = useRunSync({
+    runId: run?.id || '',
+    userId: user?.id || '',
+    enabled: !!run && !!user && run.status !== 'completed',
+    onProgressUpdate: (newProgress) => {
+      // Update progress from other devices
+      setProgress(newProgress)
+    },
+    onStatusChange: (newStatus) => {
+      // Update status from other devices
+      setRun((prev) => prev ? { ...prev, status: newStatus } : null)
+    },
+  })
+
   // Load run data
   useEffect(() => {
     async function loadData() {
@@ -714,6 +736,16 @@ export function RunMode() {
                 >
                   {isComplete ? '✓ Complete' : run?.status === 'paused' ? '⏸ Paused' : 'In Progress'}
                 </Badge>
+                {/* Sync indicator */}
+                {!isComplete && (
+                  <SyncIndicator
+                    isConnected={syncConnected}
+                    otherDevices={otherDevices}
+                    lastSyncedAt={lastSyncedAt}
+                    syncError={syncError}
+                    compact
+                  />
+                )}
               </div>
             </div>
           </div>

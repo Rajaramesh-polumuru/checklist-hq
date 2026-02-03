@@ -1,24 +1,27 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/stores/auth-store'
 
 export function AuthCallback() {
   const navigate = useNavigate()
+  const { setSession } = useAuthStore()
 
   useEffect(() => {
     const handleAuthCallback = async () => {
-      const { error } = await supabase.auth.getSession()
-      if (error) {
+      const { data, error } = await supabase.auth.getSession()
+      if (error || !data.session) {
         console.error('Auth callback error:', error)
         navigate('/')
         return
       }
-      // Redirect to dashboard after successful auth
+      // Sync session into the store so ProtectedRoute sees the user immediately
+      setSession(data.session)
       navigate('/app')
     }
 
     handleAuthCallback()
-  }, [navigate])
+  }, [navigate, setSession])
 
   return (
     <div className="min-h-screen flex items-center justify-center">
