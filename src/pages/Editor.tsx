@@ -192,7 +192,7 @@ export function Editor() {
         navigate(`/app/repo/${newRepo.id}`, { replace: true })
       } else if (repository) {
         // Update existing repository
-        const updates: Promise<any>[] = []
+        const updates: Promise<unknown>[] = []
 
         // 1. Update metadata if changed
         if (title !== repository.title || isPublic !== repository.is_public) {

@@ -40,7 +40,7 @@ export function useRunSync({
   enabled = true,
 }: UseRunSyncOptions): UseRunSyncReturn {
   const [isConnected, setIsConnected] = useState(false)
-  const [isSyncing, _setIsSyncing] = useState(false)
+  const [isSyncing] = useState(false)
   const [otherDevices, setOtherDevices] = useState<ActiveDevice[]>([])
   const [syncError, setSyncError] = useState<string | null>(null)
   const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null)

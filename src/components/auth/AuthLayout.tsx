@@ -92,7 +92,7 @@ export function AuthLayout({ children, greeting, subtitle }: AuthLayoutProps) {
     )
 }
 
-function FeatureItem({ icon: Icon, text, delay }: { icon: any, text: string, delay: number }) {
+function FeatureItem({ icon: Icon, text, delay }: { icon: React.ElementType, text: string, delay: number }) {
     return (
         <motion.div
             initial={{ opacity: 0, x: -20 }}

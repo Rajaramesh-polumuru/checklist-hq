@@ -216,8 +216,12 @@ function CompletionNoteDialog({
 
   useEffect(() => {
     if (isOpen) {
-      setNote('')
-      setTimeout(() => textareaRef.current?.focus(), 100)
+      // Defer state update to avoid sync warning
+      const timer = setTimeout(() => {
+        setNote('')
+        textareaRef.current?.focus()
+      }, 0)
+      return () => clearTimeout(timer)
     }
   }, [isOpen])
 

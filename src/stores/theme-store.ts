@@ -34,7 +34,7 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
     // Persist to localStorage
     try {
       localStorage.setItem(STORAGE_KEY, theme)
-    } catch (e) {
+    } catch {
       // localStorage may not be available
     }
 
@@ -50,7 +50,7 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
       if (stored === 'light' || stored === 'dark' || stored === 'system') {
         storedTheme = stored
       }
-    } catch (e) {
+    } catch {
       // localStorage may not be available
     }
 

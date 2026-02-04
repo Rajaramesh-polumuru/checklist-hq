@@ -7,8 +7,7 @@ import { Card } from '@/components/ui/card'
 import { X, ChevronRight, ChevronLeft, GitFork, Plus, Edit3 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import type { NavigationAdapter } from 'nextstepjs'
-
-const ONBOARDING_STORAGE_KEY = 'checklist-hq-onboarding-completed'
+import { useOnboarding } from '@/hooks/useOnboarding'
 
 // Custom navigation adapter for React Router
 const useReactRouterAdapter = (): NavigationAdapter => {
@@ -160,29 +159,6 @@ const onboardingSteps: Tour[] = [
     ],
   },
 ]
-
-// Hook to manage onboarding state
-export function useOnboarding() {
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(() => {
-    return localStorage.getItem(ONBOARDING_STORAGE_KEY) === 'true'
-  })
-
-  const completeOnboarding = () => {
-    localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true')
-    setHasCompletedOnboarding(true)
-  }
-
-  const resetOnboarding = () => {
-    localStorage.removeItem(ONBOARDING_STORAGE_KEY)
-    setHasCompletedOnboarding(false)
-  }
-
-  return {
-    hasCompletedOnboarding,
-    completeOnboarding,
-    resetOnboarding,
-  }
-}
 
 // Provider component that wraps the app
 interface OnboardingProviderProps {

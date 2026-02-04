@@ -18,14 +18,14 @@ export function useCountUp(
   useEffect(() => {
     // Skip animation if disabled
     if (!enabled) {
-      setCount(end)
       return
     }
 
     // Skip animation for 0
     if (end === 0) {
-      setCount(0)
-      return
+      // Defer to avoid render loop
+      const timer = setTimeout(() => setCount(0), 0)
+      return () => clearTimeout(timer)
     }
 
     const startTime = Date.now()
@@ -56,5 +56,5 @@ export function useCountUp(
     return () => cancelAnimationFrame(animationFrame)
   }, [end, duration, enabled])
 
-  return count
+  return enabled ? count : end
 }

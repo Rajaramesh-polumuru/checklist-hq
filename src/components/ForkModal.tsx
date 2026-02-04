@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, startTransition } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Dialog,
@@ -85,23 +85,25 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
   // Reset state when modal opens/closes or repository changes
   useEffect(() => {
     if (isOpen && repository) {
-      startTransition(() => {
+      // Defer state updates to avoid synchronous render warnings
+      const timer = setTimeout(() => {
         setForkState('loading-preview')
         setTitle(repository.title)
         setError(null)
         setNewRepoId(null)
         setProgress(0)
-      })
-
-      // Load the latest commit to get the item preview
-      loadCommit()
+        loadCommit()
+      }, 0)
+      return () => clearTimeout(timer)
     } else {
-      startTransition(() => {
+      // Defer reset too
+      const timer = setTimeout(() => {
         setForkState('idle')
         setCommit(null)
-      })
+      }, 0)
+      return () => clearTimeout(timer)
     }
-  }, [isOpen, repository?.id, loadCommit])
+  }, [isOpen, repository, loadCommit])
 
   // Handle fork
   const handleFork = async () => {
