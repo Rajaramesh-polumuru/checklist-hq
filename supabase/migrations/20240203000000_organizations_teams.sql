@@ -56,6 +56,7 @@ CREATE INDEX IF NOT EXISTS idx_organizations_slug ON public.organizations(slug);
 CREATE INDEX IF NOT EXISTS idx_organizations_created ON public.organizations(created_at DESC);
 
 -- Trigger for updated_at
+DROP TRIGGER IF EXISTS on_organization_updated ON public.organizations;
 CREATE TRIGGER on_organization_updated
     BEFORE UPDATE ON public.organizations
     FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
@@ -154,6 +155,7 @@ CREATE INDEX IF NOT EXISTS idx_teams_slug ON public.teams(organization_id, slug)
 CREATE INDEX IF NOT EXISTS idx_teams_visibility ON public.teams(organization_id) WHERE visibility = 'visible';
 
 -- Trigger for updated_at
+DROP TRIGGER IF EXISTS on_team_updated ON public.teams;
 CREATE TRIGGER on_team_updated
     BEFORE UPDATE ON public.teams
     FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
@@ -250,20 +252,72 @@ CREATE INDEX IF NOT EXISTS idx_repos_org ON public.repositories(organization_id)
 COMMENT ON COLUMN public.repositories.organization_id IS 'Optional org ownership; NULL means personal repository';
 
 -- ============================================
+-- 6.5. HELPER FUNCTIONS FOR RLS
+-- ============================================
+
+-- Check if user is a member of an organization (avoids recursion)
+CREATE OR REPLACE FUNCTION public.is_org_member(org_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.organization_members
+        WHERE organization_id = org_id
+        AND user_id = auth.uid()
+    );
+$$;
+
+-- Check if user is a member of a team (avoids recursion)
+CREATE OR REPLACE FUNCTION public.is_team_member(team_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.team_members
+        WHERE team_id = team_id
+        AND user_id = auth.uid()
+    );
+$$;
+
+-- Check if user is the owner of a repository (avoids recursion)
+CREATE OR REPLACE FUNCTION public.is_repo_owner(repo_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.repositories
+        WHERE id = repo_id
+        AND owner_id = auth.uid()
+    );
+$$;
+
+-- ============================================
 -- 7. RLS POLICIES FOR ORGANIZATIONS
 -- ============================================
 
 -- Anyone can view organizations (public directory)
+DROP POLICY IF EXISTS "Organizations are publicly viewable" ON public.organizations;
 CREATE POLICY "Organizations are publicly viewable"
 ON public.organizations FOR SELECT
 USING (true);
 
 -- Only authenticated users can create organizations
+DROP POLICY IF EXISTS "Authenticated users can create organizations" ON public.organizations;
 CREATE POLICY "Authenticated users can create organizations"
 ON public.organizations FOR INSERT
 WITH CHECK (auth.uid() IS NOT NULL);
 
 -- Only owners and admins can update organizations
+DROP POLICY IF EXISTS "Owners and admins can update organizations" ON public.organizations;
 CREATE POLICY "Owners and admins can update organizations"
 ON public.organizations FOR UPDATE
 USING (
@@ -276,6 +330,7 @@ USING (
 );
 
 -- Only owners can delete organizations
+DROP POLICY IF EXISTS "Only owners can delete organizations" ON public.organizations;
 CREATE POLICY "Only owners can delete organizations"
 ON public.organizations FOR DELETE
 USING (
@@ -292,22 +347,21 @@ USING (
 -- ============================================
 
 -- Members can view other members in their organizations
+DROP POLICY IF EXISTS "Members can view org members" ON public.organization_members;
 CREATE POLICY "Members can view org members"
 ON public.organization_members FOR SELECT
 USING (
-    EXISTS (
-        SELECT 1 FROM public.organization_members om
-        WHERE om.organization_id = organization_members.organization_id
-        AND om.user_id = auth.uid()
-    )
+    public.is_org_member(organization_id)
 );
 
 -- Users can view their own memberships
+DROP POLICY IF EXISTS "Users can view own memberships" ON public.organization_members;
 CREATE POLICY "Users can view own memberships"
 ON public.organization_members FOR SELECT
 USING (user_id = auth.uid());
 
 -- Owners and admins can add members
+DROP POLICY IF EXISTS "Owners and admins can add members" ON public.organization_members;
 CREATE POLICY "Owners and admins can add members"
 ON public.organization_members FOR INSERT
 WITH CHECK (
@@ -323,6 +377,7 @@ WITH CHECK (
 );
 
 -- Owners and admins can update member roles
+DROP POLICY IF EXISTS "Owners and admins can update members" ON public.organization_members;
 CREATE POLICY "Owners and admins can update members"
 ON public.organization_members FOR UPDATE
 USING (
@@ -335,6 +390,7 @@ USING (
 );
 
 -- Owners and admins can remove members; users can remove themselves
+DROP POLICY IF EXISTS "Owners and admins can remove members" ON public.organization_members;
 CREATE POLICY "Owners and admins can remove members"
 ON public.organization_members FOR DELETE
 USING (
@@ -353,28 +409,23 @@ USING (
 -- ============================================
 
 -- Org members can view visible teams; team members can view secret teams
+DROP POLICY IF EXISTS "Org members can view visible teams" ON public.teams;
 CREATE POLICY "Org members can view visible teams"
 ON public.teams FOR SELECT
 USING (
     visibility = 'visible' AND
-    EXISTS (
-        SELECT 1 FROM public.organization_members om
-        WHERE om.organization_id = teams.organization_id
-        AND om.user_id = auth.uid()
-    )
+    public.is_org_member(organization_id)
 );
 
+DROP POLICY IF EXISTS "Team members can view secret teams" ON public.teams;
 CREATE POLICY "Team members can view secret teams"
 ON public.teams FOR SELECT
 USING (
-    EXISTS (
-        SELECT 1 FROM public.team_members tm
-        WHERE tm.team_id = teams.id
-        AND tm.user_id = auth.uid()
-    )
+    public.is_team_member(id)
 );
 
 -- Org admins and owners can create teams
+DROP POLICY IF EXISTS "Org admins can create teams" ON public.teams;
 CREATE POLICY "Org admins can create teams"
 ON public.teams FOR INSERT
 WITH CHECK (
@@ -387,6 +438,7 @@ WITH CHECK (
 );
 
 -- Org admins/owners and team maintainers can update teams
+DROP POLICY IF EXISTS "Team maintainers can update teams" ON public.teams;
 CREATE POLICY "Team maintainers can update teams"
 ON public.teams FOR UPDATE
 USING (
@@ -406,6 +458,7 @@ USING (
 );
 
 -- Org admins and owners can delete teams
+DROP POLICY IF EXISTS "Org admins can delete teams" ON public.teams;
 CREATE POLICY "Org admins can delete teams"
 ON public.teams FOR DELETE
 USING (
@@ -422,17 +475,15 @@ USING (
 -- ============================================
 
 -- Team members can view other team members
+DROP POLICY IF EXISTS "Team members can view team members" ON public.team_members;
 CREATE POLICY "Team members can view team members"
 ON public.team_members FOR SELECT
 USING (
-    EXISTS (
-        SELECT 1 FROM public.team_members tm
-        WHERE tm.team_id = team_members.team_id
-        AND tm.user_id = auth.uid()
-    )
+    public.is_team_member(team_id)
 );
 
 -- Org admins can view all team members
+DROP POLICY IF EXISTS "Org admins can view all team members" ON public.team_members;
 CREATE POLICY "Org admins can view all team members"
 ON public.team_members FOR SELECT
 USING (
@@ -446,6 +497,7 @@ USING (
 );
 
 -- Org admins and team maintainers can add team members
+DROP POLICY IF EXISTS "Team maintainers can add members" ON public.team_members;
 CREATE POLICY "Team maintainers can add members"
 ON public.team_members FOR INSERT
 WITH CHECK (
@@ -466,6 +518,7 @@ WITH CHECK (
 );
 
 -- Org admins and team maintainers can update team members
+DROP POLICY IF EXISTS "Team maintainers can update members" ON public.team_members;
 CREATE POLICY "Team maintainers can update members"
 ON public.team_members FOR UPDATE
 USING (
@@ -486,6 +539,7 @@ USING (
 );
 
 -- Org admins and team maintainers can remove members; users can remove themselves
+DROP POLICY IF EXISTS "Team maintainers can remove members" ON public.team_members;
 CREATE POLICY "Team maintainers can remove members"
 ON public.team_members FOR DELETE
 USING (
@@ -512,27 +566,22 @@ USING (
 -- ============================================
 
 -- Repo owners and team members can view access entries
+DROP POLICY IF EXISTS "Repo owners can view team access" ON public.repository_team_access;
 CREATE POLICY "Repo owners can view team access"
 ON public.repository_team_access FOR SELECT
 USING (
-    EXISTS (
-        SELECT 1 FROM public.repositories r
-        WHERE r.id = repository_team_access.repository_id
-        AND r.owner_id = auth.uid()
-    )
+    public.is_repo_owner(repository_id)
 );
 
+DROP POLICY IF EXISTS "Team members can view their team's access" ON public.repository_team_access;
 CREATE POLICY "Team members can view their team's access"
 ON public.repository_team_access FOR SELECT
 USING (
-    EXISTS (
-        SELECT 1 FROM public.team_members tm
-        WHERE tm.team_id = repository_team_access.team_id
-        AND tm.user_id = auth.uid()
-    )
+    public.is_team_member(team_id)
 );
 
 -- Org admins can view all repo access in their org
+DROP POLICY IF EXISTS "Org admins can view repo access" ON public.repository_team_access;
 CREATE POLICY "Org admins can view repo access"
 ON public.repository_team_access FOR SELECT
 USING (
@@ -546,14 +595,11 @@ USING (
 );
 
 -- Repo owners can grant team access
+DROP POLICY IF EXISTS "Repo owners can grant team access" ON public.repository_team_access;
 CREATE POLICY "Repo owners can grant team access"
 ON public.repository_team_access FOR INSERT
 WITH CHECK (
-    EXISTS (
-        SELECT 1 FROM public.repositories r
-        WHERE r.id = repository_team_access.repository_id
-        AND r.owner_id = auth.uid()
-    )
+    public.is_repo_owner(repository_id)
     OR
     -- Org admins can grant access to org repos
     EXISTS (
@@ -566,14 +612,11 @@ WITH CHECK (
 );
 
 -- Repo owners and org admins can update team access
+DROP POLICY IF EXISTS "Repo owners can update team access" ON public.repository_team_access;
 CREATE POLICY "Repo owners can update team access"
 ON public.repository_team_access FOR UPDATE
 USING (
-    EXISTS (
-        SELECT 1 FROM public.repositories r
-        WHERE r.id = repository_team_access.repository_id
-        AND r.owner_id = auth.uid()
-    )
+    public.is_repo_owner(repository_id)
     OR
     EXISTS (
         SELECT 1 FROM public.repositories r
@@ -585,14 +628,11 @@ USING (
 );
 
 -- Repo owners and org admins can revoke team access
+DROP POLICY IF EXISTS "Repo owners can revoke team access" ON public.repository_team_access;
 CREATE POLICY "Repo owners can revoke team access"
 ON public.repository_team_access FOR DELETE
 USING (
-    EXISTS (
-        SELECT 1 FROM public.repositories r
-        WHERE r.id = repository_team_access.repository_id
-        AND r.owner_id = auth.uid()
-    )
+    public.is_repo_owner(repository_id)
     OR
     EXISTS (
         SELECT 1 FROM public.repositories r
@@ -608,41 +648,27 @@ USING (
 -- ============================================
 
 -- Teams with read/write/admin access can view repos
+DROP POLICY IF EXISTS "Teams can view accessible repos" ON public.repositories;
 CREATE POLICY "Teams can view accessible repos"
 ON public.repositories FOR SELECT
 USING (
-    EXISTS (
-        SELECT 1 FROM public.repository_team_access rta
-        JOIN public.team_members tm ON tm.team_id = rta.team_id
-        WHERE rta.repository_id = repositories.id
-        AND tm.user_id = auth.uid()
-    )
+    public.user_has_repo_permission(auth.uid(), id, 'read')
 );
 
 -- Teams with write/admin access can update repos
+DROP POLICY IF EXISTS "Teams with write access can update repos" ON public.repositories;
 CREATE POLICY "Teams with write access can update repos"
 ON public.repositories FOR UPDATE
 USING (
-    EXISTS (
-        SELECT 1 FROM public.repository_team_access rta
-        JOIN public.team_members tm ON tm.team_id = rta.team_id
-        WHERE rta.repository_id = repositories.id
-        AND tm.user_id = auth.uid()
-        AND rta.permission IN ('write', 'admin')
-    )
+    public.user_has_repo_permission(auth.uid(), id, 'write')
 );
 
 -- Teams with admin access can delete repos
+DROP POLICY IF EXISTS "Teams with admin access can delete repos" ON public.repositories;
 CREATE POLICY "Teams with admin access can delete repos"
 ON public.repositories FOR DELETE
 USING (
-    EXISTS (
-        SELECT 1 FROM public.repository_team_access rta
-        JOIN public.team_members tm ON tm.team_id = rta.team_id
-        WHERE rta.repository_id = repositories.id
-        AND tm.user_id = auth.uid()
-        AND rta.permission = 'admin'
-    )
+    public.user_has_repo_permission(auth.uid(), id, 'admin')
 );
 
 -- ============================================
@@ -650,6 +676,7 @@ USING (
 -- ============================================
 
 -- Teams can view commits on accessible repos
+DROP POLICY IF EXISTS "Teams can view commits on accessible repos" ON public.commits;
 CREATE POLICY "Teams can view commits on accessible repos"
 ON public.commits FOR SELECT
 USING (
@@ -662,6 +689,7 @@ USING (
 );
 
 -- Teams with write access can create commits
+DROP POLICY IF EXISTS "Teams with write access can create commits" ON public.commits;
 CREATE POLICY "Teams with write access can create commits"
 ON public.commits FOR INSERT
 WITH CHECK (
@@ -679,6 +707,7 @@ WITH CHECK (
 -- ============================================
 
 -- Teams can view runs on accessible repos
+DROP POLICY IF EXISTS "Teams can view runs on accessible repos" ON public.runs;
 CREATE POLICY "Teams can view runs on accessible repos"
 ON public.runs FOR SELECT
 USING (
@@ -691,6 +720,7 @@ USING (
 );
 
 -- Teams with write access can create runs
+DROP POLICY IF EXISTS "Teams with write access can create runs" ON public.runs;
 CREATE POLICY "Teams with write access can create runs"
 ON public.runs FOR INSERT
 WITH CHECK (
@@ -704,6 +734,7 @@ WITH CHECK (
 );
 
 -- Teams with write access can update runs they create
+DROP POLICY IF EXISTS "Teams with write access can update runs" ON public.runs;
 CREATE POLICY "Teams with write access can update runs"
 ON public.runs FOR UPDATE
 USING (
@@ -791,9 +822,12 @@ BEGIN
 END;
 $$;
 
+
+
 COMMENT ON FUNCTION public.create_team IS 'Creates a team within an organization and adds the caller as maintainer';
 
 -- Function to check if a user has a specific permission on a repository
+-- Moved here to be available for RLS policies
 CREATE OR REPLACE FUNCTION public.user_has_repo_permission(
     p_user_id UUID,
     p_repo_id UUID,
@@ -832,6 +866,8 @@ END;
 $$;
 
 COMMENT ON FUNCTION public.user_has_repo_permission IS 'Checks if a user has a specific permission level on a repository';
+
+
 
 -- Function to get user's role in an organization
 CREATE OR REPLACE FUNCTION public.get_user_org_role(
@@ -899,8 +935,30 @@ COMMENT ON FUNCTION public.transfer_repo_to_org IS 'Transfers a personal reposit
 -- 16. ENABLE REALTIME FOR NEW TABLES
 -- ============================================
 
-ALTER PUBLICATION supabase_realtime ADD TABLE public.organizations;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.organization_members;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.teams;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.team_members;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.repository_team_access;
+DO $$
+BEGIN
+    -- Add organizations if not present
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'organizations') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.organizations;
+    END IF;
+
+    -- Add organization_members if not present
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'organization_members') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.organization_members;
+    END IF;
+
+    -- Add teams if not present
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'teams') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.teams;
+    END IF;
+
+    -- Add team_members if not present
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'team_members') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.team_members;
+    END IF;
+
+    -- Add repository_team_access if not present
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'repository_team_access') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.repository_team_access;
+    END IF;
+END $$;
