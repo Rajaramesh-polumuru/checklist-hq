@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { DESIGN_TOKENS } from '@/lib/constants'
 import { useChecklistStore } from '@/stores/checklist-store'
 import { useIsMobile } from '@/hooks/useMobile'
+import { FormattedText } from '@/lib/rich-text'
 import type { ChecklistItem as ChecklistItemType } from '@/types/database'
 
 interface ChecklistItemProps {
@@ -500,7 +501,11 @@ export function DragOverlayItem({ item }: { item: ChecklistItemType }) {
     <div className="flex items-center gap-3 px-4 py-3 bg-card border-2 border-primary/30 rounded-xl shadow-2xl shadow-primary/20">
       <GripVertical className="h-4 w-4 text-primary" />
       <span className="text-base font-medium text-foreground">
-        {item.text || <span className="text-muted-foreground italic">Empty item</span>}
+        {item.text ? (
+          <FormattedText text={item.text} />
+        ) : (
+          <span className="text-muted-foreground italic">Empty item</span>
+        )}
       </span>
     </div>
   )

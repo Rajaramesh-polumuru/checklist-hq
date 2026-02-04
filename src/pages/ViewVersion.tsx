@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { FormattedText } from '@/lib/rich-text'
 import {
   ArrowLeft,
   GitCommit,
@@ -257,7 +258,7 @@ function ViewItem({ item, depth }: { item: ChecklistItem; depth: number }) {
     >
       <ChevronRight className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
       <div className="flex-1 min-w-0">
-        <p className="text-sm">{item.text || 'Untitled item'}</p>
+        <p className="text-sm">{item.text ? <FormattedText text={item.text} /> : 'Untitled item'}</p>
         {item.details && (
           <p className="text-xs text-muted-foreground mt-1">{item.details}</p>
         )}

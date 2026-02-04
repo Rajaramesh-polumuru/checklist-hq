@@ -6,6 +6,7 @@ import { ForkModal } from '@/components/ForkModal'
 import { StartRunModal } from '@/components/StartRunModal'
 import { ToastContainer } from '@/components/Toast'
 import { useToast } from '@/hooks/useToast'
+import { FormattedText } from '@/lib/rich-text'
 import {
   ArrowLeft,
   GitFork,
@@ -348,7 +349,7 @@ function ViewItem({ item, depth }: { item: ChecklistItem; depth: number }) {
     >
       <ChevronRight className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
       <div className="flex-1 min-w-0">
-        <p className="text-sm">{item.text || 'Untitled item'}</p>
+        <p className="text-sm">{item.text ? <FormattedText text={item.text} /> : 'Untitled item'}</p>
         {item.details && (
           <p className="text-xs text-muted-foreground mt-1">{item.details}</p>
         )}

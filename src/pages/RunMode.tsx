@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { formatRelativeTime } from '@/lib/date-utils'
+import { FormattedText } from '@/lib/rich-text'
 import {
   ArrowLeft,
   CheckCircle2,
@@ -170,7 +171,7 @@ function SectionHeader({
           'font-semibold text-base',
           isAllComplete ? 'text-success' : 'text-foreground'
         )}>
-          {item.text || 'Section'}
+          {item.text ? <FormattedText text={item.text} /> : 'Section'}
         </h3>
         {childCount > 0 && (
           <p className="text-xs text-muted-foreground">
@@ -300,7 +301,7 @@ function PremiumRunItem({
           isNext && !isCompleted && 'text-foreground',
           !isNext && !isCompleted && 'text-muted-foreground'
         )}>
-          {item.text || 'Untitled item'}
+          {item.text ? <FormattedText text={item.text} /> : 'Untitled item'}
         </p>
 
         {/* Details */}
