@@ -63,6 +63,65 @@
 
   /* Focus ring shadow */
   --shadow-ring: 0 0 0 3px hsl(8 85% 55% / 0.15);
+
+  /* Theme transition duration */
+  --theme-transition: 200ms;
+}
+
+/* ============================================
+ * DARK MODE COLOR OVERRIDES
+ * ============================================ */
+.dark {
+  /* Background - Dark slate with slight warmth */
+  --color-background: hsl(220 20% 10%);
+  --color-foreground: hsl(30 15% 92%);
+
+  /* Surface/Card colors - Slightly elevated from background */
+  --color-card: hsl(220 18% 13%);
+  --color-card-foreground: hsl(30 15% 92%);
+  --color-popover: hsl(220 18% 13%);
+  --color-popover-foreground: hsl(30 15% 92%);
+
+  /* Primary - Slightly adjusted scarlet for dark mode */
+  --color-primary: hsl(8 85% 58%);
+  --color-primary-foreground: hsl(0 0% 100%);
+
+  /* Secondary - Dark warm gray */
+  --color-secondary: hsl(220 15% 20%);
+  --color-secondary-foreground: hsl(30 10% 85%);
+
+  /* Muted - For subtle text and backgrounds */
+  --color-muted: hsl(220 15% 18%);
+  --color-muted-foreground: hsl(220 10% 55%);
+
+  /* Accent - Slightly different from muted */
+  --color-accent: hsl(220 15% 22%);
+  --color-accent-foreground: hsl(30 15% 92%);
+
+  /* Status colors - Slightly adjusted for dark mode visibility */
+  --color-destructive: hsl(0 72% 55%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-success: hsl(152 60% 38%);
+  --color-success-foreground: hsl(0 0% 100%);
+  --color-warning: hsl(38 90% 55%);
+  --color-warning-foreground: hsl(0 0% 10%);
+  --color-info: hsl(199 85% 55%);
+  --color-info-foreground: hsl(0 0% 100%);
+
+  /* Border and inputs */
+  --color-border: hsl(220 15% 22%);
+  --color-input: hsl(220 15% 22%);
+  --color-ring: hsl(8 85% 58%);
+
+  /* Shadows - More subtle in dark mode */
+  --shadow-1: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-2: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-3: 0 4px 6px -1px rgb(0 0 0 / 0.35), 0 2px 4px -1px rgb(0 0 0 / 0.2);
+  --shadow-4: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -2px rgb(0 0 0 / 0.2);
+  --shadow-5: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 10px 10px -5px rgb(0 0 0 / 0.2);
+
+  /* Focus ring shadow */
+  --shadow-ring: 0 0 0 3px hsl(8 85% 58% / 0.25);
 }
 
 @layer base {
@@ -79,6 +138,24 @@
     color: var(--color-foreground);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Smooth theme transitions */
+    transition: background-color var(--theme-transition) ease-out,
+                color var(--theme-transition) ease-out;
+  }
+
+  /* Theme transition for key elements */
+  .theme-transition,
+  header,
+  main,
+  nav,
+  aside,
+  footer,
+  [class*="bg-"],
+  [class*="text-"],
+  [class*="border-"] {
+    transition: background-color var(--theme-transition) ease-out,
+                color var(--theme-transition) ease-out,
+                border-color var(--theme-transition) ease-out;
   }
 
   /* Tighter tracking on headings */
@@ -285,5 +362,19 @@
 
   .hover-lift:hover {
     transform: none;
+  }
+
+  /* Disable theme transitions for users who prefer reduced motion */
+  body,
+  .theme-transition,
+  header,
+  main,
+  nav,
+  aside,
+  footer,
+  [class*="bg-"],
+  [class*="text-"],
+  [class*="border-"] {
+    transition: none !important;
   }
 }

@@ -1,11 +1,20 @@
+import { useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth-store'
+import { useThemeStore } from '@/stores/theme-store'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { GitFork, LogOut, Plus } from 'lucide-react'
 
 export function Layout() {
   const { user, signOut } = useAuthStore()
   const location = useLocation()
+  const initializeTheme = useThemeStore((state) => state.initialize)
+
+  // Initialize theme on mount
+  useEffect(() => {
+    initializeTheme()
+  }, [initializeTheme])
 
   const isEditor = location.pathname.includes('/app/repo/') || location.pathname === '/app/new'
 
@@ -70,6 +79,9 @@ export function Layout() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Theme Toggle - always visible */}
+            <ThemeToggle />
+
             {user ? (
               <>
                 {/* New Button */}
