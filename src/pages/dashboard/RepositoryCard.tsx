@@ -45,10 +45,7 @@ export function RepositoryCard({
 
     return (
         <Card
-            className="group hover:shadow-md transition-all duration-200 border-l-4 h-full flex flex-col"
-            style={{
-                borderLeftColor: colorStatus === 'dormant' ? undefined : `var(--${colorConfig.text.split('-')[1]}-400)`
-            }}
+            className={`group hover:shadow-md transition-all duration-200 border-l-4 h-full flex flex-col ${colorStatus === 'dormant' ? '' : colorConfig.border}`}
         >
             <div className={`flex-1 flex flex-col ${colorStatus === 'dormant' ? 'opacity-70 hover:opacity-100' : ''}`}>
                 <div className="p-4 flex-1">

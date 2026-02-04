@@ -12,6 +12,7 @@ export interface ColorConfig {
   description: string
   icon: typeof Zap
   priority: number
+  border: string
 }
 
 export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
@@ -23,6 +24,7 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     description: '⚠️ Inactive for 30+ days',
     icon: AlertCircle,
     priority: 1, // Highest priority - warnings bubble up
+    border: 'border-slate-400',
   },
   'new': {
     bg: 'bg-pink-300',
@@ -32,6 +34,7 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     description: '✨ Created this week',
     icon: Sparkles,
     priority: 2, // Fresh content needs setup
+    border: 'border-pink-400',
   },
   'popular': {
     bg: 'bg-amber-300',
@@ -41,6 +44,7 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     description: '🔥 Community validated (3+ forks)',
     icon: Star,
     priority: 3, // High-value content
+    border: 'border-amber-500',
   },
   'forked': {
     bg: 'bg-violet-300',
@@ -50,6 +54,7 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     description: '📂 Forked from community',
     icon: GitFork,
     priority: 4, // Shows learning/origin
+    border: 'border-violet-400',
   },
   'recently-used': {
     bg: 'bg-red-300',
@@ -59,6 +64,7 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     description: '⚡ Used in the last 7 days',
     icon: Zap,
     priority: 5, // Engaged but not urgent
+    border: 'border-red-500',
   },
   'public': {
     bg: 'bg-sky-300',
@@ -68,6 +74,7 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     description: '🌐 Public & visible to all',
     icon: Eye,
     priority: 6, // Informational status
+    border: 'border-sky-500',
   },
   'default': {
     bg: 'bg-indigo-200',
@@ -77,6 +84,7 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     description: '🔒 Standard private checklist',
     icon: ListChecks,
     priority: 7, // Base state
+    border: 'border-indigo-400',
   },
 }
 

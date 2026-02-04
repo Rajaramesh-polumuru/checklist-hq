@@ -7,7 +7,7 @@ import { useAuthStore } from '@/stores/auth-store'
 
 // Lazy load all pages for code splitting
 const Home = lazy(() => import('@/pages/Home').then(m => ({ default: m.Home })))
-const Dashboard = lazy(() => import('@/pages/Dashboard').then(m => ({ default: m.Dashboard })))
+const Dashboard = lazy(() => import('@/pages/DashboardPage').then(m => ({ default: m.Dashboard })))
 const Editor = lazy(() => import('@/pages/Editor').then(m => ({ default: m.Editor })))
 const ActiveRuns = lazy(() => import('@/pages/ActiveRuns').then(m => ({ default: m.ActiveRuns })))
 const RunHistory = lazy(() => import('@/pages/RunHistory').then(m => ({ default: m.RunHistory })))
@@ -67,138 +67,138 @@ function App() {
           <Route path="/login" element={<Suspense fallback={<PageLoader />}><Login /></Suspense>} />
           <Route path="/signup" element={<Suspense fallback={<PageLoader />}><Signup /></Suspense>} />
 
-        <Route path="/" element={<Layout />}>
-          {/* Public routes */}
-          <Route index element={<Suspense fallback={<PageLoader />}><Home /></Suspense>} />
-          <Route path="explore" element={<Suspense fallback={<PageLoader />}><Explore /></Suspense>} />
-          <Route path="auth/callback" element={<Suspense fallback={<PageLoader />}><AuthCallback /></Suspense>} />
+          <Route path="/" element={<Layout />}>
+            {/* Public routes */}
+            <Route index element={<Suspense fallback={<PageLoader />}><Home /></Suspense>} />
+            <Route path="explore" element={<Suspense fallback={<PageLoader />}><Explore /></Suspense>} />
+            <Route path="auth/callback" element={<Suspense fallback={<PageLoader />}><AuthCallback /></Suspense>} />
 
-          {/* Protected routes */}
-          <Route
-            path="app"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <Dashboard />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="app/runs"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <ActiveRuns />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="app/history"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <RunHistory />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="app/activity"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <Activity />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="app/profile"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <Profile />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="app/new"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <Editor />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="app/repo/:repoId"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <Editor />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="app/run/:runId"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <RunMode />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="app/run/start/:repoId"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <RunMode />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="app/repo/:repoId/version/:commitId"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <ViewVersion />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="app/analytics"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <RunAnalytics />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="app/repo/:repoId/analytics"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <RunAnalytics />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
+            {/* Protected routes */}
+            <Route
+              path="app"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <Dashboard />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="app/runs"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <ActiveRuns />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="app/history"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <RunHistory />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="app/activity"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <Activity />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="app/profile"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <Profile />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="app/new"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <Editor />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="app/repo/:repoId"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <Editor />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="app/run/:runId"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <RunMode />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="app/run/start/:repoId"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <RunMode />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="app/repo/:repoId/version/:commitId"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <ViewVersion />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="app/analytics"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <RunAnalytics />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="app/repo/:repoId/analytics"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <RunAnalytics />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Public repo view (for forking) */}
-          <Route path="repo/:repoId" element={<Suspense fallback={<PageLoader />}><ViewRepository /></Suspense>} />
-        </Route>
-      </Routes>
+            {/* Public repo view (for forking) */}
+            <Route path="repo/:repoId" element={<Suspense fallback={<PageLoader />}><ViewRepository /></Suspense>} />
+          </Route>
+        </Routes>
       </ErrorBoundary>
     </BrowserRouter>
   )
