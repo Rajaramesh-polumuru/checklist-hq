@@ -9,6 +9,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Mock Next.js navigation imports that nextstepjs might try to access
+      'next/navigation': path.resolve(__dirname, './src/mocks/next-navigation.ts'),
     },
   },
 })

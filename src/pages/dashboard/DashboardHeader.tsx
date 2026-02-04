@@ -29,7 +29,7 @@ export function DashboardHeader({ userEmail, activeRunsCount }: DashboardHeaderP
                         Templates
                     </Link>
                 </Button>
-                <Button asChild size="sm">
+                <Button asChild size="sm" id="onboarding-new-checklist">
                     <Link to="/app/new">
                         <Plus className="mr-2 h-4 w-4" />
                         New Checklist

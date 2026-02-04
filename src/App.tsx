@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { OnboardingProvider } from '@/components/Onboarding'
 import { useAuthStore } from '@/stores/auth-store'
 
 // Lazy load all pages for code splitting
@@ -63,6 +64,7 @@ function App() {
   return (
     <BrowserRouter>
       <ErrorBoundary>
+        <OnboardingProvider>
         <Routes>
           <Route path="/login" element={<Suspense fallback={<PageLoader />}><Login /></Suspense>} />
           <Route path="/signup" element={<Suspense fallback={<PageLoader />}><Signup /></Suspense>} />
@@ -199,6 +201,7 @@ function App() {
             <Route path="repo/:repoId" element={<Suspense fallback={<PageLoader />}><ViewRepository /></Suspense>} />
           </Route>
         </Routes>
+        </OnboardingProvider>
       </ErrorBoundary>
     </BrowserRouter>
   )

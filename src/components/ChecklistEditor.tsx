@@ -244,7 +244,7 @@ export function ChecklistEditor() {
   }, [undo, redo, isMobile])
 
   return (
-    <div className="space-y-4">
+    <div id="onboarding-editor" className="space-y-4">
       {/* Progress bar - hide on mobile to save space */}
       {itemCount > 0 && !isMobile && (
         <div className="flex items-center gap-3 px-1 animate-fade-in">
