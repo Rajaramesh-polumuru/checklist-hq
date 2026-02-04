@@ -417,6 +417,7 @@ export async function searchUsersByEmail(_email: string): Promise<{
 }[]> {
   // Note: This requires a custom function or view in Supabase
   // to search auth.users safely. For now, return empty array.
+  void _email // Suppress unused variable warning
   // In production, you'd create a secure function for this.
   console.warn('searchUsersByEmail not implemented - requires custom Supabase function')
   return []

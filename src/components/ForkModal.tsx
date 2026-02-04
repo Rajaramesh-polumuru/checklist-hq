@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, startTransition } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Dialog,
@@ -53,25 +53,8 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
     ? Object.values(commit.content.items).filter((item: ChecklistItem) => item.type === 'header').length
     : 0
 
-  // Reset state when modal opens/closes or repository changes
-  useEffect(() => {
-    if (isOpen && repository) {
-      setForkState('loading-preview')
-      setTitle(repository.title)
-      setError(null)
-      setNewRepoId(null)
-      setProgress(0)
-
-      // Load the latest commit to get the item preview
-      loadCommit()
-    } else {
-      setForkState('idle')
-      setCommit(null)
-    }
-  }, [isOpen, repository?.id])
-
   // Load commit for preview
-  const loadCommit = async () => {
+  const loadCommit = useCallback(async () => {
     if (!repository) return
 
     try {
@@ -97,7 +80,28 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
       setError('Failed to load checklist preview')
       setForkState('error')
     }
-  }
+  }, [repository])
+
+  // Reset state when modal opens/closes or repository changes
+  useEffect(() => {
+    if (isOpen && repository) {
+      startTransition(() => {
+        setForkState('loading-preview')
+        setTitle(repository.title)
+        setError(null)
+        setNewRepoId(null)
+        setProgress(0)
+      })
+
+      // Load the latest commit to get the item preview
+      loadCommit()
+    } else {
+      startTransition(() => {
+        setForkState('idle')
+        setCommit(null)
+      })
+    }
+  }, [isOpen, repository?.id, loadCommit])
 
   // Handle fork
   const handleFork = async () => {

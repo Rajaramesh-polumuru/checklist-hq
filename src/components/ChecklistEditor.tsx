@@ -176,7 +176,7 @@ export function ChecklistEditor() {
       })
       setQuickAddValue('')
     }
-  }, [addItem])
+  }, [addItem, setQuickAddValue])
 
   const getAllVisibleItems = (): ChecklistItemType[] => {
     const result: ChecklistItemType[] = []

@@ -235,7 +235,7 @@ export async function getMyActiveRuns(userId: string): Promise<(Run & { reposito
     .order('started_at', { ascending: false })
 
   if (error) throw error
-  return (data || []).map((d: any) => ({
+  return (data || []).map((d: Run & { repositories: { title: string; owner_id: string } }) => ({
     ...d,
     repository: d.repositories
   }))
@@ -253,7 +253,7 @@ export async function getMyCompletedRuns(userId: string): Promise<(Run & { repos
     .order('completed_at', { ascending: false })
 
   if (error) throw error
-  return (data || []).map((d: any) => ({
+  return (data || []).map((d: Run & { repositories: { title: string; owner_id: string } }) => ({
     ...d,
     repository: d.repositories
   }))
@@ -527,7 +527,7 @@ export async function getMyRunsWithDuration(
 
   // Calculate duration for each run
   const runsWithDuration = await Promise.all(
-    (data || []).map(async (d: any) => {
+    (data || []).map(async (d: Run & { repositories: { title: string; owner_id: string } }) => {
       const duration_ms = await calculateRunDuration(d.id)
       return {
         ...d,
@@ -555,7 +555,7 @@ export async function getMyPausedRuns(userId: string): Promise<(Run & { reposito
     .order('paused_at', { ascending: false })
 
   if (error) throw error
-  return (data || []).map((d: any) => ({
+  return (data || []).map((d: Run & { repositories: { title: string; owner_id: string } }) => ({
     ...d,
     repository: d.repositories
   }))

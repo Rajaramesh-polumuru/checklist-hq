@@ -30,24 +30,6 @@ function formatTime(ms: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
-/**
- * Format milliseconds to human readable (e.g., "2h 15m" or "45m 30s")
- */
-function formatTimeReadable(ms: number): string {
-  const totalSeconds = Math.floor(ms / 1000)
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`
-  }
-  if (minutes > 0) {
-    return `${minutes}m ${seconds}s`
-  }
-  return `${seconds}s`
-}
-
 export function RunTimer({
   run,
   initialDurationMs = 0,
@@ -192,5 +174,4 @@ export function RunTimer({
   )
 }
 
-// Export utility functions for use elsewhere
-export { formatTime, formatTimeReadable }
+// Utility functions are only used internally

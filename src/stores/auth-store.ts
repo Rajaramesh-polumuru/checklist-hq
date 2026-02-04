@@ -16,11 +16,11 @@ interface AuthState {
   setLoading: (loading: boolean) => void
   signInWithGoogle: () => Promise<void>
   signInWithPassword: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string, data?: any) => Promise<boolean>
+  signUp: (email: string, password: string, data?: Record<string, unknown>) => Promise<boolean>
   signOut: () => Promise<void>
   initialize: () => Promise<void>
   setOnboardingStep: (step: number) => void
-  updateProfile: (updates: any) => Promise<void>
+  updateProfile: (updates: Record<string, unknown>) => Promise<void>
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Palette, X, Check } from 'lucide-react'
 
 // Curated PASTEL color palettes - thinking like CDO/CMO
@@ -130,10 +130,15 @@ type ThemeKey = keyof typeof COLOR_THEMES
 
 export function DevColorPicker() {
     const [isOpen, setIsOpen] = useState(false)
-    const [activeTheme, setActiveTheme] = useState<ThemeKey>('scarlet')
+
+    // Initialize theme from localStorage
+    const [activeTheme, setActiveTheme] = useState<ThemeKey>(() => {
+        const saved = localStorage.getItem('dev-color-theme') as ThemeKey | null
+        return saved && COLOR_THEMES[saved] ? saved : 'scarlet'
+    })
 
     // Apply theme to CSS variables
-    const applyTheme = (themeKey: ThemeKey) => {
+    const applyTheme = useCallback((themeKey: ThemeKey) => {
         const theme = COLOR_THEMES[themeKey]
         document.documentElement.style.setProperty('--color-primary', theme.primary)
         document.documentElement.style.setProperty('--color-ring', theme.primary)
@@ -142,15 +147,15 @@ export function DevColorPicker() {
 
         // Save to localStorage for persistence during dev
         localStorage.setItem('dev-color-theme', themeKey)
-    }
-
-    // Load saved theme on mount
-    useEffect(() => {
-        const saved = localStorage.getItem('dev-color-theme') as ThemeKey | null
-        if (saved && COLOR_THEMES[saved]) {
-            applyTheme(saved)
-        }
     }, [])
+
+    // Apply initial theme to DOM on mount
+    useEffect(() => {
+        const theme = COLOR_THEMES[activeTheme]
+        document.documentElement.style.setProperty('--color-primary', theme.primary)
+        document.documentElement.style.setProperty('--color-ring', theme.primary)
+        document.documentElement.style.setProperty('--shadow-ring', `0 0 0 3px ${theme.ring}`)
+    }, [activeTheme])
 
     if (!isOpen) {
         return (

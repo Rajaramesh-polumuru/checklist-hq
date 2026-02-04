@@ -35,28 +35,43 @@ import { SyncIndicator } from '@/components/SyncIndicator'
 import { useRunSync } from '@/hooks/useRunSync'
 import type { Repository, Run, Commit, ChecklistItem, RunProgress } from '@/types/database'
 
+// Generate initial confetti pieces to avoid Math.random() during render
+const generateConfettiPieces = () => {
+  const colors = ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444']
+  return [...Array(50)].map((_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    animationDelay: Math.random() * 2,
+    animationDuration: 2 + Math.random() * 2,
+    backgroundColor: colors[Math.floor(Math.random() * colors.length)],
+    rotation: Math.random() * 360,
+  }))
+}
+
 // Confetti effect component
 function Confetti({ active }: { active: boolean }) {
+  const [confettiPieces] = useState(() => generateConfettiPieces())
+
   if (!active) return null
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      {[...Array(50)].map((_, i) => (
+      {confettiPieces.map((piece) => (
         <div
-          key={i}
+          key={piece.id}
           className="absolute animate-confetti"
           style={{
-            left: `${Math.random() * 100}%`,
+            left: `${piece.left}%`,
             top: '-20px',
-            animationDelay: `${Math.random() * 2}s`,
-            animationDuration: `${2 + Math.random() * 2}s`,
+            animationDelay: `${piece.animationDelay}s`,
+            animationDuration: `${piece.animationDuration}s`,
           }}
         >
           <div
             className="w-3 h-3 rounded-sm"
             style={{
-              backgroundColor: ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444'][Math.floor(Math.random() * 5)],
-              transform: `rotate(${Math.random() * 360}deg)`,
+              backgroundColor: piece.backgroundColor,
+              transform: `rotate(${piece.rotation}deg)`,
             }}
           />
         </div>
@@ -189,7 +204,7 @@ function PremiumRunItem({
 }) {
   const isCompleted = progress?.completed ?? false
   const [isAnimating, setIsAnimating] = useState(false)
-  const checkboxRef = useRef<HTMLButtonElement>(null)
+  const checkboxRef = useRef<HTMLDivElement>(null)
 
   const handleToggle = () => {
     if (!isCompleted) {
@@ -217,7 +232,7 @@ function PremiumRunItem({
       {/* Animated checkbox */}
       <div className="relative pt-0.5 shrink-0">
         <div
-          ref={checkboxRef as any}
+          ref={checkboxRef}
           className={cn(
             'relative rounded-full border-2 transition-all duration-300 flex items-center justify-center',
             isSubItem ? 'h-5 w-5' : 'h-7 w-7',
@@ -566,7 +581,7 @@ export function RunMode() {
   }, [run, user])
 
   // Complete the run
-  const handleComplete = async () => {
+  const handleComplete = useCallback(async () => {
     if (!run) return
 
     setCompleting(true)
@@ -582,7 +597,7 @@ export function RunMode() {
     } finally {
       setCompleting(false)
     }
-  }
+  }, [run])
 
   // Restart the run
   const handleRestart = async () => {
@@ -680,7 +695,7 @@ export function RunMode() {
     if (progressPercent === 100 && run?.status !== 'completed' && !completing && !justCompleted) {
       handleComplete()
     }
-  }, [progressPercent, run?.status, completing, justCompleted])
+  }, [progressPercent, run?.status, completing, justCompleted, handleComplete])
 
   // Loading state
   if (loading) {

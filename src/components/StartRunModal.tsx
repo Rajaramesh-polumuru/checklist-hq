@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, startTransition } from 'react'
 import type { ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -70,24 +70,8 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
     return Object.values(items).some((item) => item.parent === itemId)
   }
 
-  // Reset state when modal opens/closes or repository changes
-  useEffect(() => {
-    if (isOpen && repository) {
-      setRunState('loading-preview')
-      setName(generateDefaultName(repository.title))
-      setError(null)
-      setNewRunId(null)
-
-      // Load the latest commit to get the item preview
-      loadCommit()
-    } else {
-      setRunState('idle')
-      setCommit(null)
-    }
-  }, [isOpen, repository?.id])
-
   // Load commit for preview
-  const loadCommit = async () => {
+  const loadCommit = useCallback(async () => {
     if (!repository) return
 
     try {
@@ -106,7 +90,27 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
       setError('Failed to load checklist')
       setRunState('error')
     }
-  }
+  }, [repository])
+
+  // Reset state when modal opens/closes or repository changes
+  useEffect(() => {
+    if (isOpen && repository) {
+      startTransition(() => {
+        setRunState('loading-preview')
+        setName(generateDefaultName(repository.title))
+        setError(null)
+        setNewRunId(null)
+      })
+
+      // Load the latest commit to get the item preview
+      loadCommit()
+    } else {
+      startTransition(() => {
+        setRunState('idle')
+        setCommit(null)
+      })
+    }
+  }, [isOpen, repository?.id, loadCommit])
 
   // Handle start run
   const handleStartRun = async () => {
