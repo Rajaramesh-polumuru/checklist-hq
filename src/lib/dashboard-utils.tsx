@@ -1,4 +1,109 @@
 import type { Repository } from '@/types/database'
+import { Zap, AlertCircle, Sparkles, Star, GitFork, Eye, ListChecks } from 'lucide-react'
+
+// Color strategy types for meaningful visual communication
+export type ColorStatus = 'recently-used' | 'new' | 'popular' | 'forked' | 'public' | 'dormant' | 'default'
+
+export interface ColorConfig {
+  bg: string
+  text: string
+  gradient: string
+  label: string
+  description: string
+  icon: typeof Zap
+  priority: number
+}
+
+export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
+  'dormant': {
+    bg: 'bg-slate-300',
+    text: 'text-slate-500',
+    gradient: 'from-slate-300 to-gray-300',
+    label: 'Needs Attention',
+    description: '⚠️ Inactive for 30+ days',
+    icon: AlertCircle,
+    priority: 1, // Highest priority - warnings bubble up
+  },
+  'new': {
+    bg: 'bg-pink-300',
+    text: 'text-pink-400',
+    gradient: 'from-pink-300 to-rose-200',
+    label: 'New',
+    description: '✨ Created this week',
+    icon: Sparkles,
+    priority: 2, // Fresh content needs setup
+  },
+  'popular': {
+    bg: 'bg-amber-300',
+    text: 'text-amber-500',
+    gradient: 'from-amber-300 to-yellow-200',
+    label: 'Popular',
+    description: '🔥 Community validated (3+ forks)',
+    icon: Star,
+    priority: 3, // High-value content
+  },
+  'forked': {
+    bg: 'bg-violet-300',
+    text: 'text-violet-400',
+    gradient: 'from-violet-300 to-purple-200',
+    label: 'Template',
+    description: '📂 Forked from community',
+    icon: GitFork,
+    priority: 4, // Shows learning/origin
+  },
+  'recently-used': {
+    bg: 'bg-red-300',
+    text: 'text-red-500',
+    gradient: 'from-red-300 to-orange-200',
+    label: 'Active',
+    description: '⚡ Used in the last 7 days',
+    icon: Zap,
+    priority: 5, // Engaged but not urgent
+  },
+  'public': {
+    bg: 'bg-sky-300',
+    text: 'text-sky-500',
+    gradient: 'from-sky-300 to-cyan-200',
+    label: 'Shared',
+    description: '🌐 Public & visible to all',
+    icon: Eye,
+    priority: 6, // Informational status
+  },
+  'default': {
+    bg: 'bg-indigo-200',
+    text: 'text-indigo-500',
+    gradient: 'from-indigo-200 to-indigo-100',
+    label: 'Private',
+    description: '🔒 Standard private checklist',
+    icon: ListChecks,
+    priority: 7, // Base state
+  },
+}
+
+// Determine the most relevant color status for a repository
+// Strategic hierarchy: Warnings > Visibility > Origin > Valuable > Fresh > Engagement
+export function getRepoColorStatus(repo: Repository): ColorStatus {
+  // 1. Dormant items surface first (needs attention - warning state)
+  if (isStale(repo)) return 'dormant'
+
+  // 2. Public items (visibility status - important to know what's shared)
+  if (repo.is_public) return 'public'
+
+  // 3. Forked items (template-based, shows origin)
+  if (repo.upstream_repo_id) return 'forked'
+
+  // 4. Popular items (high-value, community validated)
+  if (isPopular(repo)) return 'popular'
+
+  // 5. New items (fresh content, may need completion)
+  if (isNew(repo)) return 'new'
+
+  // 6. Recently used (actively engaged)
+  if (isRecentlyUsed(repo)) return 'recently-used'
+
+  // 7. Default private checklist
+  return 'default'
+}
 
 /**
  * Badge Logic Utilities
