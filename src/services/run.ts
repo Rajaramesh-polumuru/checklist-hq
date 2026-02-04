@@ -130,7 +130,8 @@ export async function updateRunProgress(
   id: string,
   itemId: string,
   completed: boolean,
-  userId?: string
+  userId?: string,
+  note?: string
 ): Promise<Run> {
   // First get current progress
   const run = await getRun(id)
@@ -142,6 +143,7 @@ export async function updateRunProgress(
       completed,
       timestamp: new Date().toISOString(),
       user_id: userId,
+      ...(note && { note }),
     },
   }
 

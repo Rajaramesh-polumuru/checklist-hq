@@ -80,6 +80,7 @@ export interface ItemProgress {
   completed: boolean
   timestamp?: string
   user_id?: string
+  note?: string  // Optional note added when completing the item
 }
 
 export type RunProgress = Record<string, ItemProgress>

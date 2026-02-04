@@ -268,11 +268,6 @@ export function Editor() {
   const handleRestoreVersion = async (commit: Commit) => {
     if (!repository) return
 
-    const confirmRestore = window.confirm(
-      `Are you sure you want to restore to this version? This will create a new version with the content from "${commit.message || 'this commit'}".`
-    )
-    if (!confirmRestore) return
-
     try {
       setSaving(true)
       const newCommit = await restoreToCommit({
@@ -285,6 +280,7 @@ export function Editor() {
       setContent(newCommit.content)
       resetDirty()
       setHistoryOpen(false)
+      showSuccessToast('Version restored successfully')
     } catch (err) {
       console.error('Error restoring version:', err)
       setError('Failed to restore version')

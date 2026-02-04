@@ -2,6 +2,14 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
   X,
   History,
   GitCommit,
@@ -9,10 +17,87 @@ import {
   Eye,
   Loader2,
   ChevronRight,
+  AlertTriangle,
 } from 'lucide-react'
 import { getCommitHistory } from '@/services/repository'
 import type { Commit } from '@/types/database'
 import { cn } from '@/lib/utils'
+
+// Restore confirmation dialog
+function RestoreConfirmationDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+  commit,
+  isRestoring,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  onConfirm: () => void
+  commit: Commit | null
+  isRestoring: boolean
+}) {
+  if (!commit) return null
+
+  const itemCount = Object.keys(commit.content.items).length
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && !isRestoring && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-warning" />
+            Restore Version
+          </DialogTitle>
+          <DialogDescription className="text-left pt-2">
+            Are you sure you want to restore to this version? This action will create a new commit with the content from this snapshot.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="py-4">
+          <Card className="bg-muted/50">
+            <CardContent className="p-3">
+              <div className="flex items-start gap-3">
+                <GitCommit className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">
+                    {commit.message || 'No message'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {formatDate(commit.created_at)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {itemCount} item{itemCount !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <p className="text-sm text-muted-foreground mt-3">
+            Your current version will remain in the history, so you can always restore it later if needed.
+          </p>
+        </div>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={onClose} disabled={isRestoring}>
+            Cancel
+          </Button>
+          <Button onClick={onConfirm} disabled={isRestoring} className="gap-2">
+            {isRestoring ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Restoring...
+              </>
+            ) : (
+              <>
+                <RotateCcw className="h-4 w-4" />
+                Restore
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 interface VersionHistoryProps {
   repoId: string
@@ -37,6 +122,8 @@ export function VersionHistory({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedForCompare, setSelectedForCompare] = useState<Commit | null>(null)
+  const [restoreCommit, setRestoreCommit] = useState<Commit | null>(null)
+  const [isRestoring, setIsRestoring] = useState(false)
 
   useEffect(() => {
     if (!isOpen) return
@@ -66,6 +153,18 @@ export function VersionHistory({
     } else {
       onCompareVersions(selectedForCompare, commit)
       setSelectedForCompare(null)
+    }
+  }
+
+  const handleRestoreConfirm = async () => {
+    if (!restoreCommit) return
+
+    setIsRestoring(true)
+    try {
+      await onRestoreVersion(restoreCommit)
+      setRestoreCommit(null)
+    } finally {
+      setIsRestoring(false)
     }
   }
 
@@ -190,7 +289,7 @@ export function VersionHistory({
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
-                              onClick={() => onRestoreVersion(commit)}
+                              onClick={() => setRestoreCommit(commit)}
                               title="Restore to this version"
                             >
                               <RotateCcw className="h-4 w-4" />
@@ -211,6 +310,15 @@ export function VersionHistory({
           {commits.length} version{commits.length !== 1 ? 's' : ''} total
         </div>
       </div>
+
+      {/* Restore Confirmation Dialog */}
+      <RestoreConfirmationDialog
+        isOpen={!!restoreCommit}
+        onClose={() => setRestoreCommit(null)}
+        onConfirm={handleRestoreConfirm}
+        commit={restoreCommit}
+        isRestoring={isRestoring}
+      />
     </div>
   )
 }

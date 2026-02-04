@@ -4,6 +4,15 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { FormattedText } from '@/lib/rich-text'
 import {
@@ -22,6 +31,8 @@ import {
   Pencil,
   Check,
   X,
+  MessageSquare,
+  StickyNote,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
@@ -188,6 +199,84 @@ function SectionHeader({
   )
 }
 
+// Completion Note Dialog component
+function CompletionNoteDialog({
+  isOpen,
+  onClose,
+  onComplete,
+  itemText,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  onComplete: (note?: string) => void
+  itemText: string
+}) {
+  const [note, setNote] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      setNote('')
+      setTimeout(() => textareaRef.current?.focus(), 100)
+    }
+  }, [isOpen])
+
+  const handleComplete = () => {
+    onComplete(note.trim() || undefined)
+    setNote('')
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault()
+      handleComplete()
+    }
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-success" />
+            Mark as Complete
+          </DialogTitle>
+          <DialogDescription className="text-left">
+            <span className="font-medium text-foreground">{itemText}</span>
+          </DialogDescription>
+        </DialogHeader>
+        <div className="py-4">
+          <label htmlFor="completion-note" className="text-sm font-medium mb-2 flex items-center gap-2">
+            <StickyNote className="h-4 w-4 text-muted-foreground" />
+            Add a note (optional)
+          </label>
+          <Textarea
+            id="completion-note"
+            ref={textareaRef}
+            value={note}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Any observations, blockers, or details to remember..."
+            className="mt-2 min-h-[80px] resize-none"
+          />
+          <p className="text-xs text-muted-foreground mt-2">
+            Press <kbd className="px-1 py-0.5 bg-muted rounded text-[10px] font-mono">Cmd/Ctrl+Enter</kbd> to complete
+          </p>
+        </div>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleComplete} className="gap-2">
+            <Check className="h-4 w-4" />
+            Complete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 // Run item with premium styling - now supports sub-items
 function PremiumRunItem({
   item,
@@ -201,9 +290,9 @@ function PremiumRunItem({
   showStepNumber = true,
 }: {
   item: ChecklistItem
-  progress: { completed: boolean; timestamp?: string } | undefined
+  progress: { completed: boolean; timestamp?: string; note?: string } | undefined
   depth: number
-  onToggle: (itemId: string, completed: boolean) => void
+  onToggle: (itemId: string, completed: boolean, note?: string) => void
   stepNumber: number
   isNext: boolean
   isFocused: boolean
@@ -212,119 +301,147 @@ function PremiumRunItem({
 }) {
   const isCompleted = progress?.completed ?? false
   const [isAnimating, setIsAnimating] = useState(false)
+  const [showNoteDialog, setShowNoteDialog] = useState(false)
   const checkboxRef = useRef<HTMLDivElement>(null)
 
-  const handleToggle = () => {
-    if (!isCompleted) {
-      setIsAnimating(true)
-      setTimeout(() => setIsAnimating(false), 500)
+  const handleClick = () => {
+    if (isCompleted) {
+      // Uncomplete directly - no note needed
+      onToggle(item.id, false)
+    } else {
+      // Show dialog to add optional note before completing
+      setShowNoteDialog(true)
     }
-    onToggle(item.id, !isCompleted)
+  }
+
+  const handleComplete = (note?: string) => {
+    setIsAnimating(true)
+    setTimeout(() => setIsAnimating(false), 500)
+    onToggle(item.id, true, note)
+    setShowNoteDialog(false)
   }
 
   // Adjust sizing based on depth
   const isSubItem = depth > 0
 
   return (
-    <button
-      onClick={handleToggle}
-      data-item-id={item.id}
-      className={cn(
-        'w-full text-left group flex items-start gap-3 transition-all duration-300',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
-        isSubItem ? 'p-3 rounded-xl' : 'p-4 rounded-2xl',
-        isCompleted && 'bg-success/10 hover:bg-success/15',
-        !isCompleted && isNext && 'bg-primary/5 ring-2 ring-primary/20 hover:bg-primary/10',
-        !isCompleted && !isNext && 'hover:bg-muted/50',
-        isFocused && 'ring-2 ring-primary ring-offset-2 ring-offset-background'
-      )}
-    >
-      {/* Animated checkbox */}
-      <div className="relative pt-0.5 shrink-0">
-        <div
-          ref={checkboxRef}
-          className={cn(
-            'relative rounded-full border-2 transition-all duration-300 flex items-center justify-center',
-            isSubItem ? 'h-5 w-5' : 'h-7 w-7',
-            isCompleted && 'bg-success border-success scale-110',
-            !isCompleted && isNext && 'border-primary bg-primary/10',
-            !isCompleted && !isNext && 'border-muted-foreground/30 group-hover:border-primary/50',
-            isAnimating && 'animate-bounce'
-          )}
-        >
-          {isCompleted ? (
-            <CheckCircle2 className={cn('text-white animate-fade-in', isSubItem ? 'h-3 w-3' : 'h-5 w-5')} />
-          ) : isNext ? (
-            <Play className={cn('text-primary', isSubItem ? 'h-2 w-2' : 'h-3 w-3')} />
-          ) : (
-            <Circle className={cn('text-muted-foreground/30', isSubItem ? 'h-3 w-3' : 'h-4 w-4')} />
+    <>
+      <button
+        onClick={handleClick}
+        data-item-id={item.id}
+        className={cn(
+          'w-full text-left group flex items-start gap-3 transition-all duration-300',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+          isSubItem ? 'p-3 rounded-xl' : 'p-4 rounded-2xl',
+          isCompleted && 'bg-success/10 hover:bg-success/15',
+          !isCompleted && isNext && 'bg-primary/5 ring-2 ring-primary/20 hover:bg-primary/10',
+          !isCompleted && !isNext && 'hover:bg-muted/50',
+          isFocused && 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+        )}
+      >
+        {/* Animated checkbox */}
+        <div className="relative pt-0.5 shrink-0">
+          <div
+            ref={checkboxRef}
+            className={cn(
+              'relative rounded-full border-2 transition-all duration-300 flex items-center justify-center',
+              isSubItem ? 'h-5 w-5' : 'h-7 w-7',
+              isCompleted && 'bg-success border-success scale-110',
+              !isCompleted && isNext && 'border-primary bg-primary/10',
+              !isCompleted && !isNext && 'border-muted-foreground/30 group-hover:border-primary/50',
+              isAnimating && 'animate-bounce'
+            )}
+          >
+            {isCompleted ? (
+              <CheckCircle2 className={cn('text-white animate-fade-in', isSubItem ? 'h-3 w-3' : 'h-5 w-5')} />
+            ) : isNext ? (
+              <Play className={cn('text-primary', isSubItem ? 'h-2 w-2' : 'h-3 w-3')} />
+            ) : (
+              <Circle className={cn('text-muted-foreground/30', isSubItem ? 'h-3 w-3' : 'h-4 w-4')} />
+            )}
+          </div>
+
+          {/* Pulse effect for next item */}
+          {isNext && !isCompleted && (
+            <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
           )}
         </div>
 
-        {/* Pulse effect for next item */}
-        {isNext && !isCompleted && (
-          <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
-        )}
-      </div>
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {/* Step indicator - only for top-level items */}
+          {showStepNumber && !isSubItem && (
+            <div className="flex items-center gap-2 mb-1">
+              <span className={cn(
+                "text-xs font-medium uppercase tracking-wider",
+                isCompleted ? "text-success" : isNext ? "text-primary" : "text-muted-foreground"
+              )}>
+                Step {stepNumber} of {totalSteps}
+              </span>
+              {isNext && !isCompleted && (
+                <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4 bg-primary text-primary-foreground hover:bg-primary/90">
+                  NEXT
+                </Badge>
+              )}
+            </div>
+          )}
 
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        {/* Step indicator - only for top-level items */}
-        {showStepNumber && !isSubItem && (
-          <div className="flex items-center gap-2 mb-1">
-            <span className={cn(
-              "text-xs font-medium uppercase tracking-wider",
-              isCompleted ? "text-success" : isNext ? "text-primary" : "text-muted-foreground"
-            )}>
-              Step {stepNumber} of {totalSteps}
-            </span>
-            {isNext && !isCompleted && (
-              <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4 bg-primary text-primary-foreground hover:bg-primary/90">
-                NEXT
-              </Badge>
-            )}
-          </div>
-        )}
+          {/* Sub-item indicator */}
+          {isSubItem && isNext && !isCompleted && (
+            <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4 bg-primary text-primary-foreground hover:bg-primary/90 mb-1">
+              NEXT
+            </Badge>
+          )}
 
-        {/* Sub-item indicator */}
-        {isSubItem && isNext && !isCompleted && (
-          <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4 bg-primary text-primary-foreground hover:bg-primary/90 mb-1">
-            NEXT
-          </Badge>
-        )}
-
-        {/* Item text */}
-        <p className={cn(
-          'font-medium transition-all',
-          isSubItem ? 'text-base' : 'text-lg',
-          isCompleted && 'text-success line-through opacity-70',
-          isNext && !isCompleted && 'text-foreground',
-          !isNext && !isCompleted && 'text-muted-foreground'
-        )}>
-          {item.text ? <FormattedText text={item.text} /> : 'Untitled item'}
-        </p>
-
-        {/* Details */}
-        {item.details && (
-          <p className={cn('text-muted-foreground mt-1', isSubItem ? 'text-xs' : 'text-sm')}>
-            {item.details}
+          {/* Item text */}
+          <p className={cn(
+            'font-medium transition-all',
+            isSubItem ? 'text-base' : 'text-lg',
+            isCompleted && 'text-success line-through opacity-70',
+            isNext && !isCompleted && 'text-foreground',
+            !isNext && !isCompleted && 'text-muted-foreground'
+          )}>
+            {item.text ? <FormattedText text={item.text} /> : 'Untitled item'}
           </p>
-        )}
 
-        {/* Completion timestamp */}
-        {isCompleted && progress?.timestamp && (
-          <p className="text-xs text-success mt-1.5 flex items-center gap-1.5 opacity-80">
-            <CheckCircle2 className="h-3 w-3" />
-            Completed {formatRelativeTime(progress.timestamp)}
-          </p>
-        )}
-      </div>
+          {/* Details */}
+          {item.details && (
+            <p className={cn('text-muted-foreground mt-1', isSubItem ? 'text-xs' : 'text-sm')}>
+              {item.details}
+            </p>
+          )}
 
-      {/* Chevron for next item */}
-      {isNext && !isCompleted && !isSubItem && (
-        <ChevronRight className="h-5 w-5 text-primary shrink-0 mt-1 group-hover:translate-x-1 transition-transform" />
-      )}
-    </button>
+          {/* Completion timestamp and note */}
+          {isCompleted && progress?.timestamp && (
+            <div className="mt-1.5 space-y-1">
+              <p className="text-xs text-success flex items-center gap-1.5 opacity-80">
+                <CheckCircle2 className="h-3 w-3" />
+                Completed {formatRelativeTime(progress.timestamp)}
+              </p>
+              {progress.note && (
+                <div className="flex items-start gap-1.5 text-xs text-muted-foreground bg-muted/50 rounded-lg px-2 py-1.5">
+                  <MessageSquare className="h-3 w-3 mt-0.5 shrink-0" />
+                  <span className="italic">{progress.note}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Chevron for next item */}
+        {isNext && !isCompleted && !isSubItem && (
+          <ChevronRight className="h-5 w-5 text-primary shrink-0 mt-1 group-hover:translate-x-1 transition-transform" />
+        )}
+      </button>
+
+      {/* Completion Note Dialog */}
+      <CompletionNoteDialog
+        isOpen={showNoteDialog}
+        onClose={() => setShowNoteDialog(false)}
+        onComplete={handleComplete}
+        itemText={item.text || 'Untitled item'}
+      />
+    </>
   )
 }
 
@@ -342,7 +459,7 @@ function RecursiveRunItems({
   items: ChecklistItem[]
   allItems: Record<string, ChecklistItem>
   progress: RunProgress
-  onToggle: (itemId: string, completed: boolean) => void
+  onToggle: (itemId: string, completed: boolean, note?: string) => void
   depth?: number
   checkableItems: ChecklistItem[]
   nextItemId: string | null
@@ -597,7 +714,7 @@ export function RunMode() {
   }, [])
 
   // Toggle item completion
-  const handleToggle = useCallback(async (itemId: string, completed: boolean) => {
+  const handleToggle = useCallback(async (itemId: string, completed: boolean, note?: string) => {
     if (!run || !user) return
 
     // Optimistic update
@@ -607,11 +724,12 @@ export function RunMode() {
         completed,
         timestamp: new Date().toISOString(),
         user_id: user.id,
+        ...(note && { note }),
       },
     }))
 
     try {
-      await updateRunProgress(run.id, itemId, completed, user.id)
+      await updateRunProgress(run.id, itemId, completed, user.id, note)
     } catch (err) {
       console.error('Error updating progress:', err)
       setProgress((prev) => {
