@@ -22,6 +22,7 @@ const ViewVersion = lazy(() => import('@/pages/ViewVersion').then(m => ({ defaul
 const RunAnalytics = lazy(() => import('@/pages/RunAnalytics'))
 const Login = lazy(() => import('@/pages/Login').then(m => ({ default: m.Login })))
 const Signup = lazy(() => import('@/pages/Signup').then(m => ({ default: m.Signup })))
+const NewOrganization = lazy(() => import('@/pages/NewOrganization').then(m => ({ default: m.NewOrganization })))
 
 // Loading fallback component
 function PageLoader() {
@@ -192,6 +193,30 @@ function App() {
                 <ProtectedRoute>
                   <Suspense fallback={<PageLoader />}>
                     <RunAnalytics />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="app/orgs/new"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <NewOrganization />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="app/orgs/:orgId"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    {/* Placeholder for future organization dashboard */}
+                    <div className="container mx-auto px-4 py-8">
+                      <h1 className="text-2xl font-bold">Organization Dashboard</h1>
+                      <p className="text-muted-foreground mt-2">Coming soon...</p>
+                    </div>
                   </Suspense>
                 </ProtectedRoute>
               }

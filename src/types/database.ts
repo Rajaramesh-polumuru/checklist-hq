@@ -105,6 +105,35 @@ export interface RepositoryTag {
   created_at: string
 }
 
+// Organization types (Phase 5)
+export interface Organization {
+  id: string
+  slug: string
+  name: string
+  description: string | null
+  avatar_url: string | null
+  plan: 'free' | 'pro' | 'team' | 'enterprise'
+  settings: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+export interface OrganizationMember {
+  id: string
+  organization_id: string
+  user_id: string
+  role: 'owner' | 'admin' | 'member' | 'viewer'
+  invited_by: string | null
+  invited_at: string | null
+  joined_at: string
+}
+
+export interface OrganizationInsert {
+  name: string
+  slug: string
+  description?: string | null
+}
+
 // Repository with tags (for display purposes)
 export interface RepositoryWithTags extends Repository {
   tags?: Tag[]
