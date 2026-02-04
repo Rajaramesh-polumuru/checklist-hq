@@ -190,6 +190,7 @@ function PremiumRunItem({
   onToggle,
   stepNumber,
   isNext,
+  isFocused,
   totalSteps,
   showStepNumber = true,
 }: {
@@ -199,6 +200,7 @@ function PremiumRunItem({
   onToggle: (itemId: string, completed: boolean) => void
   stepNumber: number
   isNext: boolean
+  isFocused: boolean
   totalSteps: number
   showStepNumber?: boolean
 }) {
@@ -220,13 +222,15 @@ function PremiumRunItem({
   return (
     <button
       onClick={handleToggle}
+      data-item-id={item.id}
       className={cn(
         'w-full text-left group flex items-start gap-3 transition-all duration-300',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
         isSubItem ? 'p-3 rounded-xl' : 'p-4 rounded-2xl',
         isCompleted && 'bg-success/10 hover:bg-success/15',
         !isCompleted && isNext && 'bg-primary/5 ring-2 ring-primary/20 hover:bg-primary/10',
-        !isCompleted && !isNext && 'hover:bg-muted/50'
+        !isCompleted && !isNext && 'hover:bg-muted/50',
+        isFocused && 'ring-2 ring-primary ring-offset-2 ring-offset-background'
       )}
     >
       {/* Animated checkbox */}
@@ -327,6 +331,7 @@ function RecursiveRunItems({
   depth = 0,
   checkableItems,
   nextItemId,
+  focusedItemId,
 }: {
   items: ChecklistItem[]
   allItems: Record<string, ChecklistItem>
@@ -335,6 +340,7 @@ function RecursiveRunItems({
   depth?: number
   checkableItems: ChecklistItem[]
   nextItemId: string | null
+  focusedItemId: string | null
 }) {
   // Get children for a given parent
   const getChildren = (parentId: string): ChecklistItem[] => {
@@ -385,6 +391,7 @@ function RecursiveRunItems({
                   depth={depth + 1}
                   checkableItems={checkableItems}
                   nextItemId={nextItemId}
+                  focusedItemId={focusedItemId}
                 />
               </div>
             </div>
@@ -402,6 +409,7 @@ function RecursiveRunItems({
               stepNumber={getStepNumber(item.id)}
               totalSteps={checkableItems.length}
               isNext={isNext}
+              isFocused={item.id === focusedItemId}
               showStepNumber={depth === 0}
             />
             {/* Render children if this item has any */}
@@ -415,6 +423,7 @@ function RecursiveRunItems({
                   depth={depth + 1}
                   checkableItems={checkableItems}
                   nextItemId={nextItemId}
+                  focusedItemId={focusedItemId}
                 />
               </div>
             )}
@@ -444,6 +453,7 @@ export function RunMode() {
   const [justCompleted, setJustCompleted] = useState(false)
   const [durationMs, setDurationMs] = useState(0)
   const [isPauseLoading, setIsPauseLoading] = useState(false)
+  const [focusedItemIndex, setFocusedItemIndex] = useState<number | null>(null)
 
   // Real-time sync
   const {
@@ -697,6 +707,58 @@ export function RunMode() {
     }
   }, [progressPercent, run?.status, completing, justCompleted, handleComplete])
 
+  // J/K keyboard navigation
+  useEffect(() => {
+    if (loading || isComplete || totalItems === 0) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input or textarea
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
+
+      if (e.key === 'j' || e.key === 'J') {
+        e.preventDefault()
+        setFocusedItemIndex((prev) => {
+          if (prev === null) return 0
+          // Move to next item, loop to beginning if at end
+          return (prev + 1) % totalItems
+        })
+      } else if (e.key === 'k' || e.key === 'K') {
+        e.preventDefault()
+        setFocusedItemIndex((prev) => {
+          if (prev === null) return totalItems - 1
+          // Move to previous item, loop to end if at beginning
+          return prev === 0 ? totalItems - 1 : prev - 1
+        })
+      } else if ((e.key === 'Enter' || e.key === ' ') && focusedItemIndex !== null) {
+        // Toggle the focused item on Enter or Space
+        e.preventDefault()
+        const item = checkableItems[focusedItemIndex]
+        if (item) {
+          const isCompleted = progress[item.id]?.completed ?? false
+          handleToggle(item.id, !isCompleted)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [loading, isComplete, totalItems, focusedItemIndex, checkableItems, progress, handleToggle])
+
+  // Scroll focused item into view
+  useEffect(() => {
+    if (focusedItemIndex !== null && checkableItems[focusedItemIndex]) {
+      const itemId = checkableItems[focusedItemIndex].id
+      const element = document.querySelector(`[data-item-id="${itemId}"]`)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
+  }, [focusedItemIndex, checkableItems])
+
+  // Get the focused item ID for passing to components
+  const focusedItemId = focusedItemIndex !== null ? checkableItems[focusedItemIndex]?.id : null
+
   // Loading state
   if (loading) {
     return (
@@ -871,12 +933,17 @@ export function RunMode() {
                 <span className="font-semibold">All steps completed!</span>
               </div>
             ) : (
-              <p className="text-muted-foreground">
-                {completedItems === 0
-                  ? "Let's get started!"
-                  : `${totalItems - completedItems} step${totalItems - completedItems > 1 ? 's' : ''} remaining`
-                }
-              </p>
+              <>
+                <p className="text-muted-foreground">
+                  {completedItems === 0
+                    ? "Let's get started!"
+                    : `${totalItems - completedItems} step${totalItems - completedItems > 1 ? 's' : ''} remaining`
+                  }
+                </p>
+                <p className="text-xs text-muted-foreground/60 mt-1">
+                  Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">J</kbd> / <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">K</kbd> to navigate, <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Enter</kbd> to toggle
+                </p>
+              </>
             )}
           </div>
         </div>
@@ -944,6 +1011,7 @@ export function RunMode() {
               depth={0}
               checkableItems={checkableItems}
               nextItemId={nextItemId}
+              focusedItemId={focusedItemId}
             />
           )}
         </div>

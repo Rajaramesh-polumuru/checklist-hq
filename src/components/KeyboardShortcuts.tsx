@@ -26,6 +26,12 @@ const shortcuts: Shortcut[] = [
   { keys: ['↑'], description: 'Navigate to previous item', context: 'Editor' },
   { keys: ['↓'], description: 'Navigate to next item', context: 'Editor' },
 
+  // Run Mode shortcuts
+  { keys: ['J'], description: 'Navigate to next item', context: 'Run Mode' },
+  { keys: ['K'], description: 'Navigate to previous item', context: 'Run Mode' },
+  { keys: ['Enter'], description: 'Toggle focused item', context: 'Run Mode' },
+  { keys: ['Space'], description: 'Toggle focused item', context: 'Run Mode' },
+
   // Global shortcuts
   { keys: ['⌘/Ctrl', 'K'], description: 'Focus search', context: 'Global' },
   { keys: ['⌘/Ctrl', 'S'], description: 'Save checklist', context: 'Global' },
@@ -80,6 +86,7 @@ export function KeyboardShortcuts({ open, onClose }: KeyboardShortcutsProps) {
             <div key={context}>
               <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                 {context === 'Editor' && <span className="w-1 h-4 bg-primary rounded" />}
+                {context === 'Run Mode' && <span className="w-1 h-4 bg-warning rounded" />}
                 {context === 'Global' && <span className="w-1 h-4 bg-success rounded" />}
                 {context === 'Navigation' && <span className="w-1 h-4 bg-info rounded" />}
                 {context}
