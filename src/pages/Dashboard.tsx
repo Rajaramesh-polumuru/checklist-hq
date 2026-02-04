@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ShareSettingsModal } from '@/components/ShareSettingsModal'
 import { StartRunModal } from '@/components/StartRunModal'
-import { Plus, GitFork, Play, Clock, Trash2, Pencil, ListChecks, MoreVertical, Share2, Copy, Info, ChevronDown, ChevronUp, Zap, Star, Eye, AlertCircle, Sparkles } from 'lucide-react'
+import { Plus, GitFork, Play, Clock, Trash2, Pencil, ListChecks, MoreVertical, Share2, Copy, Info, Zap, Star, Eye, AlertCircle, Sparkles } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { getUserRepositories, deleteRepository, updateRepository, forkRepository } from '@/services/repository'
@@ -235,16 +235,7 @@ export function Dashboard() {
   const [repoToRun, setRepoToRun] = useState<Repository | null>(null)
   const [runModalOpen, setRunModalOpen] = useState(false)
 
-  // Color legend state (persisted)
-  const [legendExpanded, setLegendExpanded] = useState(() => {
-    const saved = localStorage.getItem('dashboard-legend-expanded')
-    return saved ? JSON.parse(saved) : true // Show by default for first-time users
-  })
 
-  // Persist legend state
-  useEffect(() => {
-    localStorage.setItem('dashboard-legend-expanded', JSON.stringify(legendExpanded))
-  }, [legendExpanded])
 
   // Persist filter and sort state to localStorage
   useEffect(() => {
@@ -496,10 +487,7 @@ export function Dashboard() {
             />
             <div className="ml-4">
               {/* Minimal Legend Trigger */}
-              <ColorLegend
-                isExpanded={legendExpanded}
-                onToggle={() => setLegendExpanded(!legendExpanded)}
-              />
+              <ColorLegend />
             </div>
           </div>
         )}

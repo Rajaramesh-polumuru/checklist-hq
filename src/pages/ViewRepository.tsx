@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { ForkModal } from '@/components/ForkModal'
+import { StartRunModal } from '@/components/StartRunModal'
 import { ToastContainer } from '@/components/Toast'
 import { useToast } from '@/hooks/useToast'
 import {
@@ -15,10 +16,14 @@ import {
   ListChecks,
   ChevronRight,
   Sparkles,
+  Play,
+  Pencil,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { getRepository, getLatestCommit } from '@/services/repository'
-import type { Repository, Commit, ChecklistItem } from '@/types/database'
+import { getActiveRunsForRepo } from '@/services/run'
+import { RunCard } from '@/components/RunCard'
+import type { Repository, Commit, ChecklistItem, Run } from '@/types/database'
 import { cn } from '@/lib/utils'
 
 export function ViewRepository() {
@@ -29,10 +34,12 @@ export function ViewRepository() {
   // Data state
   const [repository, setRepository] = useState<Repository | null>(null)
   const [commit, setCommit] = useState<Commit | null>(null)
+  const [activeRuns, setActiveRuns] = useState<Run[]>([])
 
   // UI state
   const [loading, setLoading] = useState(true)
   const [forkModalOpen, setForkModalOpen] = useState(false)
+  const [runModalOpen, setRunModalOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Toast notifications
@@ -68,6 +75,12 @@ export function ViewRepository() {
         // Load latest commit
         const latestCommit = await getLatestCommit(repoId)
         setCommit(latestCommit)
+
+        // If owner, load active runs
+        if (user?.id && repo.owner_id === user.id) {
+          const runs = await getActiveRunsForRepo(repoId)
+          setActiveRuns(runs)
+        }
       } catch (err) {
         console.error('Error loading repository:', err)
         setError('Failed to load repository')
@@ -187,11 +200,18 @@ export function ViewRepository() {
 
             <div className="flex items-center gap-2">
               {isOwner ? (
-                <Button asChild>
-                  <Link to={`/app/repo/${repository.id}`}>
-                    Edit Checklist
-                  </Link>
-                </Button>
+                <>
+                  <Button asChild variant="outline">
+                    <Link to={`/app/repo/${repository.id}`}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </Link>
+                  </Button>
+                  <Button onClick={() => setRunModalOpen(true)}>
+                    <Play className="mr-2 h-4 w-4" />
+                    Run Now
+                  </Button>
+                </>
               ) : (
                 <Button onClick={handleForkClick} className="gap-2">
                   <GitFork className="h-4 w-4" />
@@ -215,6 +235,27 @@ export function ViewRepository() {
               </p>
             </CardContent>
           </Card>
+        )}
+
+        {/* Active Runs Section */}
+        {activeRuns.length > 0 && repository && (
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Play className="h-5 w-5 text-primary" />
+              Active Runs
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {activeRuns.map(run => (
+                <RunCard
+                  key={run.id}
+                  run={{
+                    ...run,
+                    repository: { title: repository.title, owner_id: repository.owner_id }
+                  }}
+                />
+              ))}
+            </div>
+          </div>
         )}
 
         {/* Checklist preview */}
@@ -277,9 +318,23 @@ export function ViewRepository() {
 
       {/* Toast Notifications */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
+      {/* Start Run Modal */}
+      {repository && (
+        <StartRunModal
+          repository={repository}
+          isOpen={runModalOpen}
+          onClose={() => setRunModalOpen(false)}
+          onSuccess={() => {
+            // Navigation is handled inside the modal handleGoToRun
+            setRunModalOpen(false)
+          }}
+        />
+      )}
     </div>
   )
 }
+
 
 // Read-only view of a checklist item
 function ViewItem({ item, depth }: { item: ChecklistItem; depth: number }) {

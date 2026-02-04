@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { formatRelativeTime } from '@/lib/date-utils'
 import {
@@ -17,6 +18,9 @@ import {
   Play,
   Target,
   Pause,
+  Pencil,
+  Check,
+  X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
@@ -29,6 +33,7 @@ import {
   pauseRun,
   resumeRun,
   calculateRunDuration,
+  updateRunName,
 } from '@/services/run'
 import { RunTimer } from '@/components/RunTimer'
 import { SyncIndicator } from '@/components/SyncIndicator'
@@ -455,6 +460,10 @@ export function RunMode() {
   const [isPauseLoading, setIsPauseLoading] = useState(false)
   const [focusedItemIndex, setFocusedItemIndex] = useState<number | null>(null)
 
+  // Renaming state
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [editName, setEditName] = useState('')
+
   // Real-time sync
   const {
     isConnected: syncConnected,
@@ -564,6 +573,28 @@ export function RunMode() {
     }
   }, [run, isPauseLoading])
 
+  // Handle renaming
+  const handleStartRenaming = useCallback(() => {
+    setEditName(run?.name || repository?.title || '')
+    setIsEditingName(true)
+  }, [run, repository])
+
+  const handleSaveName = useCallback(async () => {
+    if (!run || !editName.trim()) return
+    try {
+      const updatedRun = await updateRunName(run.id, editName.trim())
+      setRun(updatedRun)
+      setIsEditingName(false)
+    } catch (err) {
+      console.error('Error updating name:', err)
+      setError('Failed to update name')
+    }
+  }, [run, editName])
+
+  const handleCancelRenaming = useCallback(() => {
+    setIsEditingName(false)
+  }, [])
+
   // Toggle item completion
   const handleToggle = useCallback(async (itemId: string, completed: boolean) => {
     if (!run || !user) return
@@ -638,28 +669,25 @@ export function RunMode() {
     return getSortedItems().filter((item) => !item.parent)
   }
 
-  // Get all items as a record for easy lookup
-  const getAllItems = (): Record<string, ChecklistItem> => {
-    return commit?.content?.items || {}
-  }
 
-  // Get children for a given parent
-  const getChildren = (parentId: string): ChecklistItem[] => {
-    const allItems = getAllItems()
-    return Object.values(allItems)
-      .filter(item => item.parent === parentId)
-      .sort((a, b) => a.order - b.order)
-  }
 
   // Get all checkable items (tasks and notes, not headers with children)
-  const getCheckableItems = (): ChecklistItem[] => {
-    const allItems = getAllItems()
+  const checkableItems = useMemo(() => {
+    if (!commit?.content?.items) return []
+    const allItems = commit.content.items
     const checkable: ChecklistItem[] = []
+
+    // Helper to get children locally to avoid closure staleness issues
+    const getChildrenLocal = (parentId: string): ChecklistItem[] => {
+      return Object.values(allItems)
+        .filter(item => item.parent === parentId)
+        .sort((a, b) => a.order - b.order)
+    }
 
     // Recursive function to collect checkable items in order
     const collectCheckable = (items: ChecklistItem[]) => {
       for (const item of items) {
-        const children = getChildren(item.id)
+        const children = getChildrenLocal(item.id)
         const isHeader = item.type === 'header'
 
         // A header with children is not checkable itself, but its children might be
@@ -683,22 +711,19 @@ export function RunMode() {
 
     collectCheckable(rootItems)
     return checkable
-  }
+  }, [commit])
 
   // Find the next incomplete item (can be at any depth)
-  const getNextIncompleteItemId = (): string | null => {
-    const checkable = getCheckableItems()
-    const nextItem = checkable.find(item => !progress[item.id]?.completed)
+  const nextItemId = useMemo(() => {
+    const nextItem = checkableItems.find(item => !progress[item.id]?.completed)
     return nextItem?.id || null
-  }
+  }, [checkableItems, progress])
 
   const rootItems = getRootItems()
-  const checkableItems = getCheckableItems()
   const totalItems = checkableItems.length
   const completedItems = checkableItems.filter(item => progress[item.id]?.completed).length
   const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0
   const isComplete = run?.status === 'completed' || progressPercent === 100
-  const nextItemId = getNextIncompleteItemId()
 
   // Auto-complete when all items done
   useEffect(() => {
@@ -749,10 +774,14 @@ export function RunMode() {
   useEffect(() => {
     if (focusedItemIndex !== null && checkableItems[focusedItemIndex]) {
       const itemId = checkableItems[focusedItemIndex].id
-      const element = document.querySelector(`[data-item-id="${itemId}"]`)
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }
+
+      // Use requestAnimationFrame to ensure the scroll happens after render/paint
+      requestAnimationFrame(() => {
+        const element = document.querySelector(`[data-item-id="${itemId}"]`)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      })
     }
   }, [focusedItemIndex, checkableItems])
 
@@ -803,9 +832,44 @@ export function RunMode() {
               </Link>
             </Button>
             <div>
-              <h1 className="font-semibold text-base truncate max-w-[200px] sm:max-w-none">
-                {run?.name || repository?.title || 'Checklist Run'}
-              </h1>
+              {isEditingName ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="h-8 w-[200px] sm:w-[300px]"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveName()
+                      if (e.key === 'Escape') handleCancelRenaming()
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-success hover:text-success hover:bg-success/10" onClick={handleSaveName}>
+                    <Check className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleCancelRenaming}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 group">
+                  <h1
+                    className="font-semibold text-base truncate max-w-[200px] sm:max-w-none cursor-pointer hover:text-primary transition-colors border-b border-transparent hover:border-primary/30"
+                    onClick={handleStartRenaming}
+                    title="Click to rename"
+                  >
+                    {run?.name || repository?.title || 'Checklist Run'}
+                  </h1>
+                  <button
+                    onClick={handleStartRenaming}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
+                    aria-label="Rename run"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <Badge
                   variant={isComplete ? 'success' : run?.status === 'paused' ? 'warning' : 'default'}
@@ -1005,7 +1069,7 @@ export function RunMode() {
           ) : (
             <RecursiveRunItems
               items={rootItems}
-              allItems={getAllItems()}
+              allItems={commit?.content?.items || {}}
               progress={progress}
               onToggle={handleToggle}
               depth={0}
