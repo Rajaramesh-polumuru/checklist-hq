@@ -19,7 +19,8 @@ import {
 import { useChecklistStore } from '@/stores/checklist-store'
 import { ChecklistItem, DragOverlayItem } from './ChecklistItem'
 import { Card } from '@/components/ui/card'
-import { Plus, ListChecks, Undo2, Redo2, Hand, Trash2, MoreVertical } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Plus, Undo2, Redo2, Hand, MoreVertical, Sparkles, CheckCircle2, ArrowRight, Lightbulb } from 'lucide-react'
 import type { ChecklistItem as ChecklistItemType } from '@/types/database'
 import { cn } from '@/lib/utils'
 import { useIsMobile } from '@/hooks/useMobile'
@@ -297,43 +298,96 @@ export function ChecklistEditor() {
       >
         <SortableContext items={allItemIds} strategy={verticalListSortingStrategy}>
           {rootItems.length === 0 ? (
-            /* Empty state - optimized for mobile */
-            <Card className="border-dashed border-2 bg-gradient-to-b from-muted/30 to-muted/10">
+            /* Empty state - welcoming and engaging */
+            <Card className="border-dashed border-2 bg-gradient-to-b from-muted/30 to-muted/10 overflow-hidden">
               <div className={cn(
-                "text-center px-4",
-                isMobile ? "py-10" : "py-16 px-6"
+                "text-center px-4 relative",
+                isMobile ? "py-10" : "py-12 px-8"
               )}>
-                <div className={cn(
-                  "mx-auto bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl flex items-center justify-center shadow-sm",
-                  isMobile ? "w-14 h-14 mb-4" : "w-16 h-16 mb-6"
-                )}>
-                  <ListChecks className={cn(isMobile ? "h-7 w-7" : "h-8 w-8", "text-primary")} />
+                {/* Decorative background elements */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
+                  <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
                 </div>
-                <h3 className={cn(
-                  "font-semibold mb-2",
-                  isMobile ? "text-lg" : "text-xl"
+
+                {/* Custom SVG illustration */}
+                <div className={cn(
+                  "mx-auto relative",
+                  isMobile ? "w-20 h-20 mb-4" : "w-28 h-28 mb-6"
                 )}>
-                  Start building your checklist
-                </h3>
+                  <svg
+                    viewBox="0 0 120 120"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-full h-full"
+                  >
+                    {/* Background circle */}
+                    <circle cx="60" cy="60" r="56" className="fill-primary/10" />
+                    <circle cx="60" cy="60" r="48" className="fill-primary/5" />
+
+                    {/* Checklist paper */}
+                    <rect x="32" y="24" width="56" height="72" rx="4" className="fill-card stroke-primary/30" strokeWidth="2" />
+
+                    {/* Checklist lines with checkboxes */}
+                    <rect x="40" y="36" width="10" height="10" rx="2" className="fill-primary/20 stroke-primary" strokeWidth="1.5" />
+                    <path d="M42 41L44.5 43.5L48 39" className="stroke-primary" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <rect x="54" y="38" width="26" height="4" rx="2" className="fill-muted-foreground/20" />
+
+                    <rect x="40" y="52" width="10" height="10" rx="2" className="fill-primary/20 stroke-primary" strokeWidth="1.5" />
+                    <path d="M42 57L44.5 59.5L48 55" className="stroke-primary" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <rect x="54" y="54" width="22" height="4" rx="2" className="fill-muted-foreground/20" />
+
+                    <rect x="40" y="68" width="10" height="10" rx="2" className="fill-muted/50 stroke-muted-foreground/30" strokeWidth="1.5" strokeDasharray="2 2" />
+                    <rect x="54" y="70" width="18" height="4" rx="2" className="fill-muted-foreground/10" />
+
+                    {/* Sparkle accent */}
+                    <circle cx="92" cy="32" r="8" className="fill-primary/20" />
+                    <path d="M92 26V38M86 32H98" className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </div>
+
+                {/* Title with icon */}
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Sparkles className={cn("text-primary", isMobile ? "h-4 w-4" : "h-5 w-5")} />
+                  <h3 className={cn(
+                    "font-semibold",
+                    isMobile ? "text-lg" : "text-xl"
+                  )}>
+                    Create Your First Checklist
+                  </h3>
+                </div>
+
                 <p className={cn(
-                  "text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed",
-                  isMobile ? "text-sm" : "text-sm mb-8"
+                  "text-muted-foreground max-w-sm mx-auto leading-relaxed",
+                  isMobile ? "text-sm mb-5" : "text-sm mb-6"
                 )}>
                   {isMobile
-                    ? "Tap below to add your first step."
-                    : "Create a reusable process that your team can follow. Just start typing below."
+                    ? "Build a reusable process in seconds."
+                    : "Build a reusable process that you and your team can follow every time."
                   }
                 </p>
 
-                {/* Quick add box for empty state */}
+                {/* Primary CTA button */}
+                <Button
+                  onClick={() => quickAddRef.current?.focus()}
+                  size={isMobile ? "default" : "lg"}
+                  className="mb-6 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-shadow"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create First Item
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+
+                {/* Quick add input (alternative to button) */}
                 <div className="max-w-md mx-auto">
+                  <p className="text-xs text-muted-foreground mb-2">or start typing below</p>
                   <div className="relative group">
                     <div className="absolute inset-0 bg-primary/5 rounded-xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity" />
                     <div className={cn(
-                      "relative flex items-center gap-3 bg-card border-2 border-dashed border-primary/30 rounded-xl transition-all focus-within:border-primary focus-within:shadow-lg focus-within:shadow-primary/10",
+                      "relative flex items-center gap-3 bg-card border-2 border-dashed border-muted-foreground/20 rounded-xl transition-all focus-within:border-primary focus-within:shadow-lg focus-within:shadow-primary/10",
                       isMobile ? "px-4 py-4" : "px-4 py-3"
                     )}>
-                      <Plus className={cn(isMobile ? "h-6 w-6" : "h-5 w-5", "text-primary/60")} />
+                      <Plus className={cn(isMobile ? "h-6 w-6" : "h-5 w-5", "text-muted-foreground/40 group-focus-within:text-primary transition-colors")} />
                       <input
                         ref={quickAddRef}
                         type="text"
@@ -346,56 +400,68 @@ export function ChecklistEditor() {
                           "flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground/50",
                           isMobile ? "text-base" : "text-base"
                         )}
-                        autoFocus={!isMobile}
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Tips section - different for mobile vs desktop */}
+                {/* Tips section - mini tutorial */}
                 <div className={cn(
-                  "pt-6 border-t border-dashed",
-                  isMobile ? "mt-8" : "mt-10"
+                  "pt-6 border-t border-dashed border-muted-foreground/20",
+                  isMobile ? "mt-8" : "mt-8"
                 )}>
-                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mb-3">
-                    <span className="font-medium">Quick tips</span>
+                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mb-4">
+                    <Lightbulb className="h-3.5 w-3.5 text-primary" />
+                    <span className="font-medium">Pro tips to get started</span>
                   </div>
 
                   {isMobile ? (
                     /* Mobile-specific touch tips */
-                    <div className="flex flex-col gap-2 text-xs text-muted-foreground">
-                      <span className="flex items-center justify-center gap-2">
-                        <Hand className="h-3.5 w-3.5" />
-                        Long-press for options
-                      </span>
-                      <span className="flex items-center justify-center gap-2">
-                        <MoreVertical className="h-3.5 w-3.5" />
-                        Tap ⋮ to move or delete
-                      </span>
-                      <span className="flex items-center justify-center gap-2">
-                        <Trash2 className="h-3.5 w-3.5" />
-                        Swipe left in context menu to delete
-                      </span>
+                    <div className="grid gap-3 text-xs text-muted-foreground max-w-xs mx-auto">
+                      <div className="flex items-start gap-3 text-left bg-muted/30 rounded-lg p-3">
+                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium text-foreground">Tap to add</span>
+                          <p className="text-muted-foreground mt-0.5">Tap the button or input to add your first item</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 text-left bg-muted/30 rounded-lg p-3">
+                        <Hand className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium text-foreground">Long-press for options</span>
+                          <p className="text-muted-foreground mt-0.5">Hold an item to indent, outdent, or delete</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 text-left bg-muted/30 rounded-lg p-3">
+                        <MoreVertical className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium text-foreground">Drag to reorder</span>
+                          <p className="text-muted-foreground mt-0.5">Use the handle to rearrange items</p>
+                        </div>
+                      </div>
                     </div>
                   ) : (
-                    /* Desktop keyboard tips */
-                    <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1.5">
-                        <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] font-mono">Tab</kbd>
-                        <span>indent</span>
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] font-mono">Shift+Tab</kbd>
-                        <span>outdent</span>
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] font-mono">↑↓</kbd>
-                        <span>navigate</span>
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] font-mono">⌘Z</kbd>
-                        <span>undo</span>
-                      </span>
+                    /* Desktop keyboard tips - more visual */
+                    <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto text-xs">
+                      <div className="flex items-center gap-3 bg-muted/30 rounded-lg p-3 text-left">
+                        <kbd className="px-2 py-1 bg-card rounded border text-[10px] font-mono shrink-0 shadow-sm">Enter</kbd>
+                        <span className="text-muted-foreground">Add new item below</span>
+                      </div>
+                      <div className="flex items-center gap-3 bg-muted/30 rounded-lg p-3 text-left">
+                        <kbd className="px-2 py-1 bg-card rounded border text-[10px] font-mono shrink-0 shadow-sm">Tab</kbd>
+                        <span className="text-muted-foreground">Indent (create sub-item)</span>
+                      </div>
+                      <div className="flex items-center gap-3 bg-muted/30 rounded-lg p-3 text-left">
+                        <div className="flex gap-0.5 shrink-0">
+                          <kbd className="px-1.5 py-1 bg-card rounded border text-[10px] font-mono shadow-sm">↑</kbd>
+                          <kbd className="px-1.5 py-1 bg-card rounded border text-[10px] font-mono shadow-sm">↓</kbd>
+                        </div>
+                        <span className="text-muted-foreground">Navigate items</span>
+                      </div>
+                      <div className="flex items-center gap-3 bg-muted/30 rounded-lg p-3 text-left">
+                        <kbd className="px-2 py-1 bg-card rounded border text-[10px] font-mono shrink-0 shadow-sm">⌘Z</kbd>
+                        <span className="text-muted-foreground">Undo changes</span>
+                      </div>
                     </div>
                   )}
                 </div>
