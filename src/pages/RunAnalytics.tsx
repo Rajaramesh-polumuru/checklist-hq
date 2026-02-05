@@ -5,17 +5,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
-  ArrowLeft,
-  BarChart3,
-  Clock,
-  CheckCircle2,
-  TrendingUp,
-  Users,
-  Calendar,
-  Timer,
-  Activity,
-  Target,
-} from 'lucide-react'
+  ArrowLeft01Icon,
+  ChartColumnIcon,
+  Clock01Icon,
+  CheckmarkCircle02Icon,
+  AnalyticsUpIcon,
+  UserGroupIcon,
+  Calendar01Icon,
+  Timer01Icon,
+  Activity01Icon,
+  Target01Icon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import {
   getUserRunStats,
   getRepoRunStats,
@@ -91,12 +92,12 @@ export default function RunAnalytics() {
         <div className="flex items-center gap-4 mb-8">
           <Link to={repoId ? `/app/repo/${repoId}` : '/app'}>
             <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
+              <Icon icon={ArrowLeft01Icon} className="h-5 w-5" />
             </Button>
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <BarChart3 className="h-6 w-6 text-primary" />
+              <Icon icon={ChartColumnIcon} className="h-6 w-6 text-primary" />
               {repository ? `${repository.title} Analytics` : 'Run Analytics'}
             </h1>
             <p className="text-muted-foreground">
@@ -111,27 +112,27 @@ export default function RunAnalytics() {
         {userStats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <StatCard
-              icon={<Target className="h-5 w-5" />}
+              icon={<Icon icon={Target01Icon} className="h-5 w-5" />}
               label="Total Runs"
               value={userStats.total_runs.toString()}
               subtext={`${userStats.runs_this_month} this month`}
             />
             <StatCard
-              icon={<CheckCircle2 className="h-5 w-5" />}
+              icon={<Icon icon={CheckmarkCircle02Icon} className="h-5 w-5" />}
               label="Completed"
               value={userStats.completed_runs.toString()}
               subtext={formatCompletionRate(userStats.completion_rate)}
               variant="success"
             />
             <StatCard
-              icon={<Activity className="h-5 w-5" />}
+              icon={<Icon icon={Activity01Icon} className="h-5 w-5" />}
               label="Active / Paused"
               value={`${userStats.active_runs} / ${userStats.paused_runs}`}
               subtext="In progress"
               variant="warning"
             />
             <StatCard
-              icon={<Timer className="h-5 w-5" />}
+              icon={<Icon icon={Timer01Icon} className="h-5 w-5" />}
               label="Total Time"
               value={formatDuration(userStats.total_time_spent_seconds)}
               subtext={`Avg: ${formatDuration(userStats.avg_duration_seconds)}`}
@@ -144,7 +145,7 @@ export default function RunAnalytics() {
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-primary" />
+                <Icon icon={Calendar01Icon} className="h-5 w-5 text-primary" />
                 Recent Activity
               </CardTitle>
               <CardDescription>Your run activity this week</CardDescription>
@@ -164,9 +165,8 @@ export default function RunAnalytics() {
                     return (
                       <div
                         key={i}
-                        className={`w-8 rounded-t transition-all ${
-                          isToday ? 'bg-primary' : 'bg-primary/30'
-                        }`}
+                        className={`w-8 rounded-t transition-all ${isToday ? 'bg-primary' : 'bg-primary/30'
+                          }`}
                         style={{ height: `${height}%` }}
                       />
                     )
@@ -181,24 +181,24 @@ export default function RunAnalytics() {
         {repoId && repoStats && (
           <>
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
+              <Icon icon={AnalyticsUpIcon} className="h-5 w-5 text-primary" />
               Repository Statistics
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <StatCard
-                icon={<Target className="h-5 w-5" />}
+                icon={<Icon icon={Target01Icon} className="h-5 w-5" />}
                 label="Total Runs"
                 value={repoStats.total_runs.toString()}
                 subtext={`${repoStats.completed_runs} completed`}
               />
               <StatCard
-                icon={<Users className="h-5 w-5" />}
+                icon={<Icon icon={UserGroupIcon} className="h-5 w-5" />}
                 label="Unique Users"
                 value={repoStats.unique_users.toString()}
                 subtext="Have run this checklist"
               />
               <StatCard
-                icon={<Clock className="h-5 w-5" />}
+                icon={<Icon icon={Clock01Icon} className="h-5 w-5" />}
                 label="Avg Duration"
                 value={formatDuration(repoStats.avg_duration_seconds)}
                 subtext={formatCompletionRate(repoStats.avg_completion_rate)}
@@ -212,7 +212,7 @@ export default function RunAnalytics() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-primary" />
+                <Icon icon={ChartColumnIcon} className="h-5 w-5 text-primary" />
                 Item Completion Analysis
               </CardTitle>
               <CardDescription>
@@ -257,7 +257,7 @@ export default function RunAnalytics() {
         {!userStats && !repoStats && (
           <Card className="text-center py-12">
             <CardContent>
-              <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <Icon icon={ChartColumnIcon} className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No Analytics Yet</h3>
               <p className="text-muted-foreground mb-4">
                 Complete some runs to see your analytics here.

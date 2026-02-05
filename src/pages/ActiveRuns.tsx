@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
 import { getMyActiveRuns, getMyPausedRuns } from '@/services/run'
 import { RunCard } from '@/components/RunCard'
-import { Loader2, Play, Pause } from 'lucide-react'
+import { Loading02Icon, PlayIcon, PauseIcon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import type { Run } from '@/types/database'
 
 // Define the type to match getMyActiveRuns return
@@ -42,7 +43,7 @@ export function ActiveRuns() {
     if (loading) {
         return (
             <div className="container mx-auto px-4 py-8 flex justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Icon icon={Loading02Icon} className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
         )
     }
@@ -52,7 +53,7 @@ export function ActiveRuns() {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex items-center gap-2 mb-8">
-                <Play className="h-6 w-6 text-primary" />
+                <Icon icon={PlayIcon} className="h-6 w-6 text-primary" />
                 <h1 className="text-3xl font-bold">Active Runs</h1>
             </div>
 
@@ -73,7 +74,7 @@ export function ActiveRuns() {
                     {pausedRuns.length > 0 && (
                         <section>
                             <div className="flex items-center gap-2 mb-4">
-                                <Pause className="h-5 w-5 text-warning" />
+                                <Icon icon={PauseIcon} className="h-5 w-5 text-warning" />
                                 <h2 className="text-xl font-semibold">Paused ({pausedRuns.length})</h2>
                             </div>
                             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -88,7 +89,7 @@ export function ActiveRuns() {
                     {activeRuns.length > 0 && (
                         <section>
                             <div className="flex items-center gap-2 mb-4">
-                                <Play className="h-5 w-5 text-primary" />
+                                <Icon icon={PlayIcon} className="h-5 w-5 text-primary" />
                                 <h2 className="text-xl font-semibold">In Progress ({activeRuns.length})</h2>
                             </div>
                             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

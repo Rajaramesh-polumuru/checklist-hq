@@ -10,15 +10,17 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import {
-  X,
-  History,
-  GitCommit,
-  RotateCcw,
-  Eye,
-  Loader2,
-  ChevronRight,
-  AlertTriangle,
-} from 'lucide-react'
+  Cancel01Icon,
+  Clock01Icon,
+  GitForkIcon,
+  ArrowLeft02Icon,
+  EyeIcon,
+  Loading02Icon,
+  ArrowRight01Icon,
+  Alert01Icon,
+  GitCommitIcon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { getCommitHistory } from '@/services/repository'
 import type { Commit } from '@/types/database'
 import { cn } from '@/lib/utils'
@@ -46,7 +48,7 @@ function RestoreConfirmationDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-warning" />
+            <Icon icon={Alert01Icon} className="h-5 w-5 text-warning" />
             Restore Version
           </DialogTitle>
           <DialogDescription className="text-left pt-2">
@@ -57,7 +59,7 @@ function RestoreConfirmationDialog({
           <Card className="bg-muted/50">
             <CardContent className="p-3">
               <div className="flex items-start gap-3">
-                <GitCommit className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                <Icon icon={GitCommitIcon} className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">
                     {commit.message || 'No message'}
@@ -83,12 +85,12 @@ function RestoreConfirmationDialog({
           <Button onClick={onConfirm} disabled={isRestoring} className="gap-2">
             {isRestoring ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Icon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
                 Restoring...
               </>
             ) : (
               <>
-                <RotateCcw className="h-4 w-4" />
+                <Icon icon={ArrowLeft02Icon} className="h-4 w-4" />
                 Restore
               </>
             )}
@@ -183,11 +185,11 @@ export function VersionHistory({
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <div className="flex items-center gap-2">
-            <History className="h-5 w-5" />
+            <Icon icon={Clock01Icon} className="h-5 w-5" />
             <h2 className="font-semibold">Version History</h2>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-4 w-4" />
+            <Icon icon={Cancel01Icon} className="h-4 w-4" />
           </Button>
         </div>
 
@@ -213,7 +215,7 @@ export function VersionHistory({
         <div className="flex-1 overflow-y-auto p-4">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <Icon icon={Loading02Icon} className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : error ? (
             <div className="text-center py-12 text-destructive">
@@ -221,7 +223,7 @@ export function VersionHistory({
             </div>
           ) : commits.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              <GitCommit className="h-8 w-8 mx-auto mb-3 opacity-50" />
+              <Icon icon={GitCommitIcon} className="h-8 w-8 mx-auto mb-3 opacity-50" />
               <p>No version history yet</p>
             </div>
           ) : (
@@ -243,7 +245,7 @@ export function VersionHistory({
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <GitCommit className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <Icon icon={GitCommitIcon} className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                             <p className="text-sm font-medium truncate">
                               {commit.message || 'No message'}
                             </p>
@@ -269,7 +271,7 @@ export function VersionHistory({
                             onClick={() => onViewVersion(commit)}
                             title="View this version"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Icon icon={EyeIcon} className="h-4 w-4" />
                           </Button>
 
                           {onCompareVersions && (
@@ -280,7 +282,7 @@ export function VersionHistory({
                               onClick={() => handleCompareClick(commit)}
                               title={isSelected ? 'Selected for compare' : 'Compare versions'}
                             >
-                              <ChevronRight className="h-4 w-4" />
+                              <Icon icon={ArrowRight01Icon} className="h-4 w-4" />
                             </Button>
                           )}
 
@@ -292,7 +294,7 @@ export function VersionHistory({
                               onClick={() => setRestoreCommit(commit)}
                               title="Restore to this version"
                             >
-                              <RotateCcw className="h-4 w-4" />
+                              <Icon icon={ArrowLeft02Icon} className="h-4 w-4" />
                             </Button>
                           )}
                         </div>

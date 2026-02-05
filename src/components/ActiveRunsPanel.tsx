@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Play, Pause, Clock } from 'lucide-react'
+import { PlayIcon, PauseIcon, Clock01Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { formatRelativeTime } from '@/lib/date-utils'
 import type { Run } from '@/types/database'
 
@@ -16,7 +17,7 @@ export function ActiveRunsPanel({ runs, loading, compact = false }: ActiveRunsPa
             <Card>
                 <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
-                        <Play className="h-5 w-5" /> Active Runs
+                        <Icon icon={PlayIcon} className="h-5 w-5" /> Active Runs
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -43,7 +44,7 @@ export function ActiveRunsPanel({ runs, loading, compact = false }: ActiveRunsPa
             <Card>
                 <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
-                        <Play className="h-5 w-5 text-primary" /> Active Runs
+                        <Icon icon={PlayIcon} className="h-5 w-5 text-primary" /> Active Runs
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -61,7 +62,7 @@ export function ActiveRunsPanel({ runs, loading, compact = false }: ActiveRunsPa
         <Card className="h-full max-h-[500px] flex flex-col">
             <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
-                    <Play className="h-5 w-5 text-primary" />
+                    <Icon icon={PlayIcon} className="h-5 w-5 text-primary" />
                     Active Runs
                     <span className="text-sm font-normal text-muted-foreground ml-auto">
                         {runs.length}
@@ -73,14 +74,14 @@ export function ActiveRunsPanel({ runs, loading, compact = false }: ActiveRunsPa
                     <div className="space-y-4">
                         {runs.map((run) => {
                             const isPaused = run.status === 'paused'
-                            const Icon = isPaused ? Pause : Play
+                            const StatusIcon = isPaused ? PauseIcon : PlayIcon
                             const iconColor = isPaused ? 'text-warning' : 'text-primary'
                             const bgColor = isPaused ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-primary/10'
 
                             return (
                                 <div key={run.id} className="flex gap-3 relative group items-start">
                                     <div className={`h-8 w-8 rounded-full ${bgColor} flex items-center justify-center shrink-0 mt-0.5`}>
-                                        <Icon className={`h-4 w-4 ${iconColor}`} />
+                                        <Icon icon={StatusIcon} className={`h-4 w-4 ${iconColor}`} />
                                     </div>
                                     <div className="min-w-0 flex-1">
                                         <p className="text-sm font-medium leading-none mb-1.5 pt-1">
@@ -90,7 +91,7 @@ export function ActiveRunsPanel({ runs, loading, compact = false }: ActiveRunsPa
                                         </p>
                                         <div className="flex items-center text-xs text-muted-foreground gap-2">
                                             <span className="flex items-center gap-1">
-                                                <Clock className="h-3 w-3" />
+                                                <Icon icon={Clock01Icon} className="h-3 w-3" />
                                                 {formatRelativeTime(run.last_activity_at || run.started_at)}
                                             </span>
                                             {isPaused && (

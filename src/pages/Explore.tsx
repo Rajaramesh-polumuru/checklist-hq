@@ -9,15 +9,16 @@ import { ForkModal } from '@/components/ForkModal'
 import { ToastContainer } from '@/components/Toast'
 import { useToast } from '@/hooks/useToast'
 import {
-  GitFork,
-  TrendingUp,
-  Clock,
-  Eye,
-  ListChecks,
-  Plus,
-  Tag as TagIcon,
-  X,
-} from 'lucide-react'
+  GitForkIcon,
+  AnalyticsUpIcon,
+  Clock01Icon,
+  EyeIcon,
+  CheckListIcon,
+  PlusSignIcon,
+  Tag01Icon,
+  Cancel01Icon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
 import {
   getPublicRepositoriesWithTags,
@@ -176,10 +177,10 @@ export function Explore() {
     success(`Successfully forked ${itemCount} items to your checklist!`, 5000)
   }
 
-  const sortOptions: { value: SortOption; label: string; icon: typeof TrendingUp }[] = [
-    { value: 'fork_count', label: 'Most Forked', icon: TrendingUp },
-    { value: 'created_at', label: 'Newest', icon: Clock },
-    { value: 'updated_at', label: 'Recently Updated', icon: Clock },
+  const sortOptions: { value: SortOption; label: string; icon: typeof AnalyticsUpIcon }[] = [
+    { value: 'fork_count', label: 'Most Forked', icon: AnalyticsUpIcon },
+    { value: 'created_at', label: 'Newest', icon: Clock01Icon },
+    { value: 'updated_at', label: 'Recently Updated', icon: Clock01Icon },
   ]
 
   return (
@@ -240,7 +241,7 @@ export function Explore() {
         <div className="border-b bg-muted/30">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-3 mb-3">
-              <TagIcon className="h-4 w-4 text-muted-foreground" />
+              <Icon icon={Tag01Icon} className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium text-muted-foreground">Filter by category:</span>
               {selectedTag && (
                 <Button
@@ -249,7 +250,7 @@ export function Explore() {
                   onClick={() => handleTagSelect(null)}
                   className="h-6 px-2 text-xs"
                 >
-                  <X className="h-3 w-3 mr-1" />
+                  <Icon icon={Cancel01Icon} className="h-3 w-3 mr-1" />
                   Clear filter
                 </Button>
               )}
@@ -285,14 +286,14 @@ export function Explore() {
         {selectedTag && (
           <div className="flex items-center justify-center gap-2 mb-6">
             <Badge variant="secondary" className="px-3 py-1">
-              <TagIcon className="h-3 w-3 mr-1.5" />
+              <Icon icon={Tag01Icon} className="h-3 w-3 mr-1.5" />
               {tags.find(t => t.slug === selectedTag)?.name || selectedTag}
               <button
                 onClick={() => handleTagSelect(null)}
                 className="ml-2 hover:text-destructive"
                 aria-label="Clear tag filter"
               >
-                <X className="h-3 w-3" />
+                <Icon icon={Cancel01Icon} className="h-3 w-3" />
               </button>
             </Badge>
           </div>
@@ -308,7 +309,7 @@ export function Explore() {
               onClick={() => setActiveSort(option.value)}
               className="gap-2"
             >
-              <option.icon className="h-4 w-4" />
+              <Icon icon={option.icon} className="h-4 w-4" />
               {option.label}
             </Button>
           ))}
@@ -340,7 +341,7 @@ export function Explore() {
             {searchQuery.trim() ? (
               <div className="max-w-md mx-auto">
                 <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                  <ListChecks className="h-8 w-8 text-muted-foreground" />
+                  <Icon icon={CheckListIcon} className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">No templates found</h3>
                 <p className="text-muted-foreground mb-6">
@@ -361,7 +362,7 @@ export function Explore() {
             ) : (
               <>
                 <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                  <ListChecks className="h-8 w-8 text-muted-foreground" />
+                  <Icon icon={CheckListIcon} className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <p className="text-muted-foreground mb-4">
                   No public templates yet. Be the first to share!
@@ -369,7 +370,7 @@ export function Explore() {
                 {user && (
                   <Button asChild>
                     <Link to="/app/new">
-                      <Plus className="mr-2 h-4 w-4" />
+                      <Icon icon={PlusSignIcon} className="mr-2 h-4 w-4" />
                       Create a Template
                     </Link>
                   </Button>
@@ -400,14 +401,14 @@ export function Explore() {
                       <div className="flex items-start gap-3">
                         {/* Icon */}
                         <div className={`h-10 w-10 rounded-lg ${accentColor}/10 flex items-center justify-center shrink-0`}>
-                          <ListChecks className={`h-5 w-5 ${accentColor.replace('bg-', 'text-')}`} />
+                          <Icon icon={CheckListIcon} className={`h-5 w-5 ${accentColor.replace('bg-', 'text-')}`} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <CardTitle className="text-lg truncate">{repo.title}</CardTitle>
                           <div className="flex items-center gap-2 mt-1.5">
                             {repo.fork_count > 0 && (
                               <Badge variant="default" className="text-xs">
-                                <GitFork className="h-3 w-3 mr-1" />
+                                <Icon icon={GitForkIcon} className="h-3 w-3 mr-1" />
                                 {repo.fork_count} forks
                               </Badge>
                             )}
@@ -450,7 +451,7 @@ export function Explore() {
                     <CardContent>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5" />
+                          <Icon icon={Clock01Icon} className="h-3.5 w-3.5" />
                           {formatRelativeTime(repo.updated_at)}
                         </span>
                         <div className="flex gap-2">
@@ -464,7 +465,7 @@ export function Explore() {
                               navigate(`/repo/${repo.id}`)
                             }}
                           >
-                            <Eye className="mr-1 h-3.5 w-3.5" />
+                            <Icon icon={EyeIcon} className="mr-1 h-3.5 w-3.5" />
                             View
                           </Button>
                           <Button
@@ -472,7 +473,7 @@ export function Explore() {
                             className="h-8 shadow-sm"
                             onClick={(e) => handleForkClick(repo, e)}
                           >
-                            <GitFork className="mr-1 h-3.5 w-3.5" />
+                            <Icon icon={GitForkIcon} className="mr-1 h-3.5 w-3.5" />
                             Fork
                           </Button>
                         </div>

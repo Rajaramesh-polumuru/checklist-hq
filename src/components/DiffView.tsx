@@ -1,13 +1,14 @@
 import { useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import {
-  X,
-  GitCompare,
-  Plus,
-  Minus,
-  Equal,
-  ArrowRight,
-} from 'lucide-react'
+  Cancel01Icon,
+  GitForkIcon,
+  PlusSignIcon,
+  MinusSignIcon,
+  PencilEdit02Icon,
+  ArrowRight01Icon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import type { Commit, ChecklistItem, ChecklistContent } from '@/types/database'
 import { cn } from '@/lib/utils'
 
@@ -63,11 +64,11 @@ export function DiffView({ commit1, commit2, isOpen, onClose }: DiffViewProps) {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <div className="flex items-center gap-2">
-            <GitCompare className="h-5 w-5" />
+            <Icon icon={GitForkIcon} className="h-5 w-5" />
             <h2 className="font-semibold">Compare Versions</h2>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-4 w-4" />
+            <Icon icon={Cancel01Icon} className="h-4 w-4" />
           </Button>
         </div>
 
@@ -81,7 +82,7 @@ export function DiffView({ commit1, commit2, isOpen, onClose }: DiffViewProps) {
                 ({formatDate(olderCommit.created_at)})
               </span>
             </div>
-            <ArrowRight className="h-4 w-4 mx-4 text-muted-foreground" />
+            <Icon icon={ArrowRight01Icon} className="h-4 w-4 mx-4 text-muted-foreground" />
             <div className="flex-1 text-right">
               <span className="text-muted-foreground">Newer: </span>
               <span className="font-medium">{newerCommit.message || 'No message'}</span>
@@ -95,15 +96,15 @@ export function DiffView({ commit1, commit2, isOpen, onClose }: DiffViewProps) {
         {/* Stats */}
         <div className="px-4 py-2 border-b flex items-center gap-4 text-sm">
           <span className="flex items-center gap-1 text-green-600">
-            <Plus className="h-4 w-4" />
+            <Icon icon={PlusSignIcon} className="h-4 w-4" />
             {stats.added} added
           </span>
           <span className="flex items-center gap-1 text-red-600">
-            <Minus className="h-4 w-4" />
+            <Icon icon={MinusSignIcon} className="h-4 w-4" />
             {stats.removed} removed
           </span>
           <span className="flex items-center gap-1 text-amber-600">
-            <Equal className="h-4 w-4" />
+            <Icon icon={PencilEdit02Icon} className="h-4 w-4" />
             {stats.modified} modified
           </span>
           <span className="text-muted-foreground">
@@ -154,11 +155,11 @@ function DiffItemRow({ diff }: { diff: DiffItem }) {
   const getIcon = () => {
     switch (diff.type) {
       case 'added':
-        return <Plus className="h-4 w-4 text-green-600" />
+        return <Icon icon={PlusSignIcon} className="h-4 w-4 text-green-600" />
       case 'removed':
-        return <Minus className="h-4 w-4 text-red-600" />
+        return <Icon icon={MinusSignIcon} className="h-4 w-4 text-red-600" />
       case 'modified':
-        return <Equal className="h-4 w-4 text-amber-600" />
+        return <Icon icon={PencilEdit02Icon} className="h-4 w-4 text-amber-600" />
       default:
         return null
     }

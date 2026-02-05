@@ -1,7 +1,8 @@
 import { Component, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react'
+import { Alert01Icon, ReloadIcon, Home01Icon, Bug01Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -63,7 +64,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="min-h-[400px] flex items-center justify-center p-6">
           <Card className="max-w-md w-full p-8 text-center animate-fade-in">
             <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-destructive/10 flex items-center justify-center">
-              <AlertTriangle className="w-8 h-8 text-destructive" />
+              <Icon icon={Alert01Icon} className="w-8 h-8 text-destructive" />
             </div>
 
             <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
@@ -75,7 +76,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             {import.meta.env.DEV && this.state.error && (
               <details className="mb-6 text-left">
                 <summary className="text-sm text-muted-foreground cursor-pointer hover:text-foreground flex items-center gap-2">
-                  <Bug className="h-4 w-4" />
+                  <Icon icon={Bug01Icon} className="h-4 w-4" />
                   Error details
                 </summary>
                 <pre className="mt-2 p-3 bg-muted rounded-lg text-xs overflow-auto max-h-40 text-left">
@@ -92,11 +93,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button onClick={this.handleRetry} variant="outline" className="gap-2">
-                <RefreshCw className="h-4 w-4" />
+                <Icon icon={ReloadIcon} className="h-4 w-4" />
                 Try Again
               </Button>
               <Button onClick={this.handleGoHome} className="gap-2">
-                <Home className="h-4 w-4" />
+                <Icon icon={Home01Icon} className="h-4 w-4" />
                 Go to Dashboard
               </Button>
             </div>

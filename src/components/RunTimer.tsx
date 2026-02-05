@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Play, Pause, Clock, Loader2 } from 'lucide-react'
+import { PlayIcon, PauseIcon, Clock01Icon, Loading02Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 import type { Run } from '@/types/database'
 
@@ -94,7 +95,7 @@ export function RunTimer({
   if (compact) {
     return (
       <div className={cn('flex items-center gap-1.5 text-sm', className)}>
-        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+        <Icon icon={Clock01Icon} className="h-3.5 w-3.5 text-muted-foreground" />
         <span className={cn(
           'font-mono tabular-nums',
           isPaused && 'text-muted-foreground',
@@ -120,7 +121,7 @@ export function RunTimer({
         isActive && 'bg-primary/10 text-primary',
         isCompleted && 'bg-success/10 text-success'
       )}>
-        <Clock className="h-4 w-4" />
+        <Icon icon={Clock01Icon} className="h-4 w-4" />
         <span className="font-mono text-lg font-semibold tabular-nums">
           {formatTime(elapsedMs)}
         </span>
@@ -138,9 +139,9 @@ export function RunTimer({
               className="gap-1.5"
             >
               {isLoading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <Icon icon={Loading02Icon} className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Pause className="h-3.5 w-3.5" />
+                <Icon icon={PauseIcon} className="h-3.5 w-3.5" />
               )}
               Pause
             </Button>
@@ -154,9 +155,9 @@ export function RunTimer({
               className="gap-1.5"
             >
               {isLoading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <Icon icon={Loading02Icon} className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Play className="h-3.5 w-3.5" />
+                <Icon icon={PlayIcon} className="h-3.5 w-3.5" />
               )}
               Resume
             </Button>

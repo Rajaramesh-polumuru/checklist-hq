@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { Loader2, Users, Plus, Trash2, Shield } from 'lucide-react'
+import { Loading02Icon, UserGroupIcon, PlusSignIcon, Delete02Icon, Shield01Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import {
   getRepositoryTeams,
   addTeamAccess,
@@ -97,7 +98,7 @@ export function TeamAccessManager({ repoId, organizationId }: TeamAccessManagerP
   if (loading) {
     return (
       <div className="flex justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Icon icon={Loading02Icon} className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -105,7 +106,7 @@ export function TeamAccessManager({ repoId, organizationId }: TeamAccessManagerP
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-2">
-        <Users className="h-4 w-4 text-muted-foreground" />
+        <Icon icon={UserGroupIcon} className="h-4 w-4 text-muted-foreground" />
         <h3 className="text-sm font-medium">Team Access</h3>
       </div>
 
@@ -120,7 +121,7 @@ export function TeamAccessManager({ repoId, organizationId }: TeamAccessManagerP
             <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg bg-card">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Shield className="h-4 w-4 text-primary" />
+                  <Icon icon={Shield01Icon} className="h-4 w-4 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">{item.team.name}</p>
@@ -149,7 +150,7 @@ export function TeamAccessManager({ repoId, organizationId }: TeamAccessManagerP
                   className="h-8 w-8 text-muted-foreground hover:text-destructive"
                   onClick={() => handleRemoveTeam(item.team_id)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Icon icon={Delete02Icon} className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -189,7 +190,7 @@ export function TeamAccessManager({ repoId, organizationId }: TeamAccessManagerP
           </div>
 
           <Button onClick={handleAddTeam} disabled={!selectedTeamId || adding}>
-            {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            {adding ? <Icon icon={Loading02Icon} className="h-4 w-4 animate-spin" /> : <Icon icon={PlusSignIcon} className="h-4 w-4" />}
           </Button>
         </div>
       )}

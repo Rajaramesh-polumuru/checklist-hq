@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, Key, Trash2, Copy, Check, Plus } from 'lucide-react'
+import { Loading02Icon, Key01Icon, Delete02Icon, Copy01Icon, Tick01Icon, PlusSignIcon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { supabase } from '@/lib/supabase'
 
 
@@ -98,7 +99,7 @@ export function ApiKeyManager() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Key className="h-5 w-5" />
+            <Icon icon={Key01Icon} className="h-5 w-5" />
             API Keys
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -120,7 +121,7 @@ export function ApiKeyManager() {
               />
             </div>
             <Button type="submit" disabled={!newKeyName || creating}>
-              {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+              {creating ? <Icon icon={Loading02Icon} className="h-4 w-4 animate-spin" /> : <Icon icon={PlusSignIcon} className="h-4 w-4 mr-2" />}
               Generate Key
             </Button>
           </form>
@@ -132,7 +133,7 @@ export function ApiKeyManager() {
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 animate-in fade-in slide-in-from-top-2">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-green-100 rounded-full">
-              <Check className="h-5 w-5 text-green-600" />
+              <Icon icon={Tick01Icon} className="h-5 w-5 text-green-600" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-green-900">API Key Generated</h3>
@@ -147,7 +148,7 @@ export function ApiKeyManager() {
                   className="font-mono text-sm bg-white border-green-200"
                 />
                 <Button variant="outline" onClick={copyToClipboard} className="shrink-0 bg-white">
-                  {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                  {copied ? <Icon icon={Tick01Icon} className="h-4 w-4 text-green-600" /> : <Icon icon={Copy01Icon} className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
@@ -159,11 +160,11 @@ export function ApiKeyManager() {
       <div className="space-y-4">
         {loading ? (
           <div className="text-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+            <Icon icon={Loading02Icon} className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
           </div>
         ) : keys.length === 0 ? (
           <div className="text-center py-8 border rounded-lg bg-muted/10 border-dashed">
-            <Key className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-2" />
+            <Icon icon={Key01Icon} className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-2" />
             <p className="text-muted-foreground">No active API keys found.</p>
           </div>
         ) : (
@@ -188,7 +189,7 @@ export function ApiKeyManager() {
                 onClick={() => handleRevoke(key.id)}
                 title="Revoke Key"
               >
-                <Trash2 className="h-4 w-4" />
+                <Icon icon={Delete02Icon} className="h-4 w-4" />
               </Button>
             </div>
           ))

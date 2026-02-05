@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircleIcon, Loading02Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
 
 import { Button } from '@/components/ui/button'
@@ -52,7 +53,7 @@ export function LoginForm() {
         >
             {error && (
                 <div className="p-3 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-md flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" />
+                    <Icon icon={AlertCircleIcon} className="w-4 h-4" />
                     {error}
                 </div>
             )}
@@ -93,7 +94,7 @@ export function LoginForm() {
                 >
                     {loading ? (
                         <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            <Icon icon={Loading02Icon} className="mr-2 h-4 w-4 animate-spin" />
                             Signing in...
                         </>
                     ) : (

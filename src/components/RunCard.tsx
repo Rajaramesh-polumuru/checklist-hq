@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Play, Clock, CheckCircle2, Pause } from 'lucide-react'
+import { PlayIcon, Clock01Icon, CheckmarkCircle02Icon, PauseIcon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { formatRelativeTime } from '@/lib/date-utils'
 import type { Run } from '@/types/database'
 
@@ -35,9 +36,9 @@ export function RunCard({ run }: RunCardProps) {
                     <div className="flex justify-between items-start gap-2">
                         <CardTitle className="text-base flex items-center gap-2 min-w-0">
                             {isPaused ? (
-                                <Pause className="h-4 w-4 text-warning shrink-0" />
+                                <Icon icon={PauseIcon} className="h-4 w-4 text-warning shrink-0" />
                             ) : (
-                                <Play className="h-4 w-4 text-primary shrink-0" />
+                                <Icon icon={PlayIcon} className="h-4 w-4 text-primary shrink-0" />
                             )}
                             <span className="truncate">
                                 {run.name || run.repository.title}
@@ -61,14 +62,14 @@ export function RunCard({ run }: RunCardProps) {
                 <CardContent>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
+                            <Icon icon={Clock01Icon} className="h-3 w-3" />
                             <span>
                                 {run.duration_ms ? formatDuration(run.duration_ms) : formatRelativeTime(run.started_at)}
                             </span>
                         </div>
                         {isCompleted && (
                             <div className="flex items-center gap-1 text-success">
-                                <CheckCircle2 className="h-3 w-3" />
+                                <Icon icon={CheckmarkCircle02Icon} className="h-3 w-3" />
                                 <span>Completed</span>
                             </div>
                         )}

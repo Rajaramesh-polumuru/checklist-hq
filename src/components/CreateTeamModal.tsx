@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, Users, Shield } from 'lucide-react'
+import { Loading02Icon, UserGroupIcon, Shield01Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { createTeam } from '@/services/organization' // We might need to implement team slug check
 
 
@@ -119,11 +120,11 @@ export function CreateTeamModal({ organizationId, isOpen, onClose, onTeamCreated
                 type="button"
                 onClick={() => setVisibility('visible')}
                 className={`p-3 rounded-lg border flex flex-col items-center gap-2 text-center transition-colors ${visibility === 'visible'
-                    ? 'border-primary bg-primary/5 text-primary'
-                    : 'hover:bg-muted'
+                  ? 'border-primary bg-primary/5 text-primary'
+                  : 'hover:bg-muted'
                   }`}
               >
-                <Users className="h-5 w-5" />
+                <Icon icon={UserGroupIcon} className="h-5 w-5" />
                 <div>
                   <div className="font-medium text-sm">Visible</div>
                   <div className="text-[10px] opacity-70">Visible to all org members</div>
@@ -134,11 +135,11 @@ export function CreateTeamModal({ organizationId, isOpen, onClose, onTeamCreated
                 type="button"
                 onClick={() => setVisibility('secret')}
                 className={`p-3 rounded-lg border flex flex-col items-center gap-2 text-center transition-colors ${visibility === 'secret'
-                    ? 'border-primary bg-primary/5 text-primary'
-                    : 'hover:bg-muted'
+                  ? 'border-primary bg-primary/5 text-primary'
+                  : 'hover:bg-muted'
                   }`}
               >
-                <Shield className="h-5 w-5" />
+                <Icon icon={Shield01Icon} className="h-5 w-5" />
                 <div>
                   <div className="font-medium text-sm">Secret</div>
                   <div className="text-[10px] opacity-70">Only visible to members</div>
@@ -158,7 +159,7 @@ export function CreateTeamModal({ organizationId, isOpen, onClose, onTeamCreated
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {loading ? <Icon icon={Loading02Icon} className="mr-2 h-4 w-4 animate-spin" /> : null}
               Create Team
             </Button>
           </DialogFooter>

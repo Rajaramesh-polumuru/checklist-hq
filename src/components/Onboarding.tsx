@@ -4,7 +4,8 @@ import type { CardComponentProps, Tour } from 'nextstepjs'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { X, ChevronRight, ChevronLeft, GitFork, Plus, Edit3 } from 'lucide-react'
+import { Cancel01Icon, ArrowRight01Icon, ArrowLeft01Icon, GitForkIcon, PlusSignIcon, PencilEdit02Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
 import type { NavigationAdapter } from 'nextstepjs'
 import { useOnboarding } from '@/hooks/useOnboarding'
@@ -43,7 +44,7 @@ function OnboardingCard({
         className="absolute top-3 right-3 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
         aria-label="Skip onboarding"
       >
-        <X className="h-4 w-4" />
+        <Icon icon={Cancel01Icon} className="h-4 w-4" />
       </button>
 
       {/* Icon */}
@@ -66,13 +67,12 @@ function OnboardingCard({
           {Array.from({ length: totalSteps }).map((_, i) => (
             <div
               key={i}
-              className={`h-2 rounded-full transition-all ${
-                i === currentStep
+              className={`h-2 rounded-full transition-all ${i === currentStep
                   ? 'w-6 bg-primary'
                   : i < currentStep
                     ? 'w-2 bg-primary/50'
                     : 'w-2 bg-muted'
-              }`}
+                }`}
             />
           ))}
         </div>
@@ -81,19 +81,19 @@ function OnboardingCard({
         <div className="flex items-center gap-2">
           {currentStep > 0 && (
             <Button variant="ghost" size="sm" onClick={prevStep}>
-              <ChevronLeft className="h-4 w-4 mr-1" />
+              <Icon icon={ArrowLeft01Icon} className="h-4 w-4 mr-1" />
               Back
             </Button>
           )}
           {currentStep < totalSteps - 1 ? (
             <Button size="sm" onClick={nextStep}>
               Next
-              <ChevronRight className="h-4 w-4 ml-1" />
+              <Icon icon={ArrowRight01Icon} className="h-4 w-4 ml-1" />
             </Button>
           ) : (
             <Button size="sm" onClick={skipTour}>
               Get Started
-              <ChevronRight className="h-4 w-4 ml-1" />
+              <Icon icon={ArrowRight01Icon} className="h-4 w-4 ml-1" />
             </Button>
           )}
         </div>
@@ -108,7 +108,7 @@ const onboardingSteps: Tour[] = [
     tour: 'welcome',
     steps: [
       {
-        icon: <GitFork className="h-6 w-6 text-primary" />,
+        icon: <Icon icon={GitForkIcon} className="h-6 w-6 text-primary" />,
         title: 'Welcome to Checklist HQ',
         content: (
           <p>
@@ -123,7 +123,7 @@ const onboardingSteps: Tour[] = [
         pointerRadius: 12,
       },
       {
-        icon: <Plus className="h-6 w-6 text-primary" />,
+        icon: <Icon icon={PlusSignIcon} className="h-6 w-6 text-primary" />,
         title: 'Create Your First Checklist',
         content: (
           <p>
@@ -140,7 +140,7 @@ const onboardingSteps: Tour[] = [
         nextRoute: '/app/new',
       },
       {
-        icon: <Edit3 className="h-6 w-6 text-primary" />,
+        icon: <Icon icon={PencilEdit02Icon} className="h-6 w-6 text-primary" />,
         title: 'Build Your Checklist',
         content: (
           <p>
@@ -226,7 +226,7 @@ export function OnboardingTrigger() {
 
   return (
     <Button variant="outline" size="sm" onClick={handleStart}>
-      <GitFork className="h-4 w-4 mr-2" />
+      <Icon icon={GitForkIcon} className="h-4 w-4 mr-2" />
       Take the Tour
     </Button>
   )

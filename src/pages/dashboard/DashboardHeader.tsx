@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Plus, GitFork } from 'lucide-react'
+import { PlusSignIcon, GitForkIcon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { Button } from '@/components/ui/button'
 
 interface DashboardHeaderProps {
@@ -25,13 +26,13 @@ export function DashboardHeader({ userEmail, activeRunsCount }: DashboardHeaderP
             <div className="flex items-center gap-3">
                 <Button variant="outline" asChild size="sm">
                     <Link to="/explore">
-                        <GitFork className="mr-2 h-4 w-4" />
+                        <Icon icon={GitForkIcon} className="mr-2 h-4 w-4" />
                         Templates
                     </Link>
                 </Button>
                 <Button asChild size="sm" id="onboarding-new-checklist">
                     <Link to="/app/new">
-                        <Plus className="mr-2 h-4 w-4" />
+                        <Icon icon={PlusSignIcon} className="mr-2 h-4 w-4" />
                         New Checklist
                     </Link>
                 </Button>

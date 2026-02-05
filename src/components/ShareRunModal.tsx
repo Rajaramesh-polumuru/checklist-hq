@@ -11,15 +11,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import {
-  Share2,
-  Link2,
-  Copy,
-  Check,
-  Users,
-  Loader2,
-  Trash2,
-  Shield,
-} from 'lucide-react'
+  Share01Icon,
+  Link01Icon,
+  Copy01Icon,
+  CheckmarkCircle02Icon,
+  UserGroupIcon,
+  Loading02Icon,
+  Delete02Icon,
+  Shield01Icon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import {
   generateShareToken,
   revokeShareToken,
@@ -154,7 +155,7 @@ export function ShareRunModal({ run, isOpen, onClose }: ShareRunModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Share2 className="h-4 w-4 text-primary" />
+              <Icon icon={Share01Icon} className="h-4 w-4 text-primary" />
             </div>
             Share Run
           </DialogTitle>
@@ -174,7 +175,7 @@ export function ShareRunModal({ run, isOpen, onClose }: ShareRunModalProps) {
           {/* Share Link Section */}
           <div className="space-y-3">
             <label className="text-sm font-medium flex items-center gap-2">
-              <Link2 className="h-4 w-4" />
+              <Icon icon={Link01Icon} className="h-4 w-4" />
               Share Link
             </label>
 
@@ -193,9 +194,9 @@ export function ShareRunModal({ run, isOpen, onClose }: ShareRunModalProps) {
                     className="shrink-0 gap-1.5"
                   >
                     {copying ? (
-                      <Check className="h-4 w-4 text-success" />
+                      <Icon icon={CheckmarkCircle02Icon} className="h-4 w-4 text-success" />
                     ) : (
-                      <Copy className="h-4 w-4" />
+                      <Icon icon={Copy01Icon} className="h-4 w-4" />
                     )}
                     {copying ? 'Copied!' : 'Copy'}
                   </Button>
@@ -210,7 +211,7 @@ export function ShareRunModal({ run, isOpen, onClose }: ShareRunModalProps) {
                   disabled={loading}
                   className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Icon icon={Delete02Icon} className="h-3.5 w-3.5" />
                   Revoke Link
                 </Button>
               </div>
@@ -223,9 +224,9 @@ export function ShareRunModal({ run, isOpen, onClose }: ShareRunModalProps) {
                   className="w-full gap-2"
                 >
                   {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Icon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
                   ) : (
-                    <Link2 className="h-4 w-4" />
+                    <Icon icon={Link01Icon} className="h-4 w-4" />
                   )}
                   Generate Share Link
                 </Button>
@@ -239,13 +240,13 @@ export function ShareRunModal({ run, isOpen, onClose }: ShareRunModalProps) {
           {/* Participants Section */}
           <div className="space-y-3">
             <label className="text-sm font-medium flex items-center gap-2">
-              <Users className="h-4 w-4" />
+              <Icon icon={UserGroupIcon} className="h-4 w-4" />
               Participants ({participants.length})
             </label>
 
             {loading && participants.length === 0 ? (
               <div className="flex justify-center py-4">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                <Icon icon={Loading02Icon} className="h-5 w-5 animate-spin text-muted-foreground" />
               </div>
             ) : participants.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">
@@ -260,7 +261,7 @@ export function ShareRunModal({ run, isOpen, onClose }: ShareRunModalProps) {
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <Users className="h-4 w-4 text-primary" />
+                        <Icon icon={UserGroupIcon} className="h-4 w-4 text-primary" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate">
@@ -282,7 +283,7 @@ export function ShareRunModal({ run, isOpen, onClose }: ShareRunModalProps) {
                           className="h-7 w-7 text-muted-foreground hover:text-destructive"
                           onClick={() => handleRemoveParticipant(participant.user_id)}
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Icon icon={Delete02Icon} className="h-3.5 w-3.5" />
                         </Button>
                       )}
                     </div>
@@ -294,7 +295,7 @@ export function ShareRunModal({ run, isOpen, onClose }: ShareRunModalProps) {
 
           {/* Privacy Notice */}
           <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50">
-            <Shield className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <Icon icon={Shield01Icon} className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
             <p className="text-xs text-muted-foreground">
               Shared runs allow real-time collaboration. Participants can see progress updates and complete items together.
             </p>

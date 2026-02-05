@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
-import { CheckCircle2, Command, ShieldCheck, Zap } from 'lucide-react'
+import { CheckmarkCircle02Icon, CommandIcon, SecurityCheckIcon, FlashIcon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 
 interface AuthLayoutProps {
     children: React.ReactNode
@@ -21,7 +22,7 @@ export function AuthLayout({ children, greeting, subtitle }: AuthLayoutProps) {
                 <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-8">
                         <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20">
-                            <Command className="w-6 h-6" />
+                            <Icon icon={CommandIcon} className="w-6 h-6" />
                         </div>
                         <span className="text-xl font-bold tracking-tight">Checklist HQ</span>
                     </div>
@@ -44,9 +45,9 @@ export function AuthLayout({ children, greeting, subtitle }: AuthLayoutProps) {
                         </p>
 
                         <div className="space-y-4">
-                            <FeatureItem icon={Zap} text="Lightning fast execution" delay={0.2} />
-                            <FeatureItem icon={ShieldCheck} text="Enterprise-grade reliability" delay={0.3} />
-                            <FeatureItem icon={CheckCircle2} text="Perfect compliance every time" delay={0.4} />
+                            <FeatureItem icon={FlashIcon} text="Lightning fast execution" delay={0.2} />
+                            <FeatureItem icon={SecurityCheckIcon} text="Enterprise-grade reliability" delay={0.3} />
+                            <FeatureItem icon={CheckmarkCircle02Icon} text="Perfect compliance every time" delay={0.4} />
                         </div>
                     </motion.div>
                 </div>
@@ -92,7 +93,7 @@ export function AuthLayout({ children, greeting, subtitle }: AuthLayoutProps) {
     )
 }
 
-function FeatureItem({ icon: Icon, text, delay }: { icon: React.ElementType, text: string, delay: number }) {
+function FeatureItem({ icon: FeatureIcon, text, delay }: { icon: any, text: string, delay: number }) {
     return (
         <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -101,7 +102,7 @@ function FeatureItem({ icon: Icon, text, delay }: { icon: React.ElementType, tex
             className="flex items-center gap-3 text-zinc-300"
         >
             <div className="p-1.5 rounded-full bg-white/5 border border-white/10">
-                <Icon className="w-4 h-4" />
+                <Icon icon={FeatureIcon} className="w-4 h-4" />
             </div>
             <span>{text}</span>
         </motion.div>

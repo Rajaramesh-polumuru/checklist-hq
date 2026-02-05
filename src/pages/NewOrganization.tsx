@@ -9,16 +9,17 @@ import { Textarea } from '@/components/ui/textarea'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 import { useDebounce } from '@/hooks/useDebounce'
 import {
-  Building2,
-  ArrowLeft,
-  Check,
-  X,
-  Loader2,
-  Info,
-  Users,
-  Shield,
-  Sparkles,
-} from 'lucide-react'
+  Building02Icon,
+  ArrowLeft01Icon,
+  Tick01Icon,
+  Cancel01Icon,
+  Loading02Icon,
+  InformationCircleIcon,
+  UserGroupIcon,
+  Shield01Icon,
+  SparklesIcon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 
 // Slug validation regex: lowercase letters, numbers, and hyphens
@@ -210,7 +211,7 @@ export function NewOrganization() {
     if (checkingSlug) {
       return (
         <span className="flex items-center gap-1 text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Icon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
           <span className="text-xs">Checking...</span>
         </span>
       )
@@ -219,7 +220,7 @@ export function NewOrganization() {
     if (slugAvailable === true) {
       return (
         <span className="flex items-center gap-1 text-emerald-600">
-          <Check className="h-4 w-4" />
+          <Icon icon={Tick01Icon} className="h-4 w-4" />
           <span className="text-xs">Available</span>
         </span>
       )
@@ -228,7 +229,7 @@ export function NewOrganization() {
     if (slugAvailable === false) {
       return (
         <span className="flex items-center gap-1 text-destructive">
-          <X className="h-4 w-4" />
+          <Icon icon={Cancel01Icon} className="h-4 w-4" />
           <span className="text-xs">Taken</span>
         </span>
       )
@@ -245,7 +246,7 @@ export function NewOrganization() {
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" asChild>
               <Link to="/app">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <Icon icon={ArrowLeft01Icon} className="h-4 w-4 mr-2" />
                 Back to Dashboard
               </Link>
             </Button>
@@ -262,7 +263,7 @@ export function NewOrganization() {
         {/* Page Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-violet-500 mb-4">
-            <Building2 className="h-8 w-8 text-white" />
+            <Icon icon={Building02Icon} className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight">Create Organization</h1>
           <p className="text-muted-foreground mt-2 max-w-md mx-auto">
@@ -274,7 +275,7 @@ export function NewOrganization() {
         <div className="grid sm:grid-cols-3 gap-4 mb-8">
           <div className="flex items-start gap-3 p-4 rounded-xl bg-card border">
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <Users className="h-5 w-5 text-primary" />
+              <Icon icon={UserGroupIcon} className="h-5 w-5 text-primary" />
             </div>
             <div>
               <h3 className="font-medium text-sm">Team Collaboration</h3>
@@ -283,7 +284,7 @@ export function NewOrganization() {
           </div>
           <div className="flex items-start gap-3 p-4 rounded-xl bg-card border">
             <div className="h-10 w-10 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
-              <Shield className="h-5 w-5 text-violet-600" />
+              <Icon icon={Shield01Icon} className="h-5 w-5 text-violet-600" />
             </div>
             <div>
               <h3 className="font-medium text-sm">Access Control</h3>
@@ -292,7 +293,7 @@ export function NewOrganization() {
           </div>
           <div className="flex items-start gap-3 p-4 rounded-xl bg-card border">
             <div className="h-10 w-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
-              <Sparkles className="h-5 w-5 text-amber-600" />
+              <Icon icon={SparklesIcon} className="h-5 w-5 text-amber-600" />
             </div>
             <div>
               <h3 className="font-medium text-sm">Shared Workspaces</h3>
@@ -373,7 +374,7 @@ export function NewOrganization() {
                   {renderSlugStatus()}
                 </div>
                 <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                  <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                  <Icon icon={InformationCircleIcon} className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                   <span id="slug-hint">
                     Use lowercase letters, numbers, and hyphens. Must be at least {MIN_SLUG_LENGTH} characters.
                   </span>
@@ -437,7 +438,7 @@ export function NewOrganization() {
         {/* Additional Info */}
         <div className="mt-6 p-4 rounded-xl bg-muted/50 border border-dashed">
           <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+            <Icon icon={InformationCircleIcon} className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
             <div className="text-sm text-muted-foreground">
               <p className="font-medium text-foreground mb-1">What happens next?</p>
               <ul className="list-disc list-inside space-y-1">

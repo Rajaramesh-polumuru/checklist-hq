@@ -4,15 +4,16 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormattedText } from '@/lib/rich-text'
 import {
-  ArrowLeft,
-  GitCommit,
-  RotateCcw,
-  Loader2,
-  Clock,
-  ListChecks,
-  ChevronRight,
-  Edit,
-} from 'lucide-react'
+  ArrowLeft01Icon,
+  GitCommitIcon,
+  ArrowLeft02Icon,
+  Loading02Icon,
+  Clock01Icon,
+  CheckListIcon,
+  ArrowRight01Icon,
+  PencilEdit02Icon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
 import { getRepository, getCommit, restoreToCommit, getLatestCommit } from '@/services/repository'
 import type { Repository, Commit, ChecklistItem } from '@/types/database'
@@ -129,7 +130,7 @@ export function ViewVersion() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Icon icon={Loading02Icon} className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -155,7 +156,7 @@ export function ViewVersion() {
             <div className="flex items-start gap-4">
               <Button variant="ghost" size="icon" asChild>
                 <Link to={`/app/repo/${repository.id}`}>
-                  <ArrowLeft className="h-4 w-4" />
+                  <Icon icon={ArrowLeft01Icon} className="h-4 w-4" />
                 </Link>
               </Button>
               <div>
@@ -166,16 +167,16 @@ export function ViewVersion() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                  <GitCommit className="h-4 w-4" />
+                  <Icon icon={GitCommitIcon} className="h-4 w-4" />
                   <span>{commit.message || 'No message'}</span>
                 </div>
                 <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
+                    <Icon icon={Clock01Icon} className="h-4 w-4" />
                     {formatDate(commit.created_at)}
                   </span>
                   <span className="flex items-center gap-1">
-                    <ListChecks className="h-4 w-4" />
+                    <Icon icon={CheckListIcon} className="h-4 w-4" />
                     {items.length} items
                   </span>
                 </div>
@@ -187,16 +188,16 @@ export function ViewVersion() {
                 {isLatest ? (
                   <Button asChild>
                     <Link to={`/app/repo/${repository.id}`}>
-                      <Edit className="mr-2 h-4 w-4" />
+                      <Icon icon={PencilEdit02Icon} className="mr-2 h-4 w-4" />
                       Edit
                     </Link>
                   </Button>
                 ) : (
                   <Button onClick={handleRestore} disabled={restoring}>
                     {restoring ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Icon icon={Loading02Icon} className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
-                      <RotateCcw className="mr-2 h-4 w-4" />
+                      <Icon icon={ArrowLeft02Icon} className="mr-2 h-4 w-4" />
                     )}
                     Restore This Version
                   </Button>
@@ -211,7 +212,7 @@ export function ViewVersion() {
       {!isLatest && (
         <div className="bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 px-4 py-3">
           <div className="container mx-auto flex items-center gap-2 text-sm text-amber-800 dark:text-amber-200">
-            <Clock className="h-4 w-4" />
+            <Icon icon={Clock01Icon} className="h-4 w-4" />
             <span>
               You are viewing an older version from {formatDate(commit.created_at)}.
               {isOwner && ' Click "Restore This Version" to revert to this state.'}
@@ -225,7 +226,7 @@ export function ViewVersion() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ListChecks className="h-5 w-5" />
+              <Icon icon={CheckListIcon} className="h-5 w-5" />
               Checklist Content
             </CardTitle>
           </CardHeader>
@@ -256,7 +257,7 @@ function ViewItem({ item, depth }: { item: ChecklistItem; depth: number }) {
       )}
       style={{ marginLeft: depth > 0 ? `${depth * 24}px` : undefined }}
     >
-      <ChevronRight className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+      <Icon icon={ArrowRight01Icon} className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="text-sm">{item.text ? <FormattedText text={item.text} /> : 'Untitled item'}</p>
         {item.details && (

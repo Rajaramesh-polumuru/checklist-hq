@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase'
 import type { Organization, OrganizationMember, Team } from '@/types/database'
 
+import { useAuthStore } from '@/stores/auth-store'
+
 /**
  * Create a new organization using the RPC function.
  * This automatically adds the current user as the owner.
@@ -11,6 +13,11 @@ export async function createOrganization(params: {
   description?: string | null
 }): Promise<string> {
   const { name, slug, description } = params
+  
+  const { session } = useAuthStore.getState()
+  if (!session) {
+    throw new Error('Not authenticated')
+  }
 
   const { data, error } = await supabase.rpc('create_organization', {
     p_name: name,
@@ -110,6 +117,12 @@ export async function updateOrganization(
   id: string,
   updates: Partial<Pick<Organization, 'name' | 'description' | 'avatar_url'>>
 ): Promise<Organization> {
+
+  const { session } = useAuthStore.getState()
+  if (!session) {
+    throw new Error('Not authenticated')
+  }
+
   const { data, error } = await supabase
     .from('organizations')
     .update(updates)
@@ -125,6 +138,12 @@ export async function updateOrganization(
  * Delete an organization (only owners can do this)
  */
 export async function deleteOrganization(id: string): Promise<void> {
+
+  const { session } = useAuthStore.getState()
+  if (!session) {
+    throw new Error('Not authenticated')
+  }
+
   const { error } = await supabase
     .from('organizations')
     .delete()
@@ -194,6 +213,12 @@ export async function addMemberByEmail(
   email: string,
   role: 'admin' | 'member' | 'viewer' = 'member'
 ): Promise<{ success: boolean; message?: string }> {
+
+  const { session } = useAuthStore.getState()
+  if (!session) {
+    throw new Error('Not authenticated')
+  }
+
   const { data, error } = await supabase.rpc('add_member_by_email', {
     p_organization_id: organizationId,
     p_email: email,

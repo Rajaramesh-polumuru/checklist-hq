@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, Trash2, AlertTriangle, Save } from 'lucide-react'
+import { Loading02Icon, Delete02Icon, Alert01Icon, FloppyDiskIcon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { updateOrganization, deleteOrganization } from '@/services/organization'
 import type { Organization } from '@/types/database'
 
@@ -115,7 +116,7 @@ export function OrganizationSettings({ org, onUpdate }: OrganizationSettingsProp
 
             <div className="flex justify-end">
               <Button type="submit" disabled={isSaving || (name === org.name && description === (org.description || ''))}>
-                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                {isSaving ? <Icon icon={Loading02Icon} className="mr-2 h-4 w-4 animate-spin" /> : <Icon icon={FloppyDiskIcon} className="mr-2 h-4 w-4" />}
                 Save Changes
               </Button>
             </div>
@@ -127,7 +128,7 @@ export function OrganizationSettings({ org, onUpdate }: OrganizationSettingsProp
       <Card className="border-destructive/50 bg-destructive/5">
         <CardHeader>
           <CardTitle className="text-destructive flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
+            <Icon icon={Alert01Icon} className="h-5 w-5" />
             Danger Zone
           </CardTitle>
           <CardDescription>
@@ -143,7 +144,7 @@ export function OrganizationSettings({ org, onUpdate }: OrganizationSettingsProp
               </p>
             </div>
             <Button variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Icon icon={Delete02Icon} className="mr-2 h-4 w-4" />
               Delete
             </Button>
           </div>
@@ -182,7 +183,7 @@ export function OrganizationSettings({ org, onUpdate }: OrganizationSettingsProp
               onClick={handleDelete}
               disabled={deleteConfirmation !== org.slug || isDeleting}
             >
-              {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {isDeleting ? <Icon icon={Loading02Icon} className="mr-2 h-4 w-4 animate-spin" /> : null}
               Delete Organization
             </Button>
           </DialogFooter>

@@ -1,4 +1,5 @@
-import { X, CheckCircle2, XCircle, Info, AlertTriangle } from 'lucide-react'
+import { Cancel01Icon, CheckmarkCircle02Icon, AlertCircleIcon, InformationCircleIcon, Alert01Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import type { Toast as ToastType } from '@/hooks/useToast'
 
 interface ToastProps {
@@ -10,28 +11,28 @@ const toastStyles = {
   success: {
     container: 'bg-emerald-50 border-emerald-200 text-emerald-900',
     icon: 'text-emerald-600',
-    IconComponent: CheckCircle2,
+    IconComponent: CheckmarkCircle02Icon,
   },
   error: {
     container: 'bg-red-50 border-red-200 text-red-900',
     icon: 'text-red-600',
-    IconComponent: XCircle,
+    IconComponent: AlertCircleIcon,
   },
   warning: {
     container: 'bg-amber-50 border-amber-200 text-amber-900',
     icon: 'text-amber-600',
-    IconComponent: AlertTriangle,
+    IconComponent: Alert01Icon,
   },
   info: {
     container: 'bg-blue-50 border-blue-200 text-blue-900',
     icon: 'text-blue-600',
-    IconComponent: Info,
+    IconComponent: InformationCircleIcon,
   },
 }
 
 export function Toast({ toast, onDismiss }: ToastProps) {
   const style = toastStyles[toast.type]
-  const Icon = style.IconComponent
+  const IconSymbol = style.IconComponent
 
   return (
     <div
@@ -39,14 +40,14 @@ export function Toast({ toast, onDismiss }: ToastProps) {
       role="alert"
       aria-live="polite"
     >
-      <Icon className={`h-5 w-5 shrink-0 ${style.icon}`} />
+      <Icon icon={IconSymbol} className={`h-5 w-5 shrink-0 ${style.icon}`} />
       <p className="flex-1 text-sm font-medium">{toast.message}</p>
       <button
         onClick={() => onDismiss(toast.id)}
         className="shrink-0 p-1 rounded-md hover:bg-black/5 transition-colors"
         aria-label="Dismiss notification"
       >
-        <X className="h-4 w-4" />
+        <Icon icon={Cancel01Icon} className="h-4 w-4" />
       </button>
     </div>
   )

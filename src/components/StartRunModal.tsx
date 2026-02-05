@@ -13,14 +13,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import {
-  Play,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-  ListChecks,
-  Clock,
-  Sparkles,
-} from 'lucide-react'
+  PlayIcon,
+  Loading02Icon,
+  CheckmarkCircle02Icon,
+  AlertCircleIcon,
+  CheckListIcon,
+  Clock01Icon,
+  SparklesIcon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
 import { startNamedRun } from '@/services/run'
 import { getLatestCommit } from '@/services/repository'
@@ -61,8 +62,8 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
   const itemCount = commit?.content?.items ? Object.keys(commit.content.items).length : 0
   const checkableCount = commit?.content?.items
     ? Object.values(commit.content.items).filter(
-        (item: ChecklistItem) => item.type !== 'header' || !hasChildren(item.id, commit.content.items)
-      ).length
+      (item: ChecklistItem) => item.type !== 'header' || !hasChildren(item.id, commit.content.items)
+    ).length
     : 0
 
   // Check if an item has children
@@ -170,7 +171,7 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Play className="h-4 w-4 text-primary" />
+              <Icon icon={PlayIcon} className="h-4 w-4 text-primary" />
             </div>
             {runState === 'success' ? 'Run Started!' : 'Start a New Run'}
           </DialogTitle>
@@ -184,7 +185,7 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
         {/* Loading Preview State */}
         {runState === 'loading-preview' && (
           <div className="py-8 text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground mb-3" />
+            <Icon icon={Loading02Icon} className="h-8 w-8 animate-spin mx-auto text-muted-foreground mb-3" />
             <p className="text-sm text-muted-foreground">Loading checklist...</p>
           </div>
         )}
@@ -196,7 +197,7 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
             <div className="p-3 bg-muted/50 rounded-lg border">
               <div className="flex items-start gap-3">
                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <ListChecks className="h-5 w-5 text-primary" />
+                  <Icon icon={CheckListIcon} className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{repository.title}</p>
@@ -252,7 +253,7 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
               </div>
 
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock className="h-3.5 w-3.5 text-primary" />
+                <Icon icon={Clock01Icon} className="h-3.5 w-3.5 text-primary" />
                 <span>
                   Time will be tracked automatically. You can pause and resume anytime.
                 </span>
@@ -266,7 +267,7 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
           <div className="py-6 space-y-4">
             <div className="text-center">
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                <Play className="h-6 w-6 text-primary animate-pulse" />
+                <Icon icon={PlayIcon} className="h-6 w-6 text-primary animate-pulse" />
               </div>
               <p className="font-medium mb-1">Starting your run...</p>
               <p className="text-sm text-muted-foreground">
@@ -280,14 +281,14 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
         {runState === 'success' && (
           <div className="py-6 text-center">
             <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
-              <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+              <Icon icon={CheckmarkCircle02Icon} className="h-6 w-6 text-emerald-600" />
             </div>
             <p className="font-medium text-lg mb-1">Let's Go!</p>
             <p className="text-sm text-muted-foreground mb-4">
               "{name}" is ready with {checkableCount} steps to complete
             </p>
             <div className="inline-flex items-center gap-2 px-3 py-2 bg-muted rounded-lg text-sm">
-              <Sparkles className="h-4 w-4 text-primary" />
+              <Icon icon={SparklesIcon} className="h-4 w-4 text-primary" />
               <span>Timer starts when you begin</span>
             </div>
           </div>
@@ -297,7 +298,7 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
         {runState === 'error' && (
           <div className="py-6 text-center">
             <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+              <Icon icon={AlertCircleIcon} className="h-6 w-6 text-red-600" />
             </div>
             <p className="font-medium text-lg mb-1">Unable to Start Run</p>
             <p className="text-sm text-red-600 mb-4">
@@ -317,14 +318,14 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
                 Cancel
               </Button>
               <Button onClick={handleStartRun} disabled={!name.trim()}>
-                <Play className="mr-2 h-4 w-4" />
+                <Icon icon={PlayIcon} className="mr-2 h-4 w-4" />
                 Start Run
               </Button>
             </>
           )}
           {runState === 'success' && (
             <Button onClick={handleGoToRun} className="w-full sm:w-auto">
-              <Play className="mr-2 h-4 w-4" />
+              <Icon icon={PlayIcon} className="mr-2 h-4 w-4" />
               Begin Checklist
             </Button>
           )}

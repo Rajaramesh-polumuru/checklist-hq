@@ -18,22 +18,23 @@ import { useIsMobile } from '@/hooks/useMobile'
 import { useToast } from '@/hooks/useToast'
 import { AUTO_SAVE } from '@/lib/constants'
 import {
-  ArrowLeft,
-  Save,
-  Play,
-  Globe,
-  Lock,
-  Loader2,
-  History,
-  Pencil,
-  Keyboard,
-  GitFork,
-  ListChecks,
-  Cloud,
-  CloudOff,
-  Share2,
-  MoreVertical
-} from 'lucide-react'
+  ArrowLeft01Icon,
+  FloppyDiskIcon,
+  PlayIcon,
+  Globe02Icon,
+  LockKeyIcon,
+  Loading02Icon,
+  Clock01Icon,
+  PencilEdit02Icon,
+  KeyboardIcon,
+  GitForkIcon,
+  CheckListIcon,
+  CloudIcon,
+  AlertCircleIcon,
+  Share08Icon,
+  MoreVerticalIcon
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import type { ChecklistContent, Repository, Commit } from '@/types/database'
 import {
   createRepositoryWithCommit,
@@ -352,9 +353,9 @@ export function Editor() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center animate-fade-in">
           <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <ListChecks className="h-6 w-6 text-primary" />
+            <Icon icon={CheckListIcon} className="h-6 w-6 text-primary" />
           </div>
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mx-auto mb-2" />
+          <Icon icon={Loading02Icon} className="h-5 w-5 animate-spin text-muted-foreground mx-auto mb-2" />
           <p className="text-muted-foreground text-sm">Loading checklist...</p>
         </div>
       </div>
@@ -386,7 +387,7 @@ export function Editor() {
               onClick={handleBack}
               className={`shrink-0 ${isMobile ? 'h-10 w-10' : ''}`}
             >
-              <ArrowLeft className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
+              <Icon icon={ArrowLeft01Icon} className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
             </Button>
 
             {/* Brand - hide on mobile */}
@@ -394,7 +395,7 @@ export function Editor() {
               <>
                 <Link to="/app" className="hidden sm:flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
                   <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <GitFork className="h-3.5 w-3.5 text-primary" />
+                    <Icon icon={GitForkIcon} className="h-3.5 w-3.5 text-primary" />
                   </div>
                 </Link>
                 <div className="h-4 w-px bg-border hidden sm:block" />
@@ -419,7 +420,7 @@ export function Editor() {
                   onClick={() => titleInputRef.current?.focus()}
                   title="Rename checklist"
                 >
-                  <Pencil className="h-3 w-3" />
+                  <Icon icon={PencilEdit02Icon} className="h-3 w-3" />
                 </Button>
               )}
             </div>
@@ -429,19 +430,19 @@ export function Editor() {
               <div className="hidden md:flex items-center gap-2 shrink-0">
                 {saveStatus === 'saved' && (
                   <Badge variant="success" className="gap-1 text-xs animate-fade-in">
-                    <Cloud className="h-3 w-3" />
+                    <Icon icon={CloudIcon} className="h-3 w-3" />
                     Saved
                   </Badge>
                 )}
                 {saveStatus === 'saving' && (
                   <Badge variant="secondary" className="gap-1 text-xs">
-                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <Icon icon={Loading02Icon} className="h-3 w-3 animate-spin" />
                     Saving...
                   </Badge>
                 )}
                 {saveStatus === 'error' && (
                   <Badge variant="destructive" className="gap-1 text-xs">
-                    <CloudOff className="h-3 w-3" />
+                    <Icon icon={AlertCircleIcon} className="h-3 w-3" />
                     Error
                   </Badge>
                 )}
@@ -461,7 +462,7 @@ export function Editor() {
               <>
                 {/* Item count */}
                 <span className="hidden lg:flex items-center gap-1.5 text-xs text-muted-foreground mr-2">
-                  <ListChecks className="h-3.5 w-3.5" />
+                  <Icon icon={CheckListIcon} className="h-3.5 w-3.5" />
                   {itemCount} {itemCount === 1 ? 'item' : 'items'}
                 </span>
 
@@ -473,7 +474,7 @@ export function Editor() {
                     onClick={() => setShareOpen(true)}
                     className="gap-1.5 text-muted-foreground hover:text-foreground"
                   >
-                    <Share2 className="h-4 w-4" />
+                    <Icon icon={Share08Icon} className="h-4 w-4" />
                     <span className="hidden sm:inline text-xs">Share</span>
                   </Button>
                 )}
@@ -488,12 +489,12 @@ export function Editor() {
                 >
                   {isPublic ? (
                     <>
-                      <Globe className="h-4 w-4 text-success" />
+                      <Icon icon={Globe02Icon} className="h-4 w-4 text-success" />
                       <span className="hidden sm:inline text-xs">Public</span>
                     </>
                   ) : (
                     <>
-                      <Lock className="h-4 w-4" />
+                      <Icon icon={LockKeyIcon} className="h-4 w-4" />
                       <span className="hidden sm:inline text-xs">Private</span>
                     </>
                   )}
@@ -507,7 +508,7 @@ export function Editor() {
                   className="text-muted-foreground hover:text-foreground"
                   title="Keyboard shortcuts (?)"
                 >
-                  <Keyboard className="h-4 w-4" />
+                  <Icon icon={KeyboardIcon} className="h-4 w-4" />
                 </Button>
 
                 {/* Version History */}
@@ -519,7 +520,7 @@ export function Editor() {
                     className="text-muted-foreground hover:text-foreground"
                     title="Version history"
                   >
-                    <History className="h-4 w-4" />
+                    <Icon icon={Clock01Icon} className="h-4 w-4" />
                   </Button>
                 )}
 
@@ -536,7 +537,7 @@ export function Editor() {
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className="h-10 w-10 text-muted-foreground"
                 >
-                  <MoreVertical className="h-5 w-5" />
+                  <Icon icon={MoreVerticalIcon} className="h-5 w-5" />
                 </Button>
 
                 {/* Mobile dropdown menu */}
@@ -551,7 +552,7 @@ export function Editor() {
                         onClick={() => { setIsPublic(!isPublic); setMobileMenuOpen(false) }}
                         className="w-full px-4 py-3 text-left text-base hover:bg-accent flex items-center gap-3"
                       >
-                        {isPublic ? <Globe className="h-5 w-5 text-success" /> : <Lock className="h-5 w-5" />}
+                        {isPublic ? <Icon icon={Globe02Icon} className="h-5 w-5 text-success" /> : <Icon icon={LockKeyIcon} className="h-5 w-5" />}
                         {isPublic ? 'Make Private' : 'Make Public'}
                       </button>
                       {!isNew && repository && (
@@ -560,14 +561,14 @@ export function Editor() {
                             onClick={() => { setShareOpen(true); setMobileMenuOpen(false) }}
                             className="w-full px-4 py-3 text-left text-base hover:bg-accent flex items-center gap-3"
                           >
-                            <Share2 className="h-5 w-5" />
+                            <Icon icon={Share08Icon} className="h-5 w-5" />
                             Share
                           </button>
                           <button
                             onClick={() => { setHistoryOpen(true); setMobileMenuOpen(false) }}
                             className="w-full px-4 py-3 text-left text-base hover:bg-accent flex items-center gap-3"
                           >
-                            <History className="h-5 w-5" />
+                            <Icon icon={Clock01Icon} className="h-5 w-5" />
                             Version History
                           </button>
                         </>
@@ -587,10 +588,10 @@ export function Editor() {
               className={`${isMobile ? 'h-10 w-10' : ''} ${isDirty || hasMetadataChanges ? "border-primary text-primary hover:bg-primary/5" : ""}`}
             >
               {saving ? (
-                <Loader2 className={`animate-spin ${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
+                <Icon icon={Loading02Icon} className={`animate-spin ${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
               ) : (
                 <>
-                  <Save className={isMobile ? "h-5 w-5" : "mr-1.5 h-4 w-4"} />
+                  <Icon icon={FloppyDiskIcon} className={isMobile ? "h-5 w-5" : "mr-1.5 h-4 w-4"} />
                   {!isMobile && <span className="hidden sm:inline">{isNew ? 'Create' : 'Save'}</span>}
                 </>
               )}
@@ -603,7 +604,7 @@ export function Editor() {
               disabled={itemCount === 0}
               className={isMobile ? 'h-10 w-10' : ''}
             >
-              <Play className={isMobile ? "h-5 w-5" : "mr-1.5 h-4 w-4"} />
+              <Icon icon={PlayIcon} className={isMobile ? "h-5 w-5" : "mr-1.5 h-4 w-4"} />
               {!isMobile && <span className="hidden sm:inline">Run</span>}
             </Button>
           </div>

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, Link } from 'react-router-dom'
-import { Briefcase, User, GraduationCap, ArrowRight, Loader2, CheckCircle2, Mail } from 'lucide-react'
+import { Briefcase01Icon, UserIcon, Mortarboard01Icon, ArrowRight01Icon, Loading02Icon, CheckmarkCircle02Icon, Mail01Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -46,7 +47,7 @@ function SignupStep({ onNext }: { onNext: () => void }) {
                 className="text-center space-y-6 py-4"
             >
                 <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto">
-                    <Mail className="w-8 h-8" />
+                    <Icon icon={Mail01Icon} className="w-8 h-8" />
                 </div>
                 <div className="space-y-2">
                     <h3 className="text-xl font-semibold">Check your email</h3>
@@ -114,7 +115,7 @@ function SignupStep({ onNext }: { onNext: () => void }) {
                 </div>
 
                 <Button type="submit" className="w-full" disabled={loading || authLoading}>
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create Account'}
+                    {loading ? <Icon icon={Loading02Icon} className="w-4 h-4 animate-spin" /> : 'Create Account'}
                 </Button>
             </form>
 
@@ -129,9 +130,9 @@ function SignupStep({ onNext }: { onNext: () => void }) {
 // Step 2: Usage Intent
 function IntentStep({ onNext }: { onNext: (intent: string) => void }) {
     const intents = [
-        { id: 'work', label: 'Work', icon: Briefcase, desc: 'Manage team projects & SOPs' },
-        { id: 'personal', label: 'Personal', icon: User, desc: 'Organize daily tasks & goals' },
-        { id: 'education', label: 'Education', icon: GraduationCap, desc: 'Study plans & assignments' },
+        { id: 'work', label: 'Work', icon: Briefcase01Icon, desc: 'Manage team projects & SOPs' },
+        { id: 'personal', label: 'Personal', icon: UserIcon, desc: 'Organize daily tasks & goals' },
+        { id: 'education', label: 'Education', icon: Mortarboard01Icon, desc: 'Study plans & assignments' },
     ]
 
     return (
@@ -154,7 +155,7 @@ function IntentStep({ onNext }: { onNext: (intent: string) => void }) {
                         className="flex items-center gap-4 p-4 text-left border rounded-lg hover:border-primary hover:bg-primary/5 transition-all group"
                     >
                         <div className="p-2 rounded-full bg-muted group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                            <item.icon className="w-5 h-5" />
+                            <Icon icon={item.icon} className="w-5 h-5" />
                         </div>
                         <div>
                             <div className="font-medium">{item.label}</div>
@@ -210,7 +211,7 @@ function ProfileStep({ onNext, onBack }: { onNext: (name: string) => Promise<voi
                         Back
                     </Button>
                     <Button type="submit" className="w-full" disabled={!name.trim() || loading}>
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Continue <ArrowRight className="w-4 h-4 ml-2" /></>}
+                        {loading ? <Icon icon={Loading02Icon} className="w-4 h-4 animate-spin" /> : <>Continue <Icon icon={ArrowRight01Icon} className="w-4 h-4 ml-2" /></>}
                     </Button>
                 </div>
             </form>
@@ -242,7 +243,7 @@ function SuccessStep() {
                 transition={{ type: "spring", duration: 0.6 }}
                 className="w-20 h-20 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto"
             >
-                <CheckCircle2 className="w-10 h-10" />
+                <Icon icon={CheckmarkCircle02Icon} className="w-10 h-10" />
             </motion.div>
 
             <div className="space-y-2">

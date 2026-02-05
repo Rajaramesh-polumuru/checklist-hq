@@ -9,13 +9,14 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import {
-  Download,
-  FileJson,
-  FileSpreadsheet,
-  Printer,
-  Check,
-  Loader2,
-} from 'lucide-react'
+  Download01Icon,
+  DocumentCodeIcon,
+  File02Icon,
+  PrinterIcon,
+  CheckmarkCircle02Icon,
+  Loading02Icon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import {
   prepareRunExport,
   exportAsJSON,
@@ -82,7 +83,7 @@ export function ExportRunModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Download className="h-4 w-4 text-primary" />
+              <Icon icon={Download01Icon} className="h-4 w-4 text-primary" />
             </div>
             Export Run
           </DialogTitle>
@@ -93,7 +94,7 @@ export function ExportRunModal({
 
         <div className="space-y-3 py-4">
           <ExportOption
-            icon={<Printer className="h-5 w-5" />}
+            icon={<Icon icon={PrinterIcon} className="h-5 w-5" />}
             title="Print / PDF"
             description="Open print dialog to save as PDF or print"
             onClick={() => handleExport('print')}
@@ -102,7 +103,7 @@ export function ExportRunModal({
           />
 
           <ExportOption
-            icon={<FileSpreadsheet className="h-5 w-5" />}
+            icon={<Icon icon={File02Icon} className="h-5 w-5" />}
             title="CSV Spreadsheet"
             description="Download as CSV for Excel or Google Sheets"
             onClick={() => handleExport('csv')}
@@ -111,7 +112,7 @@ export function ExportRunModal({
           />
 
           <ExportOption
-            icon={<FileJson className="h-5 w-5" />}
+            icon={<Icon icon={DocumentCodeIcon} className="h-5 w-5" />}
             title="JSON Data"
             description="Download raw data in JSON format"
             onClick={() => handleExport('json')}
@@ -155,9 +156,9 @@ function ExportOption({
     >
       <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
         {loading ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
+          <Icon icon={Loading02Icon} className="h-5 w-5 animate-spin" />
         ) : success ? (
-          <Check className="h-5 w-5 text-success" />
+          <Icon icon={CheckmarkCircle02Icon} className="h-5 w-5 text-success" />
         ) : (
           icon
         )}

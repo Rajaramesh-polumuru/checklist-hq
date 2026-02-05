@@ -8,16 +8,17 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  Loader2,
-  Building2,
-  Users,
-  GitFork,
-  Settings,
-  Plus,
-  Shield,
-  Search,
-  LayoutGrid
-} from 'lucide-react'
+  Loading02Icon,
+  Building02Icon,
+  UserGroupIcon,
+  GitForkIcon,
+  Settings02Icon,
+  PlusSignIcon,
+  Shield01Icon,
+  Search01Icon,
+  LayoutGridIcon
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { RepositoryCard } from '@/pages/dashboard/RepositoryCard'
 import { Input } from '@/components/ui/input'
 import { CreateTeamModal } from '@/components/CreateTeamModal'
@@ -100,7 +101,7 @@ export function OrganizationDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Icon icon={Loading02Icon} className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -132,7 +133,7 @@ export function OrganizationDashboard() {
                 {org.avatar_url ? (
                   <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover rounded-xl" />
                 ) : (
-                  <Building2 className="h-8 w-8 text-primary" />
+                  <Icon icon={Building02Icon} className="h-8 w-8 text-primary" />
                 )}
               </div>
               <div>
@@ -147,11 +148,11 @@ export function OrganizationDashboard() {
 
             <div className="flex items-center gap-2">
               <Button variant="outline" onClick={() => setActiveTab('settings')}>
-                <Settings className="h-4 w-4 mr-2" />
+                <Icon icon={Settings02Icon} className="h-4 w-4 mr-2" />
                 Settings
               </Button>
               <Button>
-                <Plus className="h-4 w-4 mr-2" />
+                <Icon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                 New Project
               </Button>
             </div>
@@ -161,22 +162,22 @@ export function OrganizationDashboard() {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList>
                 <TabsTrigger value="repositories" className="gap-2">
-                  <GitFork className="h-4 w-4" />
+                  <Icon icon={GitForkIcon} className="h-4 w-4" />
                   Repositories
                   <span className="ml-1 bg-muted px-1.5 py-0.5 rounded-full text-xs">{repos.length}</span>
                 </TabsTrigger>
                 <TabsTrigger value="teams" className="gap-2">
-                  <LayoutGrid className="h-4 w-4" />
+                  <Icon icon={LayoutGridIcon} className="h-4 w-4" />
                   Teams
                   <span className="ml-1 bg-muted px-1.5 py-0.5 rounded-full text-xs">{teams.length}</span>
                 </TabsTrigger>
                 <TabsTrigger value="members" className="gap-2">
-                  <Users className="h-4 w-4" />
+                  <Icon icon={UserGroupIcon} className="h-4 w-4" />
                   People
                   <span className="ml-1 bg-muted px-1.5 py-0.5 rounded-full text-xs">{members.length}</span>
                 </TabsTrigger>
                 <TabsTrigger value="settings" className="gap-2">
-                  <Settings className="h-4 w-4" />
+                  <Icon icon={Settings02Icon} className="h-4 w-4" />
                   Settings
                 </TabsTrigger>
               </TabsList>
@@ -191,7 +192,7 @@ export function OrganizationDashboard() {
           <TabsContent value="repositories" className="space-y-6">
             <div className="flex items-center justify-between gap-4">
               <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Icon icon={Search01Icon} className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Find a repository..."
                   className="pl-9"
@@ -203,7 +204,7 @@ export function OrganizationDashboard() {
 
             {filteredRepos.length === 0 ? (
               <div className="text-center py-12 border rounded-lg bg-muted/10 border-dashed">
-                <GitFork className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <Icon icon={GitForkIcon} className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-50" />
                 <h3 className="text-lg font-medium">No repositories found</h3>
                 <p className="text-muted-foreground mt-1 max-w-sm mx-auto">
                   {repoSearch ? 'Try a different search term.' : 'Get started by creating a new repository for this organization.'}
@@ -239,7 +240,7 @@ export function OrganizationDashboard() {
 
             {teams.length === 0 ? (
               <div className="text-center py-12 border rounded-lg bg-muted/10 border-dashed">
-                <LayoutGrid className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <Icon icon={LayoutGridIcon} className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-50" />
                 <h3 className="text-lg font-medium">No teams yet</h3>
                 <p className="text-muted-foreground mt-1 max-w-sm mx-auto">
                   Create teams to organize your members and control access to repositories.
@@ -255,7 +256,7 @@ export function OrganizationDashboard() {
                         <CardTitle className="text-base font-medium flex items-center gap-2">
                           {team.name}
                           {team.visibility === 'secret' && (
-                            <Shield className="h-3 w-3 text-muted-foreground" />
+                            <Icon icon={Shield01Icon} className="h-3 w-3 text-muted-foreground" />
                           )}
                         </CardTitle>
                       </div>
@@ -289,7 +290,7 @@ export function OrganizationDashboard() {
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
                         {/* Placeholder avatar logic */}
-                        <Users className="h-5 w-5" />
+                        <Icon icon={UserGroupIcon} className="h-5 w-5" />
                       </div>
                       <div>
                         <div className="font-medium flex items-center gap-2">

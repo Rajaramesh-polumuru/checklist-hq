@@ -1,4 +1,5 @@
-import { X } from 'lucide-react'
+import { Cancel01Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 
 interface ErrorBannerProps {
@@ -59,7 +60,7 @@ export function ErrorBanner({
         )}
         aria-label="Dismiss error"
       >
-        <X className="h-4 w-4" />
+        <Icon icon={Cancel01Icon} className="h-4 w-4" />
         <span className="sr-only">Dismiss</span>
       </button>
     </div>
@@ -102,7 +103,7 @@ export function SuccessBanner({
         )}
         aria-label="Dismiss message"
       >
-        <X className="h-4 w-4" />
+        <Icon icon={Cancel01Icon} className="h-4 w-4" />
         <span className="sr-only">Dismiss</span>
       </button>
     </div>

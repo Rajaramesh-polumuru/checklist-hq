@@ -5,7 +5,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { X, ChevronDown, ArrowUpDown } from 'lucide-react'
+import { Cancel01Icon, ArrowDown01Icon, Sorting05Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { useMobile } from '@/hooks/useMobile'
 import type { FilterState, SortOption } from '@/lib/dashboard-utils'
 import { getActiveFilterCount } from '@/lib/dashboard-utils'
@@ -52,14 +53,13 @@ export function FilterBar({
             <Button
               variant="outline"
               size="sm"
-              className={`${isMobile ? 'w-full' : ''} transition-all duration-200 ${
-                filters.visibility !== 'all'
+              className={`${isMobile ? 'w-full' : ''} transition-all duration-200 ${filters.visibility !== 'all'
                   ? 'bg-primary/10 border-primary/30 shadow-sm scale-105'
                   : 'hover:border-border/60'
-              }`}
+                }`}
             >
               Visibility: {filters.visibility === 'all' ? 'All' : filters.visibility.charAt(0).toUpperCase() + filters.visibility.slice(1)}
-              <ChevronDown className="ml-2 h-3 w-3 transition-transform group-hover:rotate-180" />
+              <Icon icon={ArrowDown01Icon} className="ml-2 h-3 w-3 transition-transform group-hover:rotate-180" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
@@ -81,14 +81,13 @@ export function FilterBar({
             <Button
               variant="outline"
               size="sm"
-              className={`${isMobile ? 'w-full' : ''} transition-all duration-200 ${
-                filters.type !== 'all'
+              className={`${isMobile ? 'w-full' : ''} transition-all duration-200 ${filters.type !== 'all'
                   ? 'bg-primary/10 border-primary/30 shadow-sm scale-105'
                   : 'hover:border-border/60'
-              }`}
+                }`}
             >
               Type: {filters.type === 'all' ? 'All' : filters.type.charAt(0).toUpperCase() + filters.type.slice(1)}
-              <ChevronDown className="ml-2 h-3 w-3 transition-transform group-hover:rotate-180" />
+              <Icon icon={ArrowDown01Icon} className="ml-2 h-3 w-3 transition-transform group-hover:rotate-180" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
@@ -110,14 +109,13 @@ export function FilterBar({
             <Button
               variant="outline"
               size="sm"
-              className={`${isMobile ? 'w-full' : ''} transition-all duration-200 ${
-                filters.status !== 'all'
+              className={`${isMobile ? 'w-full' : ''} transition-all duration-200 ${filters.status !== 'all'
                   ? 'bg-primary/10 border-primary/30 shadow-sm scale-105'
                   : 'hover:border-border/60'
-              }`}
+                }`}
             >
               Status: {filters.status === 'all' ? 'All' : filters.status === 'recent' ? 'Recently Updated' : 'Stale'}
-              <ChevronDown className="ml-2 h-3 w-3 transition-transform group-hover:rotate-180" />
+              <Icon icon={ArrowDown01Icon} className="ml-2 h-3 w-3 transition-transform group-hover:rotate-180" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
@@ -141,7 +139,7 @@ export function FilterBar({
             onClick={onClearFilters}
             className="text-muted-foreground hover:text-foreground animate-fade-in transition-all hover:scale-105"
           >
-            <X className="mr-1 h-3 w-3" />
+            <Icon icon={Cancel01Icon} className="mr-1 h-3 w-3" />
             Clear {activeFilterCount > 1 ? `(${activeFilterCount})` : ''}
           </Button>
         )}
@@ -151,14 +149,14 @@ export function FilterBar({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className={isMobile ? 'w-full' : ''}>
-            <ArrowUpDown className="mr-2 h-4 w-4" />
+            <Icon icon={Sorting05Icon} className="mr-2 h-4 w-4" />
             Sort: {
               sortBy === 'updated' ? 'Recently Updated' :
-              sortBy === 'created' ? 'Recently Created' :
-              sortBy === 'alpha' ? 'Alphabetical' :
-              'Most Forked'
+                sortBy === 'created' ? 'Recently Created' :
+                  sortBy === 'alpha' ? 'Alphabetical' :
+                    'Most Forked'
             }
-            <ChevronDown className="ml-2 h-3 w-3" />
+            <Icon icon={ArrowDown01Icon} className="ml-2 h-3 w-3" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

@@ -2,7 +2,8 @@ import { cn } from '@/lib/utils'
 import { DESIGN_TOKENS } from '@/lib/constants'
 import { formatCompactTime } from '@/lib/date-utils'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Check } from 'lucide-react'
+import { Tick01Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import type { ChecklistItem, ItemProgress } from '@/types/database'
 
 interface RunItemProps {
@@ -58,7 +59,7 @@ export function RunItem({ item, progress, depth, onToggle }: RunItemProps) {
 
         {isCompleted && progress?.timestamp && (
           <p className="text-xs text-success mt-1 flex items-center gap-1">
-            <Check className="h-3 w-3" />
+            <Icon icon={Tick01Icon} className="h-3 w-3" />
             Completed {formatCompactTime(progress.timestamp)}
           </p>
         )}

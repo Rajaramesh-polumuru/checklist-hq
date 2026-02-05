@@ -1,5 +1,10 @@
-import { Search, X, Loader2 } from 'lucide-react'
+import {
+  Search01Icon,
+  Cancel01Icon,
+  Loading02Icon,
+} from '@hugeicons/core-free-icons'
 import { forwardRef, useEffect, useRef } from 'react'
+import { Icon } from '@/components/ui/icon'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -77,13 +82,14 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
         {/* Search Icon */}
         <div className="absolute left-0 top-0 h-full flex items-center pl-3 pointer-events-none z-10">
           {loading ? (
-            <Loader2
+            <Icon
+              icon={Loading02Icon}
               className="text-muted-foreground animate-spin"
               size={iconSize}
               aria-label="Searching"
             />
           ) : (
-            <Search className="text-muted-foreground" size={iconSize} aria-hidden="true" />
+            <Icon icon={Search01Icon} className="text-muted-foreground" size={iconSize} aria-hidden="true" />
           )}
         </div>
 
@@ -121,7 +127,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
               aria-label="Clear search"
               tabIndex={0}
             >
-              <X size={16} />
+              <Icon icon={Cancel01Icon} size={16} />
             </Button>
           </div>
         )}

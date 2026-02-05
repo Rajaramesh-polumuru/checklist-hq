@@ -7,7 +7,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { GitCommitHorizontal, Loader2 } from 'lucide-react'
+import { GitCommitIcon, Loading02Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 
 interface CommitMessageModalProps {
@@ -58,7 +59,7 @@ export function CommitMessageModal({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <GitCommitHorizontal className="h-5 w-5 text-primary" />
+            <Icon icon={GitCommitIcon} className="h-5 w-5 text-primary" />
             Save Changes
           </DialogTitle>
         </DialogHeader>
@@ -99,7 +100,7 @@ export function CommitMessageModal({
           <Button onClick={handleSave} disabled={saving}>
             {saving ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Icon icon={Loading02Icon} className="mr-2 h-4 w-4 animate-spin" />
                 Saving...
               </>
             ) : (

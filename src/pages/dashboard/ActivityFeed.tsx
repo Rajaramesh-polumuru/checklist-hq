@@ -1,7 +1,14 @@
 import { Link } from 'react-router-dom'
 import type { ActivityItem } from '@/services/activity'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Activity, Play, GitFork, GitCommit, CheckCircle2 } from 'lucide-react'
+import {
+    Activity01Icon,
+    PlayIcon,
+    GitForkIcon,
+    GitCommitIcon,
+    CheckmarkCircle02Icon
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { formatRelativeTime } from '@/lib/date-utils'
 
 interface ActivityFeedProps {
@@ -15,7 +22,7 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
             <Card className="h-full">
                 <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
-                        <Activity className="h-5 w-5" /> Activity
+                        <Icon icon={Activity01Icon} className="h-5 w-5" /> Activity
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -39,7 +46,7 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
         <Card className="h-full max-h-[500px] flex flex-col">
             <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-primary" />
+                    <Icon icon={Activity01Icon} className="h-5 w-5 text-primary" />
                     Recent Activity
                 </CardTitle>
             </CardHeader>
@@ -52,28 +59,28 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
                     ) : (
                         <div className="space-y-4">
                             {activities.map((item) => {
-                                let Icon = Activity
+                                let IconComponent = Activity01Icon
                                 let iconColor = 'text-muted-foreground'
                                 let bgColor = 'bg-muted'
 
                                 switch (item.type) {
                                     case 'run_started':
-                                        Icon = Play
+                                        IconComponent = PlayIcon
                                         iconColor = 'text-blue-500'
                                         bgColor = 'bg-blue-100 dark:bg-blue-900/30'
                                         break
                                     case 'run_completed':
-                                        Icon = CheckCircle2
+                                        IconComponent = CheckmarkCircle02Icon
                                         iconColor = 'text-green-500'
                                         bgColor = 'bg-green-100 dark:bg-green-900/30'
                                         break
                                     case 'repo_forked':
-                                        Icon = GitFork
+                                        IconComponent = GitForkIcon
                                         iconColor = 'text-purple-500'
                                         bgColor = 'bg-purple-100 dark:bg-purple-900/30'
                                         break
                                     case 'repo_created':
-                                        Icon = GitCommit
+                                        IconComponent = GitCommitIcon
                                         iconColor = 'text-amber-500'
                                         bgColor = 'bg-amber-100 dark:bg-amber-900/30'
                                         break
@@ -82,7 +89,7 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
                                 return (
                                     <div key={item.id} className="flex gap-3 relative group">
                                         <div className={`h-8 w-8 rounded-full ${bgColor} flex items-center justify-center shrink-0 z-10`}>
-                                            <Icon className={`h-4 w-4 ${iconColor}`} />
+                                            <Icon icon={IconComponent} className={`h-4 w-4 ${iconColor}`} />
                                         </div>
                                         <div className="min-w-0 flex-1 pb-1">
                                             <p className="text-sm font-medium leading-none mb-1">

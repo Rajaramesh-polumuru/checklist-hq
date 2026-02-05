@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Palette, X, Check } from 'lucide-react'
+import { PaintBrush01Icon, Cancel01Icon, Tick01Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 
 // Curated PASTEL color palettes - thinking like CDO/CMO
 // Softer, more refined colors for a premium SaaS productivity app
@@ -164,7 +165,7 @@ export function DevColorPicker() {
                 className="fixed bottom-4 left-4 z-50 p-3 rounded-full bg-card border shadow-lg hover:shadow-xl transition-all hover:scale-105 group"
                 title="Color Theme Picker (Dev)"
             >
-                <Palette className="h-5 w-5 text-primary group-hover:rotate-12 transition-transform" />
+                <Icon icon={PaintBrush01Icon} className="h-5 w-5 text-primary group-hover:rotate-12 transition-transform" />
             </button>
         )
     }
@@ -174,7 +175,7 @@ export function DevColorPicker() {
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                    <Palette className="h-5 w-5 text-primary" />
+                    <Icon icon={PaintBrush01Icon} className="h-5 w-5 text-primary" />
                     <div>
                         <h3 className="font-semibold text-sm">Primary Color</h3>
                         <p className="text-xs text-muted-foreground">Dev Theme Picker</p>
@@ -184,7 +185,7 @@ export function DevColorPicker() {
                     onClick={() => setIsOpen(false)}
                     className="p-1.5 rounded-lg hover:bg-muted transition-colors"
                 >
-                    <X className="h-4 w-4" />
+                    <Icon icon={Cancel01Icon} className="h-4 w-4" />
                 </button>
             </div>
 
@@ -212,7 +213,7 @@ export function DevColorPicker() {
                             {/* Active indicator */}
                             {activeTheme === key && (
                                 <div className="absolute top-1 right-1 p-0.5 rounded-full bg-primary text-primary-foreground">
-                                    <Check className="h-2.5 w-2.5" />
+                                    <Icon icon={Tick01Icon} className="h-2.5 w-2.5" />
                                 </div>
                             )}
                         </button>

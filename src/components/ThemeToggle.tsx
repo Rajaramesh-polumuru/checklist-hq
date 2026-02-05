@@ -1,4 +1,5 @@
-import { Moon, Sun, Monitor } from 'lucide-react'
+import { Moon02Icon, Sun03Icon, ComputerIcon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { Button } from '@/components/ui/button'
 import { useThemeStore } from '@/stores/theme-store'
 
@@ -18,11 +19,11 @@ export function ThemeToggle() {
 
   const getIcon = () => {
     if (theme === 'light') {
-      return <Sun className="h-4 w-4" />
+      return <Icon icon={Sun03Icon} className="h-4 w-4" />
     } else if (theme === 'dark') {
-      return <Moon className="h-4 w-4" />
+      return <Icon icon={Moon02Icon} className="h-4 w-4" />
     } else {
-      return <Monitor className="h-4 w-4" />
+      return <Icon icon={ComputerIcon} className="h-4 w-4" />
     }
   }
 

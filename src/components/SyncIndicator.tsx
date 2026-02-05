@@ -5,7 +5,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { Cloud, CloudOff, Smartphone, Monitor, Tablet, Loader2 } from 'lucide-react'
+import {
+  CloudIcon,
+  AlertCircleIcon,
+  SmartPhone01Icon,
+  ComputerIcon,
+  Tablet01Icon,
+  Loading02Icon
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 import { formatRelativeTime } from '@/lib/date-utils'
 
@@ -31,12 +39,12 @@ interface SyncIndicatorProps {
 function getDeviceIcon(deviceName: string | null) {
   const name = (deviceName || '').toLowerCase()
   if (name.includes('iphone') || name.includes('android')) {
-    return Smartphone
+    return SmartPhone01Icon
   }
   if (name.includes('ipad') || name.includes('tablet')) {
-    return Tablet
+    return Tablet01Icon
   }
-  return Monitor
+  return ComputerIcon
 }
 
 export function SyncIndicator({
@@ -60,32 +68,32 @@ export function SyncIndicator({
   const statusConfig = {
     connected: {
       color: 'bg-success',
-      icon: Cloud,
+      icon: CloudIcon,
       label: 'Synced',
       description: 'All changes saved',
     },
     syncing: {
       color: 'bg-warning',
-      icon: Loader2,
+      icon: Loading02Icon,
       label: 'Syncing',
       description: 'Saving changes...',
     },
     error: {
       color: 'bg-destructive',
-      icon: CloudOff,
+      icon: AlertCircleIcon,
       label: 'Sync Error',
       description: syncError || 'Unable to sync',
     },
     offline: {
       color: 'bg-muted-foreground',
-      icon: CloudOff,
+      icon: AlertCircleIcon,
       label: 'Offline',
       description: 'Not connected',
     },
   }
 
   const config = statusConfig[status]
-  const Icon = config.icon
+  const StatusIcon = config.icon
 
   // Compact mode - just show dot
   if (compact) {
@@ -111,7 +119,7 @@ export function SyncIndicator({
           <TooltipContent side="bottom" className="max-w-xs">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Icon className={cn('h-4 w-4', status === 'syncing' && 'animate-spin')} />
+                <Icon icon={StatusIcon} className={cn('h-4 w-4', status === 'syncing' && 'animate-spin')} />
                 <span className="font-medium">{config.label}</span>
               </div>
               <p className="text-xs text-muted-foreground">{config.description}</p>
@@ -128,7 +136,7 @@ export function SyncIndicator({
                       const DeviceIcon = getDeviceIcon(device.device_name)
                       return (
                         <div key={device.device_id} className="flex items-center gap-2 text-xs">
-                          <DeviceIcon className="h-3 w-3" />
+                          <Icon icon={DeviceIcon} className="h-3 w-3" />
                           <span>{device.device_name || 'Unknown device'}</span>
                         </div>
                       )
@@ -168,13 +176,13 @@ export function SyncIndicator({
                   <>
                     {(() => {
                       const DeviceIcon = getDeviceIcon(otherDevices[0].device_name)
-                      return <DeviceIcon className="h-3 w-3" />
+                      return <Icon icon={DeviceIcon} className="h-3 w-3" />
                     })()}
                     <span>{otherDevices[0].device_name || 'Other device'}</span>
                   </>
                 ) : (
                   <>
-                    <Monitor className="h-3 w-3" />
+                    <Icon icon={ComputerIcon} className="h-3 w-3" />
                     <span>{otherDevices.length} devices</span>
                   </>
                 )}
@@ -187,7 +195,7 @@ export function SyncIndicator({
                   const DeviceIcon = getDeviceIcon(device.device_name)
                   return (
                     <div key={device.device_id} className="flex items-center gap-2 text-xs">
-                      <DeviceIcon className="h-3 w-3" />
+                      <Icon icon={DeviceIcon} className="h-3 w-3" />
                       <span>{device.device_name || 'Unknown device'}</span>
                       <span className="text-muted-foreground">
                         ({formatRelativeTime(device.last_seen_at)})

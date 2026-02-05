@@ -8,17 +8,18 @@ import { ToastContainer } from '@/components/Toast'
 import { useToast } from '@/hooks/useToast'
 import { FormattedText } from '@/lib/rich-text'
 import {
-  ArrowLeft,
-  GitFork,
-  Globe,
-  Lock,
-  Loader2,
-  Clock,
-  ListChecks,
-  ChevronRight,
-  Play,
-  Pencil,
-} from 'lucide-react'
+  ArrowLeft01Icon,
+  GitForkIcon,
+  Globe02Icon,
+  LockKeyIcon,
+  Loading02Icon,
+  Clock01Icon,
+  CheckListIcon,
+  ArrowRight01Icon,
+  PlayIcon,
+  PencilEdit02Icon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
 import { getRepository, getLatestCommit } from '@/services/repository'
 import { getMyActiveAndPausedRunsForRepo } from '@/services/run'
@@ -134,7 +135,7 @@ export function ViewRepository() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Icon icon={Loading02Icon} className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -160,7 +161,7 @@ export function ViewRepository() {
             <div className="flex items-start gap-4">
               <Button variant="ghost" size="icon" asChild>
                 <Link to="/explore">
-                  <ArrowLeft className="h-4 w-4" />
+                  <Icon icon={ArrowLeft01Icon} className="h-4 w-4" />
                 </Link>
               </Button>
               <div>
@@ -172,26 +173,26 @@ export function ViewRepository() {
                   <span className="flex items-center gap-1">
                     {repository.is_public ? (
                       <>
-                        <Globe className="h-4 w-4" />
+                        <Icon icon={Globe02Icon} className="h-4 w-4" />
                         Public
                       </>
                     ) : (
                       <>
-                        <Lock className="h-4 w-4" />
+                        <Icon icon={LockKeyIcon} className="h-4 w-4" />
                         Private
                       </>
                     )}
                   </span>
                   <span className="flex items-center gap-1">
-                    <GitFork className="h-4 w-4" />
+                    <Icon icon={GitForkIcon} className="h-4 w-4" />
                     {repository.fork_count} forks
                   </span>
                   <span className="flex items-center gap-1">
-                    <ListChecks className="h-4 w-4" />
+                    <Icon icon={CheckListIcon} className="h-4 w-4" />
                     {items.length} items
                   </span>
                   <span className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
+                    <Icon icon={Clock01Icon} className="h-4 w-4" />
                     Updated {formatDate(repository.updated_at)}
                   </span>
                 </div>
@@ -203,18 +204,18 @@ export function ViewRepository() {
                 <>
                   <Button asChild variant="outline">
                     <Link to={`/app/repo/${repository.id}`}>
-                      <Pencil className="mr-2 h-4 w-4" />
+                      <Icon icon={PencilEdit02Icon} className="mr-2 h-4 w-4" />
                       Edit
                     </Link>
                   </Button>
                   <Button onClick={() => setRunModalOpen(true)}>
-                    <Play className="mr-2 h-4 w-4" />
+                    <Icon icon={PlayIcon} className="mr-2 h-4 w-4" />
                     Run Now
                   </Button>
                 </>
               ) : (
                 <Button onClick={handleForkClick} className="gap-2">
-                  <GitFork className="h-4 w-4" />
+                  <Icon icon={GitForkIcon} className="h-4 w-4" />
                   {user ? 'Fork to My Checklists' : 'Sign in to Fork'}
                 </Button>
               )}
@@ -233,7 +234,7 @@ export function ViewRepository() {
               <Card className="mb-6 bg-muted/50">
                 <CardContent className="py-4">
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <GitFork className="h-4 w-4" />
+                    <Icon icon={GitForkIcon} className="h-4 w-4" />
                     This is a forked checklist
                   </p>
                 </CardContent>
@@ -244,7 +245,7 @@ export function ViewRepository() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <ListChecks className="h-5 w-5" />
+                  <Icon icon={CheckListIcon} className="h-5 w-5" />
                   Checklist Preview
                 </CardTitle>
                 <CardDescription>
@@ -284,14 +285,14 @@ export function ViewRepository() {
               <Card className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-primary/5">
                 <CardContent className="p-6 text-center">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                    <GitFork className="h-5 w-5 text-primary" />
+                    <Icon icon={GitForkIcon} className="h-5 w-5 text-primary" />
                   </div>
                   <h3 className="font-semibold text-base mb-1">Fork & customize</h3>
                   <p className="text-muted-foreground text-xs mb-4">
                     Copy this checklist to your account to edit and run it.
                   </p>
                   <Button onClick={handleForkClick} className="w-full gap-2 text-sm">
-                    <GitFork className="h-4 w-4" />
+                    <Icon icon={GitForkIcon} className="h-4 w-4" />
                     {user ? 'Fork Checklist' : 'Sign in to Fork'}
                   </Button>
                 </CardContent>
@@ -339,7 +340,7 @@ function ViewItem({ item, depth }: { item: ChecklistItem; depth: number }) {
       )}
       style={{ marginLeft: depth > 0 ? `${depth * 24}px` : undefined }}
     >
-      <ChevronRight className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+      <Icon icon={ArrowRight01Icon} className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="text-sm">{item.text ? <FormattedText text={item.text} /> : 'Untitled item'}</p>
         {item.details && (

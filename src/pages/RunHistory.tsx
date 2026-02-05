@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
 import { getMyCompletedRuns } from '@/services/run'
 import { RunCard } from '@/components/RunCard'
-import { Loader2, History } from 'lucide-react'
+import { Loading02Icon, Clock01Icon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import type { Run } from '@/types/database'
 
 // Define the type to match getMyCompletedRuns return
@@ -36,7 +37,7 @@ export function RunHistory() {
     if (loading) {
         return (
             <div className="container mx-auto px-4 py-8 flex justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Icon icon={Loading02Icon} className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
         )
     }
@@ -44,7 +45,7 @@ export function RunHistory() {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex items-center gap-2 mb-8">
-                <History className="h-6 w-6 text-primary" />
+                <Icon icon={Clock01Icon} className="h-6 w-6 text-primary" />
                 <h1 className="text-3xl font-bold">Run History</h1>
             </div>
 

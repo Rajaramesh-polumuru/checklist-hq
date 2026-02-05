@@ -20,39 +20,35 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { formatRelativeTime } from '@/lib/date-utils'
 import {
-    Loader2,
-    GitFork,
-    Globe,
-    Lock,
-    Calendar,
-    Play,
-    CheckCircle2,
-    Plus,
-    ListChecks,
-    TrendingUp,
-    Award,
-    Star,
-    Zap,
-    Clock,
-    ArrowRight,
-    Settings,
-    Bell,
-    Download,
-    Shield,
-    MoreVertical,
-    Pencil,
-    Trash2,
-    Activity,
-    ChevronRight,
-    Sparkles,
-    Target,
-    BarChart3,
-    Trophy,
-    Crown,
-    Flame,
-    Mail,
-    LogOut,
-} from 'lucide-react'
+    Loading02Icon,
+    GitForkIcon,
+    Globe02Icon,
+    LockKeyIcon,
+    Calendar01Icon,
+    PlayIcon,
+    CheckmarkCircle02Icon,
+    PlusSignIcon,
+    CheckListIcon,
+    ArrowUpRight01Icon,
+    StarIcon,
+    FlashIcon,
+    Clock01Icon,
+    ArrowRight01Icon,
+    Settings02Icon,
+    Notification01Icon,
+    Download01Icon,
+    Shield01Icon,
+    MoreVerticalCircle01Icon,
+    PencilEdit02Icon,
+    Delete02Icon,
+    Activity01Icon,
+    SparklesIcon,
+    Target01Icon,
+    Analytics01Icon,
+    Mail01Icon,
+    Logout02Icon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { ApiKeyManager } from '@/components/ApiKeyManager'
 
 // ... existing code ...
@@ -70,7 +66,7 @@ interface Achievement {
 
 // Stats card component
 function StatCard({
-    icon: Icon,
+    icon: IconSymbol,
     label,
     value,
     subLabel,
@@ -78,7 +74,7 @@ function StatCard({
     bgColor,
     trend,
 }: {
-    icon: React.ComponentType<{ className?: string }>
+    icon: any
     label: string
     value: number | string
     subLabel?: string
@@ -90,11 +86,11 @@ function StatCard({
         <div className="bg-card border rounded-2xl p-5 hover:shadow-lg hover:shadow-black/5 transition-all duration-300 hover:-translate-y-0.5 group">
             <div className="flex items-start justify-between">
                 <div className={`h-12 w-12 rounded-xl ${bgColor} flex items-center justify-center transition-transform group-hover:scale-110`}>
-                    <Icon className={`h-6 w-6 ${color}`} />
+                    <Icon icon={IconSymbol} className={`h-6 w-6 ${color}`} />
                 </div>
                 {trend && (
                     <div className={`flex items-center gap-1 text-xs font-medium ${trend.positive ? 'text-emerald-500' : 'text-red-500'}`}>
-                        <TrendingUp className={`h-3 w-3 ${!trend.positive && 'rotate-180'}`} />
+                        <Icon icon={ArrowUpRight01Icon} className={`h-3 w-3 ${!trend.positive && 'rotate-180'}`} />
                         {trend.value}%
                     </div>
                 )}
@@ -130,7 +126,7 @@ function AchievementBadge({ achievement }: { achievement: Achievement }) {
                             {achievement.title}
                         </h4>
                         {achievement.earned && (
-                            <CheckCircle2 className="h-4 w-4 text-white/80" />
+                            <Icon icon={CheckmarkCircle02Icon} className="h-4 w-4 text-white/80" />
                         )}
                     </div>
                     <p className={`text-xs mt-0.5 ${achievement.earned ? 'text-white/70' : 'text-muted-foreground'}`}>
@@ -156,13 +152,13 @@ function ActivityTimelineItem({ item, isLast }: { item: ActivityItem; isFirst?: 
     const getIcon = (type: ActivityItem['type']) => {
         switch (type) {
             case 'run_started':
-                return <Play className="h-4 w-4 text-sky-500" />
+                return <Icon icon={PlayIcon} className="h-4 w-4 text-sky-500" />
             case 'run_completed':
-                return <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                return <Icon icon={CheckmarkCircle02Icon} className="h-4 w-4 text-emerald-500" />
             case 'repo_forked':
-                return <GitFork className="h-4 w-4 text-violet-500" />
+                return <Icon icon={GitForkIcon} className="h-4 w-4 text-violet-500" />
             case 'repo_created':
-                return <Plus className="h-4 w-4 text-amber-500" />
+                return <Icon icon={PlusSignIcon} className="h-4 w-4 text-amber-500" />
         }
     }
 
@@ -223,7 +219,7 @@ function SettingsPanel({ onExport, isExporting }: { onExport: () => void; isExpo
         <Card className="overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                    <Settings className="h-5 w-5 text-primary" />
+                    <Icon icon={Settings02Icon} className="h-5 w-5 text-primary" />
                     Settings & Preferences
                 </CardTitle>
                 <CardDescription>Manage your account settings and preferences</CardDescription>
@@ -238,7 +234,7 @@ function SettingsPanel({ onExport, isExporting }: { onExport: () => void; isExpo
                     >
                         <div className="flex items-center gap-3">
                             <div className="h-10 w-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                <Download className="h-5 w-5 text-emerald-600" />
+                                <Icon icon={Download01Icon} className="h-5 w-5 text-emerald-600" />
                             </div>
                             <div>
                                 <p className="font-medium">Export My Data</p>
@@ -246,9 +242,9 @@ function SettingsPanel({ onExport, isExporting }: { onExport: () => void; isExpo
                             </div>
                         </div>
                         {isExporting ? (
-                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                            <Icon icon={Loading02Icon} className="h-5 w-5 animate-spin text-muted-foreground" />
                         ) : (
-                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                            <Icon icon={ArrowRight01Icon} className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
                         )}
                     </button>
 
@@ -256,7 +252,7 @@ function SettingsPanel({ onExport, isExporting }: { onExport: () => void; isExpo
                     <div className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="h-10 w-10 rounded-lg bg-sky-100 flex items-center justify-center">
-                                <Shield className="h-5 w-5 text-sky-600" />
+                                <Icon icon={Shield01Icon} className="h-5 w-5 text-sky-600" />
                             </div>
                             <div>
                                 <p className="font-medium">Privacy & Security</p>
@@ -264,7 +260,7 @@ function SettingsPanel({ onExport, isExporting }: { onExport: () => void; isExpo
                             </div>
                         </div>
                         <Badge variant="outline" className="text-emerald-600 border-emerald-300 bg-emerald-50">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            <Icon icon={CheckmarkCircle02Icon} className="h-3 w-3 mr-1" />
                             Secured
                         </Badge>
                     </div>
@@ -273,7 +269,7 @@ function SettingsPanel({ onExport, isExporting }: { onExport: () => void; isExpo
                     <div className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="h-10 w-10 rounded-lg bg-violet-100 flex items-center justify-center">
-                                <Bell className="h-5 w-5 text-violet-600" />
+                                <Icon icon={Notification01Icon} className="h-5 w-5 text-violet-600" />
                             </div>
                             <div>
                                 <p className="font-medium">Notifications</p>
@@ -290,14 +286,14 @@ function SettingsPanel({ onExport, isExporting }: { onExport: () => void; isExpo
                     >
                         <div className="flex items-center gap-3">
                             <div className="h-10 w-10 rounded-lg bg-red-100 flex items-center justify-center">
-                                <LogOut className="h-5 w-5 text-red-600" />
+                                <Icon icon={Logout02Icon} className="h-5 w-5 text-red-600" />
                             </div>
                             <div>
                                 <p className="font-medium text-red-600">Sign Out</p>
                                 <p className="text-sm text-muted-foreground">Sign out of your account</p>
                             </div>
                         </div>
-                        <ChevronRight className="h-5 w-5 text-red-400 group-hover:translate-x-1 transition-transform" />
+                        <Icon icon={ArrowRight01Icon} className="h-5 w-5 text-red-400 group-hover:translate-x-1 transition-transform" />
                     </button>
                 </div>
             </CardContent>
@@ -321,9 +317,9 @@ function ChecklistCard({ repo, onDelete }: { repo: Repository; onDelete: (id: st
                         <div className={`h-10 w-10 rounded-lg ${repo.is_public ? 'bg-sky-100' : 'bg-violet-100'
                             } flex items-center justify-center shrink-0`}>
                             {repo.is_public ? (
-                                <Globe className="h-5 w-5 text-sky-600" />
+                                <Icon icon={Globe02Icon} className="h-5 w-5 text-sky-600" />
                             ) : (
-                                <Lock className="h-5 w-5 text-violet-600" />
+                                <Icon icon={LockKeyIcon} className="h-5 w-5 text-violet-600" />
                             )}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -334,7 +330,7 @@ function ChecklistCard({ repo, onDelete }: { repo: Repository; onDelete: (id: st
                                 </Badge>
                                 {repo.upstream_repo_id && (
                                     <Badge variant="outline" className="text-xs text-violet-500 border-violet-300">
-                                        <GitFork className="h-3 w-3 mr-1" />
+                                        <Icon icon={GitForkIcon} className="h-3 w-3 mr-1" />
                                         Forked
                                     </Badge>
                                 )}
@@ -350,12 +346,12 @@ function ChecklistCard({ repo, onDelete }: { repo: Repository; onDelete: (id: st
                 <CardContent>
                     <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <span className="flex items-center gap-1.5">
-                            <Clock className="h-3.5 w-3.5" />
+                            <Icon icon={Clock01Icon} className="h-3.5 w-3.5" />
                             {formatRelativeTime(repo.updated_at)}
                         </span>
                         {repo.fork_count > 0 && (
                             <span className="flex items-center gap-1">
-                                <GitFork className="h-3 w-3" />
+                                <Icon icon={GitForkIcon} className="h-3 w-3" />
                                 {repo.fork_count}
                             </span>
                         )}
@@ -370,19 +366,19 @@ function ChecklistCard({ repo, onDelete }: { repo: Repository; onDelete: (id: st
                         className="absolute top-3 right-3 p-2 rounded-md bg-card/90 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 shadow-sm"
                         onClick={(e) => e.preventDefault()}
                     >
-                        <MoreVertical className="h-4 w-4" />
+                        <Icon icon={MoreVerticalCircle01Icon} className="h-4 w-4" />
                     </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem asChild>
                         <Link to={`/app/repo/${repo.id}`}>
-                            <Pencil className="mr-2 h-4 w-4" />
+                            <Icon icon={PencilEdit02Icon} className="mr-2 h-4 w-4" />
                             Edit
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                         <Link to={`/app/run/start/${repo.id}`}>
-                            <Play className="mr-2 h-4 w-4" />
+                            <Icon icon={PlayIcon} className="mr-2 h-4 w-4" />
                             Start Run
                         </Link>
                     </DropdownMenuItem>
@@ -391,7 +387,7 @@ function ChecklistCard({ repo, onDelete }: { repo: Repository; onDelete: (id: st
                         onClick={() => onDelete(repo.id)}
                         className="text-red-600 focus:text-red-600"
                     >
-                        <Trash2 className="mr-2 h-4 w-4" />
+                        <Icon icon={Delete02Icon} className="mr-2 h-4 w-4" />
                         Delete
                     </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -433,7 +429,7 @@ export function Profile() {
                 id: 'first_checklist',
                 title: 'Getting Started',
                 description: 'Create your first checklist',
-                icon: <Sparkles className="h-5 w-5 text-amber-500" />,
+                icon: <Icon icon={SparklesIcon} className="h-5 w-5 text-amber-500" />,
                 color: 'text-amber-500',
                 bgColor: 'bg-gradient-to-br from-amber-400 to-orange-500',
                 earned: totalChecklists >= 1,
@@ -442,7 +438,7 @@ export function Profile() {
                 id: 'first_run',
                 title: 'Runner',
                 description: 'Complete your first run',
-                icon: <Target className="h-5 w-5 text-emerald-500" />,
+                icon: <Icon icon={Target01Icon} className="h-5 w-5 text-emerald-500" />,
                 color: 'text-emerald-500',
                 bgColor: 'bg-gradient-to-br from-emerald-400 to-green-500',
                 earned: totalCompleted >= 1,
@@ -451,7 +447,7 @@ export function Profile() {
                 id: 'five_checklists',
                 title: 'Organizer',
                 description: 'Create 5 checklists',
-                icon: <ListChecks className="h-5 w-5 text-sky-500" />,
+                icon: <Icon icon={CheckListIcon} className="h-5 w-5 text-sky-500" />,
                 color: 'text-sky-500',
                 bgColor: 'bg-gradient-to-br from-sky-400 to-blue-500',
                 earned: totalChecklists >= 5,
@@ -462,7 +458,7 @@ export function Profile() {
                 id: 'community_contributor',
                 title: 'Community Contributor',
                 description: 'Make a checklist public',
-                icon: <Globe className="h-5 w-5 text-violet-500" />,
+                icon: <Icon icon={Globe02Icon} className="h-5 w-5 text-violet-500" />,
                 color: 'text-violet-500',
                 bgColor: 'bg-gradient-to-br from-violet-400 to-purple-500',
                 earned: publicChecklists >= 1,
@@ -471,7 +467,7 @@ export function Profile() {
                 id: 'template_user',
                 title: 'Template User',
                 description: 'Fork a community checklist',
-                icon: <GitFork className="h-5 w-5 text-pink-500" />,
+                icon: <Icon icon={GitForkIcon} className="h-5 w-5 text-pink-500" />,
                 color: 'text-pink-500',
                 bgColor: 'bg-gradient-to-br from-pink-400 to-rose-500',
                 earned: forkedChecklists >= 1,
@@ -480,7 +476,7 @@ export function Profile() {
                 id: 'influencer',
                 title: 'Influencer',
                 description: 'Get 10 forks on your checklists',
-                icon: <Crown className="h-5 w-5 text-yellow-500" />,
+                icon: <Icon icon={StarIcon} className="h-5 w-5 text-yellow-500" />,
                 color: 'text-yellow-500',
                 bgColor: 'bg-gradient-to-br from-yellow-400 to-amber-500',
                 earned: totalForks >= 10,
@@ -491,7 +487,7 @@ export function Profile() {
                 id: 'productivity_master',
                 title: 'Productivity Master',
                 description: 'Complete 25 runs',
-                icon: <Trophy className="h-5 w-5 text-orange-500" />,
+                icon: <Icon icon={StarIcon} className="h-5 w-5 text-orange-500" />,
                 color: 'text-orange-500',
                 bgColor: 'bg-gradient-to-br from-orange-400 to-red-500',
                 earned: totalCompleted >= 25,
@@ -502,7 +498,7 @@ export function Profile() {
                 id: 'streak_master',
                 title: 'On Fire',
                 description: 'Complete runs 7 days in a row',
-                icon: <Flame className="h-5 w-5 text-red-500" />,
+                icon: <Icon icon={FlashIcon} className="h-5 w-5 text-red-500" />,
                 color: 'text-red-500',
                 bgColor: 'bg-gradient-to-br from-red-400 to-orange-500',
                 earned: false, // Would need streak tracking
@@ -646,7 +642,7 @@ export function Profile() {
                             </div>
                             {/* Achievement badge on avatar */}
                             <div className="absolute -bottom-1 -right-1 h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center border-4 border-background shadow-lg">
-                                <Trophy className="h-5 w-5 text-white" />
+                                <Icon icon={StarIcon} className="h-5 w-5 text-white" />
                             </div>
                         </div>
 
@@ -657,27 +653,27 @@ export function Profile() {
                                     {user?.email?.split('@')[0]}
                                 </h1>
                                 <Badge className="bg-gradient-to-r from-primary to-violet-500 text-white border-0 shadow-lg">
-                                    <Star className="h-3 w-3 mr-1" />
+                                    <Icon icon={StarIcon} className="h-3 w-3 mr-1" />
                                     Pro User
                                 </Badge>
                             </div>
                             <div className="flex flex-wrap items-center gap-4 mt-2 text-muted-foreground">
                                 <span className="flex items-center gap-1.5">
-                                    <Mail className="h-4 w-4" />
+                                    <Icon icon={Mail01Icon} className="h-4 w-4" />
                                     {user?.email}
                                 </span>
                                 <span className="flex items-center gap-1.5">
-                                    <Calendar className="h-4 w-4" />
+                                    <Icon icon={Calendar01Icon} className="h-4 w-4" />
                                     Joined {joinDate}
                                 </span>
                             </div>
                             <div className="flex items-center gap-2 mt-4">
                                 <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
-                                    <Award className="h-3 w-3 mr-1" />
+                                    <Icon icon={StarIcon} className="h-3 w-3 mr-1" />
                                     {earnedCount} Achievement{earnedCount !== 1 ? 's' : ''}
                                 </Badge>
                                 <Badge variant="outline" className="text-emerald-600 border-emerald-300 bg-emerald-50">
-                                    <Zap className="h-3 w-3 mr-1" />
+                                    <Icon icon={FlashIcon} className="h-3 w-3 mr-1" />
                                     {stats.completedRuns} Runs Completed
                                 </Badge>
                             </div>
@@ -687,13 +683,13 @@ export function Profile() {
                         <div className="flex flex-col sm:flex-row gap-3">
                             <Button asChild className="shadow-lg shadow-primary/25">
                                 <Link to="/app/new">
-                                    <Plus className="mr-2 h-4 w-4" />
+                                    <Icon icon={PlusSignIcon} className="mr-2 h-4 w-4" />
                                     New Checklist
                                 </Link>
                             </Button>
                             <Button variant="outline" asChild>
                                 <Link to="/app">
-                                    <BarChart3 className="mr-2 h-4 w-4" />
+                                    <Icon icon={Analytics01Icon} className="mr-2 h-4 w-4" />
                                     Dashboard
                                 </Link>
                             </Button>
@@ -726,7 +722,7 @@ export function Profile() {
                         {/* Stats Grid */}
                         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             <StatCard
-                                icon={ListChecks}
+                                icon={CheckListIcon}
                                 label="Total Checklists"
                                 value={repos.length}
                                 subLabel="Templates created"
@@ -734,7 +730,7 @@ export function Profile() {
                                 bgColor="bg-primary/10"
                             />
                             <StatCard
-                                icon={Play}
+                                icon={PlayIcon}
                                 label="Active Runs"
                                 value={stats.activeRuns}
                                 subLabel="In progress"
@@ -742,7 +738,7 @@ export function Profile() {
                                 bgColor="bg-sky-100"
                             />
                             <StatCard
-                                icon={CheckCircle2}
+                                icon={CheckmarkCircle02Icon}
                                 label="Completed Runs"
                                 value={stats.completedRuns}
                                 subLabel="All time"
@@ -751,7 +747,7 @@ export function Profile() {
                                 trend={{ value: 12, positive: true }}
                             />
                             <StatCard
-                                icon={GitFork}
+                                icon={GitForkIcon}
                                 label="Total Forks"
                                 value={repos.reduce((sum, r) => sum + r.fork_count, 0)}
                                 subLabel="Community impact"
@@ -766,7 +762,7 @@ export function Profile() {
                             <div className="lg:col-span-2">
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-xl font-semibold flex items-center gap-2">
-                                        <Trophy className="h-5 w-5 text-amber-500" />
+                                        <Icon icon={StarIcon} className="h-5 w-5 text-amber-500" />
                                         Achievements
                                     </h2>
                                     <Badge variant="outline">
@@ -784,20 +780,20 @@ export function Profile() {
                             <div>
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-xl font-semibold flex items-center gap-2">
-                                        <Activity className="h-5 w-5 text-primary" />
+                                        <Icon icon={Activity01Icon} className="h-5 w-5 text-primary" />
                                         Recent Activity
                                     </h2>
                                     <Button variant="ghost" size="sm" asChild>
                                         <Link to="/app/activity">
                                             View All
-                                            <ArrowRight className="ml-1 h-4 w-4" />
+                                            <Icon icon={ArrowRight01Icon} className="ml-1 h-4 w-4" />
                                         </Link>
                                     </Button>
                                 </div>
                                 {activities.length === 0 ? (
                                     <Card className="border-dashed">
                                         <CardContent className="py-8 text-center">
-                                            <Activity className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                            <Icon icon={Activity01Icon} className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                                             <p className="text-sm text-muted-foreground">No recent activity</p>
                                         </CardContent>
                                     </Card>
@@ -822,20 +818,20 @@ export function Profile() {
                                 <h2 className="text-xl font-semibold">Recent Checklists</h2>
                                 <Button variant="ghost" size="sm" onClick={() => setActiveTab('checklists')}>
                                     View All
-                                    <ArrowRight className="ml-1 h-4 w-4" />
+                                    <Icon icon={ArrowRight01Icon} className="ml-1 h-4 w-4" />
                                 </Button>
                             </div>
                             {repos.length === 0 ? (
                                 <Card className="border-dashed">
                                     <CardContent className="py-12 text-center">
-                                        <ListChecks className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                        <Icon icon={CheckListIcon} className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                                         <h3 className="font-semibold mb-2">No checklists yet</h3>
                                         <p className="text-sm text-muted-foreground mb-4">
                                             Create your first checklist to get started
                                         </p>
                                         <Button asChild>
                                             <Link to="/app/new">
-                                                <Plus className="mr-2 h-4 w-4" />
+                                                <Icon icon={PlusSignIcon} className="mr-2 h-4 w-4" />
                                                 Create Checklist
                                             </Link>
                                         </Button>
@@ -871,7 +867,7 @@ export function Profile() {
                                 />
                                 <Button asChild>
                                     <Link to="/app/new">
-                                        <Plus className="mr-2 h-4 w-4" />
+                                        <Icon icon={PlusSignIcon} className="mr-2 h-4 w-4" />
                                         New
                                     </Link>
                                 </Button>
@@ -883,7 +879,7 @@ export function Profile() {
                                 <CardContent className="py-12 text-center">
                                     {searchQuery.trim() ? (
                                         <>
-                                            <ListChecks className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                            <Icon icon={CheckListIcon} className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                                             <h3 className="font-semibold mb-2">No matches found</h3>
                                             <p className="text-sm text-muted-foreground mb-4">
                                                 No checklists match "{searchQuery}"
@@ -894,7 +890,7 @@ export function Profile() {
                                         </>
                                     ) : (
                                         <>
-                                            <ListChecks className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                            <Icon icon={CheckListIcon} className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                                             <h3 className="font-semibold mb-2">No checklists yet</h3>
                                             <p className="text-sm text-muted-foreground mb-4">
                                                 Create your first checklist to get started
@@ -902,13 +898,13 @@ export function Profile() {
                                             <div className="flex gap-3 justify-center">
                                                 <Button asChild>
                                                     <Link to="/app/new">
-                                                        <Plus className="mr-2 h-4 w-4" />
+                                                        <Icon icon={PlusSignIcon} className="mr-2 h-4 w-4" />
                                                         Create New
                                                     </Link>
                                                 </Button>
                                                 <Button variant="outline" asChild>
                                                     <Link to="/explore">
-                                                        <GitFork className="mr-2 h-4 w-4" />
+                                                        <Icon icon={GitForkIcon} className="mr-2 h-4 w-4" />
                                                         Explore Templates
                                                     </Link>
                                                 </Button>
@@ -939,7 +935,7 @@ export function Profile() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-xl font-semibold flex items-center gap-2">
-                                    <Activity className="h-5 w-5 text-primary" />
+                                    <Icon icon={Activity01Icon} className="h-5 w-5 text-primary" />
                                     Activity Timeline
                                 </h2>
                                 <p className="text-sm text-muted-foreground">
@@ -951,7 +947,7 @@ export function Profile() {
                         {activities.length === 0 ? (
                             <Card className="border-dashed">
                                 <CardContent className="py-12 text-center">
-                                    <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                    <Icon icon={Activity01Icon} className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                                     <h3 className="font-semibold mb-2">No activity yet</h3>
                                     <p className="text-sm text-muted-foreground mb-4">
                                         Start a run or create a checklist to see activity
@@ -959,7 +955,7 @@ export function Profile() {
                                     <div className="flex gap-3 justify-center">
                                         <Button asChild>
                                             <Link to="/app/new">
-                                                <Plus className="mr-2 h-4 w-4" />
+                                                <Icon icon={PlusSignIcon} className="mr-2 h-4 w-4" />
                                                 Create Checklist
                                             </Link>
                                         </Button>
@@ -987,7 +983,7 @@ export function Profile() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-xl font-semibold flex items-center gap-2">
-                                    <Zap className="h-5 w-5 text-primary" />
+                                    <Icon icon={FlashIcon} className="h-5 w-5 text-primary" />
                                     Integrations & API
                                 </h2>
                                 <p className="text-sm text-muted-foreground">
@@ -1009,7 +1005,7 @@ export function Profile() {
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-lg">
-                                    <Trophy className="h-5 w-5 text-amber-500" />
+                                    <Icon icon={StarIcon} className="h-5 w-5 text-amber-500" />
                                     All Achievements
                                 </CardTitle>
                                 <CardDescription>

@@ -13,15 +13,16 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import {
-  GitFork,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-  ListChecks,
-  Copy,
-  ArrowRight,
-  Sparkles,
-} from 'lucide-react'
+  GitForkIcon,
+  Loading02Icon,
+  CheckmarkCircle02Icon,
+  AlertCircleIcon,
+  CheckListIcon,
+  Copy01Icon,
+  ArrowRight01Icon,
+  SparklesIcon,
+} from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
 import { forkRepository, getLatestCommit } from '@/services/repository'
 import type { Repository, Commit, ChecklistItem } from '@/types/database'
@@ -179,7 +180,7 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <GitFork className="h-4 w-4 text-primary" />
+              <Icon icon={GitForkIcon} className="h-4 w-4 text-primary" />
             </div>
             {forkState === 'success' ? 'Fork Complete!' : 'Fork Checklist'}
           </DialogTitle>
@@ -193,7 +194,7 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
         {/* Loading Preview State */}
         {forkState === 'loading-preview' && (
           <div className="py-8 text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground mb-3" />
+            <Icon icon={Loading02Icon} className="h-8 w-8 animate-spin mx-auto text-muted-foreground mb-3" />
             <p className="text-sm text-muted-foreground">Loading checklist preview...</p>
           </div>
         )}
@@ -205,7 +206,7 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
             <div className="p-3 bg-muted/50 rounded-lg border">
               <div className="flex items-start gap-3">
                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <ListChecks className="h-5 w-5 text-primary" />
+                  <Icon icon={CheckListIcon} className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{repository.title}</p>
@@ -247,8 +248,8 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
 
             {/* Arrow Divider */}
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
-              <Copy className="h-4 w-4" />
-              <ArrowRight className="h-4 w-4" />
+              <Icon icon={Copy01Icon} className="h-4 w-4" />
+              <Icon icon={ArrowRight01Icon} className="h-4 w-4" />
             </div>
 
             {/* New Fork Info */}
@@ -267,7 +268,7 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
               </div>
 
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <Icon icon={SparklesIcon} className="h-3.5 w-3.5 text-primary" />
                 <span>
                   All {itemCount} items will be copied to your checklist
                 </span>
@@ -281,7 +282,7 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
           <div className="py-6 space-y-4">
             <div className="text-center">
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                <GitFork className="h-6 w-6 text-primary animate-pulse" />
+                <Icon icon={GitForkIcon} className="h-6 w-6 text-primary animate-pulse" />
               </div>
               <p className="font-medium mb-1">Creating your fork...</p>
               <p className="text-sm text-muted-foreground">
@@ -296,14 +297,14 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
         {forkState === 'success' && (
           <div className="py-6 text-center">
             <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
-              <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+              <Icon icon={CheckmarkCircle02Icon} className="h-6 w-6 text-emerald-600" />
             </div>
             <p className="font-medium text-lg mb-1">Fork Created!</p>
             <p className="text-sm text-muted-foreground mb-4">
               Successfully copied {itemCount} items to "{title}"
             </p>
             <div className="inline-flex items-center gap-2 px-3 py-2 bg-muted rounded-lg text-sm">
-              <ListChecks className="h-4 w-4 text-primary" />
+              <Icon icon={CheckListIcon} className="h-4 w-4 text-primary" />
               <span>{itemCount} items ready to customize</span>
             </div>
           </div>
@@ -313,7 +314,7 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
         {forkState === 'error' && (
           <div className="py-6 text-center">
             <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+              <Icon icon={AlertCircleIcon} className="h-6 w-6 text-red-600" />
             </div>
             <p className="font-medium text-lg mb-1">Fork Failed</p>
             <p className="text-sm text-red-600 mb-4">
@@ -333,14 +334,14 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
                 Cancel
               </Button>
               <Button onClick={handleFork} disabled={!title.trim()}>
-                <GitFork className="mr-2 h-4 w-4" />
+                <Icon icon={GitForkIcon} className="mr-2 h-4 w-4" />
                 Create Fork
               </Button>
             </>
           )}
           {forkState === 'success' && (
             <Button onClick={handleGoToFork} className="w-full sm:w-auto">
-              <ArrowRight className="mr-2 h-4 w-4" />
+              <Icon icon={ArrowRight01Icon} className="mr-2 h-4 w-4" />
               Open My Fork
             </Button>
           )}

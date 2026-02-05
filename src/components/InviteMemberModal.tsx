@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2, Mail, ShieldAlert } from 'lucide-react'
+import { Loading02Icon, Mail01Icon, AlertCircleIcon } from '@hugeicons/core-free-icons'
+import { Icon } from '@/components/ui/icon'
 import { addMemberByEmail } from '@/services/organization'
 
 interface InviteMemberModalProps {
@@ -16,7 +17,7 @@ interface InviteMemberModalProps {
 export function InviteMemberModal({ organizationId, isOpen, onClose, onMemberAdded }: InviteMemberModalProps) {
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<'admin' | 'member' | 'viewer'>('member')
-  
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -40,7 +41,7 @@ export function InviteMemberModal({ organizationId, isOpen, onClose, onMemberAdd
 
     try {
       const result = await addMemberByEmail(organizationId, email, role)
-      
+
       if (result.success) {
         setSuccess(`Successfully added ${email}`)
         onMemberAdded()
@@ -66,7 +67,7 @@ export function InviteMemberModal({ organizationId, isOpen, onClose, onMemberAdd
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="bg-blue-50 text-blue-800 p-3 rounded-md text-sm flex gap-2 items-start">
-            <Mail className="h-4 w-4 mt-0.5 shrink-0" />
+            <Icon icon={Mail01Icon} className="h-4 w-4 mt-0.5 shrink-0" />
             <p>
               Since this is a demo, enter the <strong>email address</strong> of an existing registered user to add them immediately.
             </p>
@@ -109,7 +110,7 @@ export function InviteMemberModal({ organizationId, isOpen, onClose, onMemberAdd
 
           {error && (
             <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md flex gap-2 items-center">
-              <ShieldAlert className="h-4 w-4" />
+              <Icon icon={AlertCircleIcon} className="h-4 w-4" />
               {error}
             </div>
           )}
@@ -125,7 +126,7 @@ export function InviteMemberModal({ organizationId, isOpen, onClose, onMemberAdd
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !!success}>
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {loading ? <Icon icon={Loading02Icon} className="mr-2 h-4 w-4 animate-spin" /> : null}
               Add Member
             </Button>
           </DialogFooter>
