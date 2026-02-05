@@ -12,7 +12,6 @@ import {
 import {
   Cancel01Icon,
   Clock01Icon,
-  GitForkIcon,
   ArrowLeft02Icon,
   EyeIcon,
   Loading02Icon,

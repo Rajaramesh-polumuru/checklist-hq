@@ -18,7 +18,7 @@ import { useIsMobile } from '@/hooks/useMobile'
 import { DESIGN_TOKENS } from '@/lib/constants'
 
 // Helper for item numbering
-const getNumbering = (order: number, depth: number) => {
+const getNumbering = (order: number) => {
   return `${order + 1}.`
 }
 
@@ -109,14 +109,7 @@ export const ChecklistItem = memo(function ChecklistItem({
     switch (e.key) {
       case 'Enter':
         e.preventDefault()
-        addItem('', item.id) // Add as sibling? Or next item? 
-        // addItem(text, parentId) adds to parent.
-        // We want to add a sibling after this item.
-        // The store's addItem pushes to end of parent list.
-        // We probably want to insert after. 
-        // For now, let's use addItem with parentId, which appends.
-        // To insert "next", we might need a more specific action or just append.
-        // User expectation: Enter creates new item below.
+        // Add as sibling
         addItem('', item.parent)
         break
 
@@ -233,11 +226,6 @@ export const ChecklistItem = memo(function ChecklistItem({
   // Use (renamed) prop isDragging if passed, otherwise use sortable isDragging
   const isCurrentlyDragging = isDraggingProp || isDragging
 
-  // Touch handlers (simplified placeholders if needed, or rely on dnd-kit listeners)
-  const handleTouchStart = () => { /* ... */ }
-  const handleTouchEnd = () => { /* ... */ }
-  const handleTouchMove = () => { /* ... */ }
-
   return (
     <div
       ref={setNodeRef}
@@ -252,7 +240,6 @@ export const ChecklistItem = memo(function ChecklistItem({
       )}
       onMouseEnter={() => !isMobile && setIsHovered(true)}
       onMouseLeave={() => !isMobile && setIsHovered(false)}
-    // Touch handlers could be attached to drag handle
     >
       {/* Drop zone indicator line */}
       {isDropTarget && (
@@ -316,7 +303,7 @@ export const ChecklistItem = memo(function ChecklistItem({
           isMobile ? 'text-sm' : 'text-xs',
           item.text ? 'text-muted-foreground' : 'text-muted-foreground/40'
         )}>
-          {getNumbering(item.order, depth)}
+          {getNumbering(item.order)}
         </span>
 
         {/* Expand indicator */}
