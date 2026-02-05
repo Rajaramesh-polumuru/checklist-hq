@@ -1,5 +1,19 @@
 import type { Repository } from '@/types/database'
-import { Zap, AlertCircle, Sparkles, Star, GitFork, Eye, ListChecks } from 'lucide-react'
+import { Icon } from '@/components/ui/icon'
+import {
+  FlashIcon,
+  AlertCircleIcon,
+  SparklesIcon,
+  StarIcon,
+  GitForkIcon,
+  ViewIcon,
+  TaskDaily01Icon,
+  Alert02Icon,
+  FireIcon,
+  Folder01Icon,
+  Globe02Icon,
+  LockKeyIcon
+} from '@hugeicons/core-free-icons'
 
 // Color strategy types for meaningful visual communication
 export type ColorStatus = 'recently-used' | 'new' | 'popular' | 'forked' | 'public' | 'dormant' | 'default'
@@ -9,8 +23,8 @@ export interface ColorConfig {
   text: string
   gradient: string
   label: string
-  description: string
-  icon: typeof Zap
+  description: React.ReactNode
+  icon: React.FC<any>
   priority: number
   border: string
 }
@@ -21,8 +35,12 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     text: 'text-slate-500',
     gradient: 'from-slate-300 to-gray-300',
     label: 'Needs Attention',
-    description: '⚠️ Inactive for 30+ days',
-    icon: AlertCircle,
+    description: (
+      <span className="flex items-center">
+        <Icon icon={Alert02Icon} className="w-3 h-3 mr-1 inline" /> Inactive for 30+ days
+      </span>
+    ),
+    icon: (props) => <Icon icon={AlertCircleIcon} {...props} />,
     priority: 1, // Highest priority - warnings bubble up
     border: 'border-slate-400',
   },
@@ -31,8 +49,12 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     text: 'text-pink-400',
     gradient: 'from-pink-300 to-rose-200',
     label: 'New',
-    description: '✨ Created this week',
-    icon: Sparkles,
+    description: (
+      <span className="flex items-center">
+        <Icon icon={SparklesIcon} className="w-3 h-3 mr-1 inline" /> Created this week
+      </span>
+    ),
+    icon: (props) => <Icon icon={SparklesIcon} {...props} />,
     priority: 2, // Fresh content needs setup
     border: 'border-pink-400',
   },
@@ -41,8 +63,12 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     text: 'text-amber-500',
     gradient: 'from-amber-300 to-yellow-200',
     label: 'Popular',
-    description: '🔥 Community validated (3+ forks)',
-    icon: Star,
+    description: (
+      <span className="flex items-center">
+        <Icon icon={FireIcon} className="w-3 h-3 mr-1 inline" /> Community validated (3+ forks)
+      </span>
+    ),
+    icon: (props) => <Icon icon={StarIcon} {...props} />,
     priority: 3, // High-value content
     border: 'border-amber-500',
   },
@@ -51,8 +77,12 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     text: 'text-violet-400',
     gradient: 'from-violet-300 to-purple-200',
     label: 'Template',
-    description: '📂 Forked from community',
-    icon: GitFork,
+    description: (
+      <span className="flex items-center">
+        <Icon icon={Folder01Icon} className="w-3 h-3 mr-1 inline" /> Forked from community
+      </span>
+    ),
+    icon: (props) => <Icon icon={GitForkIcon} {...props} />,
     priority: 4, // Shows learning/origin
     border: 'border-violet-400',
   },
@@ -61,8 +91,12 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     text: 'text-red-500',
     gradient: 'from-red-300 to-orange-200',
     label: 'Active',
-    description: '⚡ Used in the last 7 days',
-    icon: Zap,
+    description: (
+      <span className="flex items-center">
+        <Icon icon={FlashIcon} className="w-3 h-3 mr-1 inline" /> Used in the last 7 days
+      </span>
+    ),
+    icon: (props) => <Icon icon={FlashIcon} {...props} />,
     priority: 5, // Engaged but not urgent
     border: 'border-red-500',
   },
@@ -71,8 +105,12 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     text: 'text-sky-500',
     gradient: 'from-sky-300 to-cyan-200',
     label: 'Shared',
-    description: '🌐 Public & visible to all',
-    icon: Eye,
+    description: (
+      <span className="flex items-center">
+        <Icon icon={Globe02Icon} className="w-3 h-3 mr-1 inline" /> Public & visible to all
+      </span>
+    ),
+    icon: (props) => <Icon icon={ViewIcon} {...props} />,
     priority: 6, // Informational status
     border: 'border-sky-500',
   },
@@ -81,8 +119,12 @@ export const COLOR_LEGEND: Record<ColorStatus, ColorConfig> = {
     text: 'text-indigo-500',
     gradient: 'from-indigo-200 to-indigo-100',
     label: 'Private',
-    description: '🔒 Standard private checklist',
-    icon: ListChecks,
+    description: (
+      <span className="flex items-center">
+        <Icon icon={LockKeyIcon} className="w-3 h-3 mr-1 inline" /> Standard private checklist
+      </span>
+    ),
+    icon: (props) => <Icon icon={TaskDaily01Icon} {...props} />,
     priority: 7, // Base state
     border: 'border-indigo-400',
   },

@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth-store'
 import { useThemeStore } from '@/stores/theme-store'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { GitFork, LogOut, Plus } from 'lucide-react'
+import { Icon } from '@/components/ui/icon'
+import { GitForkIcon, Logout02Icon, PlusSignIcon } from '@hugeicons/core-free-icons'
 
 export function Layout() {
   const { user, signOut } = useAuthStore()
@@ -46,7 +47,7 @@ export function Layout() {
               className="flex items-center gap-2.5 font-semibold text-lg hover:opacity-80 transition-all group"
             >
               <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow">
-                <GitFork className="h-5 w-5 text-white" />
+                <Icon icon={GitForkIcon} className="h-5 w-5 text-white" />
               </div>
               <span className="hidden sm:inline font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
                 Checklist HQ
@@ -87,7 +88,7 @@ export function Layout() {
                 {/* New Button */}
                 <Button asChild size="sm" className="hidden sm:inline-flex shadow-md">
                   <Link to="/app/new">
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Icon icon={PlusSignIcon} className="mr-2 h-4 w-4" />
                     New
                   </Link>
                 </Button>
@@ -108,7 +109,7 @@ export function Layout() {
                     aria-label="Sign out"
                     className="text-muted-foreground hover:text-foreground"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <Icon icon={Logout02Icon} className="h-4 w-4" />
                   </Button>
                 </div>
               </>

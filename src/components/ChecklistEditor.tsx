@@ -20,7 +20,18 @@ import { useChecklistStore } from '@/stores/checklist-store'
 import { ChecklistItem, DragOverlayItem } from './ChecklistItem'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Undo2, Redo2, Hand, MoreVertical, Sparkles, CheckCircle2, ArrowRight, Lightbulb } from 'lucide-react'
+import { Icon } from '@/components/ui/icon'
+import {
+  PlusSignIcon,
+  ArrowTurnBackwardIcon,
+  ArrowTurnForwardIcon,
+  HandPointingDown02Icon,
+  MoreVerticalCircle01Icon,
+  SparklesIcon,
+  CheckmarkCircle01Icon,
+  ArrowRight01Icon,
+  BulbIcon
+} from '@hugeicons/core-free-icons'
 import type { ChecklistItem as ChecklistItemType } from '@/types/database'
 import { cn } from '@/lib/utils'
 import { useIsMobile } from '@/hooks/useMobile'
@@ -272,7 +283,7 @@ export function ChecklistEditor() {
             )}
             title="Undo (⌘Z)"
           >
-            <Undo2 className="h-4 w-4" />
+            <Icon icon={ArrowTurnBackwardIcon} className="h-4 w-4" />
           </button>
           <button
             onClick={redo}
@@ -283,7 +294,7 @@ export function ChecklistEditor() {
             )}
             title="Redo (⌘⇧Z)"
           >
-            <Redo2 className="h-4 w-4" />
+            <Icon icon={ArrowTurnForwardIcon} className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -348,7 +359,7 @@ export function ChecklistEditor() {
 
                 {/* Title with icon */}
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <Sparkles className={cn("text-primary", isMobile ? "h-4 w-4" : "h-5 w-5")} />
+                  <Icon icon={SparklesIcon} className={cn("text-primary", isMobile ? "h-4 w-4" : "h-5 w-5")} />
                   <h3 className={cn(
                     "font-semibold",
                     isMobile ? "text-lg" : "text-xl"
@@ -373,9 +384,9 @@ export function ChecklistEditor() {
                   size={isMobile ? "default" : "lg"}
                   className="mb-6 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-shadow"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Icon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                   Create First Item
-                  <ArrowRight className="h-4 w-4 ml-2" />
+                  <Icon icon={ArrowRight01Icon} className="h-4 w-4 ml-2" />
                 </Button>
 
                 {/* Quick add input (alternative to button) */}
@@ -387,7 +398,7 @@ export function ChecklistEditor() {
                       "relative flex items-center gap-3 bg-card border-2 border-dashed border-muted-foreground/20 rounded-xl transition-all focus-within:border-primary focus-within:shadow-lg focus-within:shadow-primary/10",
                       isMobile ? "px-4 py-4" : "px-4 py-3"
                     )}>
-                      <Plus className={cn(isMobile ? "h-6 w-6" : "h-5 w-5", "text-muted-foreground/40 group-focus-within:text-primary transition-colors")} />
+                      <Icon icon={PlusSignIcon} className={cn(isMobile ? "h-6 w-6" : "h-5 w-5", "text-muted-foreground/40 group-focus-within:text-primary transition-colors")} />
                       <input
                         ref={quickAddRef}
                         type="text"
@@ -411,7 +422,7 @@ export function ChecklistEditor() {
                   isMobile ? "mt-8" : "mt-8"
                 )}>
                   <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mb-4">
-                    <Lightbulb className="h-3.5 w-3.5 text-primary" />
+                    <Icon icon={BulbIcon} className="h-3.5 w-3.5 text-primary" />
                     <span className="font-medium">Pro tips to get started</span>
                   </div>
 
@@ -419,21 +430,21 @@ export function ChecklistEditor() {
                     /* Mobile-specific touch tips */
                     <div className="grid gap-3 text-xs text-muted-foreground max-w-xs mx-auto">
                       <div className="flex items-start gap-3 text-left bg-muted/30 rounded-lg p-3">
-                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <Icon icon={CheckmarkCircle01Icon} className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                         <div>
                           <span className="font-medium text-foreground">Tap to add</span>
                           <p className="text-muted-foreground mt-0.5">Tap the button or input to add your first item</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3 text-left bg-muted/30 rounded-lg p-3">
-                        <Hand className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <Icon icon={HandPointingDown02Icon} className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                         <div>
                           <span className="font-medium text-foreground">Long-press for options</span>
                           <p className="text-muted-foreground mt-0.5">Hold an item to indent, outdent, or delete</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3 text-left bg-muted/30 rounded-lg p-3">
-                        <MoreVertical className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <Icon icon={MoreVerticalCircle01Icon} className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                         <div>
                           <span className="font-medium text-foreground">Drag to reorder</span>
                           <p className="text-muted-foreground mt-0.5">Use the handle to rearrange items</p>
@@ -495,7 +506,7 @@ export function ChecklistEditor() {
               isMobile ? "px-4 py-4" : "px-4 py-3"
             )}
           >
-            <Plus className={cn(
+            <Icon icon={PlusSignIcon} className={cn(
               "text-muted-foreground/60 group-focus-within:text-primary transition-colors",
               isMobile ? "h-5 w-5" : "h-4 w-4"
             )} />

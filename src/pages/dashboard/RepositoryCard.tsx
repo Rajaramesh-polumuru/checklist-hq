@@ -1,15 +1,15 @@
 import { Link } from 'react-router-dom'
+import { Icon } from '@/components/ui/icon'
 import {
-    MoreVertical,
-    Pencil,
-    Share2,
-    Copy,
-    Trash2,
-    Clock,
-    Play,
-    GitBranch,
-
-} from 'lucide-react'
+    MoreVerticalCircle01Icon,
+    PencilEdit02Icon,
+    Share08Icon,
+    Copy01Icon,
+    Delete02Icon,
+    Clock01Icon,
+    PlayIcon,
+    GitBranchIcon,
+} from '@hugeicons/core-free-icons'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -58,28 +58,28 @@ export function RepositoryCard({
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <MoreVertical className="h-4 w-4" />
+                                    <Icon icon={MoreVerticalCircle01Icon} className="h-4 w-4" />
                                     <span className="sr-only">Actions</span>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => onRun(repo)}>
-                                    <Play className="mr-2 h-4 w-4" /> Run
+                                    <Icon icon={PlayIcon} className="mr-2 h-4 w-4" /> Run
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                     <Link to={`/app/repo/${repo.id}`}>
-                                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                                        <Icon icon={PencilEdit02Icon} className="mr-2 h-4 w-4" /> Edit
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => onShare(repo)}>
-                                    <Share2 className="mr-2 h-4 w-4" /> Share
+                                    <Icon icon={Share08Icon} className="mr-2 h-4 w-4" /> Share
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => onDuplicate(repo)}>
-                                    <Copy className="mr-2 h-4 w-4" /> Duplicate
+                                    <Icon icon={Copy01Icon} className="mr-2 h-4 w-4" /> Duplicate
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem destructive onClick={() => onDelete(repo.id, repo.title)}>
-                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                    <Icon icon={Delete02Icon} className="mr-2 h-4 w-4" /> Delete
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -107,14 +107,14 @@ export function RepositoryCard({
                         {/* Fork Count */}
                         {repo.fork_count > 0 && (
                             <span className="flex items-center gap-1" title={`${repo.fork_count} forks`}>
-                                <GitBranch className="h-3 w-3" />
+                                <Icon icon={GitBranchIcon} className="h-3 w-3" />
                                 {repo.fork_count}
                             </span>
                         )}
 
                         {/* Update time */}
                         <span className="flex items-center gap-1" title={`Updated ${new Date(repo.updated_at).toLocaleString()}`}>
-                            <Clock className="h-3 w-3" />
+                            <Icon icon={Clock01Icon} className="h-3 w-3" />
                             {formatRelativeTime(repo.updated_at)}
                         </span>
                     </div>
@@ -128,7 +128,7 @@ export function RepositoryCard({
                         className="w-full text-xs h-8"
                         onClick={() => onRun(repo)}
                     >
-                        <Play className="mr-1.5 h-3.5 w-3.5" />
+                        <Icon icon={PlayIcon} className="mr-1.5 h-3.5 w-3.5" />
                         Run Checklist
                     </Button>
                 </div>

@@ -15,25 +15,26 @@ import {
 } from '@/components/ui/dialog'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { FormattedText } from '@/lib/rich-text'
+import { Icon } from '@/components/ui/icon'
 import {
-  ArrowLeft,
-  CheckCircle2,
-  Loader2,
-  RotateCcw,
-  Trophy,
-  Clock,
-  Circle,
-  Sparkles,
-  ChevronRight,
-  Play,
-  Target,
-  Pause,
-  Pencil,
-  Check,
-  X,
-  MessageSquare,
-  StickyNote,
-} from 'lucide-react'
+  ArrowLeft01Icon,
+  CheckmarkCircle01Icon,
+  Loading02Icon,
+  ArrowTurnBackwardIcon,
+  ChampionIcon,
+  Clock01Icon,
+  CircleIcon,
+  SparklesIcon,
+  ArrowRight01Icon,
+  PlayIcon,
+  Target01Icon,
+  PauseIcon,
+  PencilEdit02Icon,
+  Tick01Icon,
+  Cancel01Icon,
+  Comment01Icon,
+  Note01Icon,
+} from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
 import { getRepository } from '@/services/repository'
@@ -172,9 +173,9 @@ function SectionHeader({
         isAllComplete ? 'bg-success/20' : 'bg-primary/10'
       )}>
         {isAllComplete ? (
-          <CheckCircle2 className="h-4 w-4 text-success" />
+          <Icon icon={CheckmarkCircle01Icon} className="h-4 w-4 text-success" />
         ) : (
-          <Target className="h-4 w-4 text-primary" />
+          <Icon icon={Target01Icon} className="h-4 w-4 text-primary" />
         )}
       </div>
       <div className="flex-1 min-w-0">
@@ -242,7 +243,7 @@ function CompletionNoteDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-success" />
+            <Icon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-success" />
             Mark as Complete
           </DialogTitle>
           <DialogDescription className="text-left">
@@ -251,7 +252,7 @@ function CompletionNoteDialog({
         </DialogHeader>
         <div className="py-4">
           <label htmlFor="completion-note" className="text-sm font-medium mb-2 flex items-center gap-2">
-            <StickyNote className="h-4 w-4 text-muted-foreground" />
+            <Icon icon={Note01Icon} className="h-4 w-4 text-muted-foreground" />
             Add a note (optional)
           </label>
           <Textarea
@@ -272,7 +273,7 @@ function CompletionNoteDialog({
             Cancel
           </Button>
           <Button onClick={handleComplete} className="gap-2">
-            <Check className="h-4 w-4" />
+            <Icon icon={Tick01Icon} className="h-4 w-4" />
             Complete
           </Button>
         </DialogFooter>
@@ -357,11 +358,11 @@ function PremiumRunItem({
             )}
           >
             {isCompleted ? (
-              <CheckCircle2 className={cn('text-white animate-fade-in', isSubItem ? 'h-3 w-3' : 'h-5 w-5')} />
+              <Icon icon={CheckmarkCircle01Icon} className={cn('text-white animate-fade-in', isSubItem ? 'h-3 w-3' : 'h-5 w-5')} />
             ) : isNext ? (
-              <Play className={cn('text-primary', isSubItem ? 'h-2 w-2' : 'h-3 w-3')} />
+              <Icon icon={PlayIcon} className={cn('text-primary', isSubItem ? 'h-2 w-2' : 'h-3 w-3')} />
             ) : (
-              <Circle className={cn('text-muted-foreground/30', isSubItem ? 'h-3 w-3' : 'h-4 w-4')} />
+              <Icon icon={CircleIcon} className={cn('text-muted-foreground/30', isSubItem ? 'h-3 w-3' : 'h-4 w-4')} />
             )}
           </div>
 
@@ -419,12 +420,12 @@ function PremiumRunItem({
           {isCompleted && progress?.timestamp && (
             <div className="mt-1.5 space-y-1">
               <p className="text-xs text-success flex items-center gap-1.5 opacity-80">
-                <CheckCircle2 className="h-3 w-3" />
+                <Icon icon={CheckmarkCircle01Icon} className="h-3 w-3" />
                 Completed {formatRelativeTime(progress.timestamp)}
               </p>
               {progress.note && (
                 <div className="flex items-start gap-1.5 text-xs text-muted-foreground bg-muted/50 rounded-lg px-2 py-1.5">
-                  <MessageSquare className="h-3 w-3 mt-0.5 shrink-0" />
+                  <Icon icon={Comment01Icon} className="h-3 w-3 mt-0.5 shrink-0" />
                   <span className="italic">{progress.note}</span>
                 </div>
               )}
@@ -434,7 +435,7 @@ function PremiumRunItem({
 
         {/* Chevron for next item */}
         {isNext && !isCompleted && !isSubItem && (
-          <ChevronRight className="h-5 w-5 text-primary shrink-0 mt-1 group-hover:translate-x-1 transition-transform" />
+          <Icon icon={ArrowRight01Icon} className="h-5 w-5 text-primary shrink-0 mt-1 group-hover:translate-x-1 transition-transform" />
         )}
       </button>
 
@@ -918,7 +919,7 @@ export function RunMode() {
         <div className="text-center">
           <div className="relative">
             <div className="h-16 w-16 rounded-full border-4 border-muted animate-pulse mx-auto" />
-            <Loader2 className="h-8 w-8 animate-spin text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            <Icon icon={Loading02Icon} className="h-8 w-8 animate-spin text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
           </div>
           <p className="text-muted-foreground mt-4">Loading checklist...</p>
         </div>
@@ -932,7 +933,7 @@ export function RunMode() {
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center">
         <div className="text-center">
           <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-            <Target className="h-8 w-8 text-destructive" />
+            <Icon icon={Target01Icon} className="h-8 w-8 text-destructive" />
           </div>
           <p className="text-destructive font-medium mb-4">{error}</p>
           <Button onClick={() => navigate('/app')}>Go to Dashboard</Button>
@@ -951,7 +952,7 @@ export function RunMode() {
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" asChild className="h-10 w-10">
               <Link to={repository ? `/app/repo/${repository.id}` : '/app'}>
-                <ArrowLeft className="h-5 w-5" />
+                <Icon icon={ArrowLeft01Icon} className="h-5 w-5" />
               </Link>
             </Button>
             <div>
@@ -969,10 +970,10 @@ export function RunMode() {
                     onClick={(e) => e.stopPropagation()}
                   />
                   <Button size="icon" variant="ghost" className="h-8 w-8 text-success hover:text-success hover:bg-success/10" onClick={handleSaveName}>
-                    <Check className="h-4 w-4" />
+                    <Icon icon={Tick01Icon} className="h-4 w-4" />
                   </Button>
                   <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleCancelRenaming}>
-                    <X className="h-4 w-4" />
+                    <Icon icon={Cancel01Icon} className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
@@ -989,7 +990,7 @@ export function RunMode() {
                     className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
                     aria-label="Rename run"
                   >
-                    <Pencil className="h-3.5 w-3.5" />
+                    <Icon icon={PencilEdit02Icon} className="h-3.5 w-3.5" />
                   </button>
                 </div>
               )}
@@ -1045,9 +1046,9 @@ export function RunMode() {
                   className="gap-2"
                 >
                   {isPauseLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Icon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
                   ) : (
-                    <Play className="h-4 w-4" />
+                    <Icon icon={PlayIcon} className="h-4 w-4" />
                   )}
                   <span className="hidden sm:inline">Resume</span>
                 </Button>
@@ -1060,9 +1061,9 @@ export function RunMode() {
                   className="gap-2"
                 >
                   {isPauseLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Icon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
                   ) : (
-                    <Pause className="h-4 w-4" />
+                    <Icon icon={PauseIcon} className="h-4 w-4" />
                   )}
                   <span className="hidden sm:inline">Pause</span>
                 </Button>
@@ -1071,7 +1072,7 @@ export function RunMode() {
 
             {isComplete ? (
               <Button onClick={handleRestart} variant="outline" size="sm" className="gap-2">
-                <RotateCcw className="h-4 w-4" />
+                <Icon icon={ArrowTurnBackwardIcon} className="h-4 w-4" />
                 <span className="hidden sm:inline">Run Again</span>
               </Button>
             ) : (
@@ -1082,9 +1083,9 @@ export function RunMode() {
                 className="gap-2"
               >
                 {completing ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Icon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
                 ) : (
-                  <CheckCircle2 className="h-4 w-4" />
+                  <Icon icon={CheckmarkCircle01Icon} className="h-4 w-4" />
                 )}
                 <span className="hidden sm:inline">Complete</span>
               </Button>
@@ -1116,7 +1117,7 @@ export function RunMode() {
           <div className="mt-4 text-center">
             {isComplete ? (
               <div className="flex items-center gap-2 text-success">
-                <Trophy className="h-5 w-5" />
+                <Icon icon={ChampionIcon} className="h-5 w-5" />
                 <span className="font-semibold">All steps completed!</span>
               </div>
             ) : (
@@ -1143,18 +1144,18 @@ export function RunMode() {
               <div className="relative">
                 <div className="relative inline-block mb-4">
                   <div className="absolute inset-0 bg-success/20 rounded-full blur-xl animate-pulse" />
-                  <Trophy className="h-16 w-16 text-success relative" />
-                  <Sparkles className="h-8 w-8 text-warning absolute -top-2 -right-2 animate-bounce" />
+                  <Icon icon={ChampionIcon} className="h-16 w-16 text-success relative" />
+                  <Icon icon={SparklesIcon} className="h-8 w-8 text-warning absolute -top-2 -right-2 animate-bounce" />
                 </div>
                 <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-success to-primary bg-clip-text text-transparent">
-                  Congratulations! 🎉
+                  Congratulations!
                 </h2>
                 <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
                   You've successfully completed all {totalItems} steps. Great work!
                 </p>
                 <div className="flex gap-3 justify-center">
                   <Button onClick={handleRestart} variant="outline" className="gap-2">
-                    <RotateCcw className="h-4 w-4" />
+                    <Icon icon={ArrowTurnBackwardIcon} className="h-4 w-4" />
                     Run Again
                   </Button>
                   <Button asChild>
@@ -1170,7 +1171,7 @@ export function RunMode() {
         {run && !isComplete && (
           <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground mb-6">
             <span className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4" />
+              <Icon icon={Clock01Icon} className="h-4 w-4" />
               Started {formatRelativeTime(run.started_at)}
             </span>
           </div>
@@ -1182,7 +1183,7 @@ export function RunMode() {
             <Card>
               <CardContent className="py-16 text-center">
                 <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                  <Target className="h-8 w-8 text-muted-foreground" />
+                  <Icon icon={Target01Icon} className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <p className="text-muted-foreground">
                   This checklist has no items.

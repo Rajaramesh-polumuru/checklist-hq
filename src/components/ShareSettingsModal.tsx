@@ -11,20 +11,21 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import { Card, CardContent } from '@/components/ui/card'
+import { Icon } from '@/components/ui/icon'
 import {
-    Globe,
-    Lock,
-    Link2,
-    Check,
-    Copy,
-    Trash2,
-    AlertTriangle,
-    Share2,
-    ExternalLink,
-    Loader2,
-    Building2,
-    ArrowRight
-} from 'lucide-react'
+    Globe02Icon,
+    LockKeyIcon,
+    Link01Icon,
+    Tick01Icon,
+    Copy01Icon,
+    Delete02Icon,
+    Alert02Icon,
+    Share08Icon,
+    LinkSquare02Icon,
+    Loading02Icon,
+    Building03Icon,
+    ArrowRight01Icon
+} from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 import type { Repository } from '@/types/database'
 import { getMyOrganizations } from '@/services/organization'
@@ -135,7 +136,7 @@ export function ShareSettingsModal({
                     <DialogHeader>
                         <div className="flex items-center gap-3 mb-2">
                             <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                                <AlertTriangle className="h-5 w-5 text-destructive" />
+                                <Icon icon={Alert02Icon} className="h-5 w-5 text-destructive" />
                             </div>
                             <div>
                                 <DialogTitle>Delete Checklist</DialogTitle>
@@ -151,7 +152,7 @@ export function ShareSettingsModal({
 
                         <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 mb-4">
                             <p className="text-sm text-destructive font-medium">
-                                ⚠️ Warning: {repository.fork_count > 0
+                                <Icon icon={Alert02Icon} className="inline w-4 h-4 mr-1 text-destructive -mt-0.5" /> Warning: {repository.fork_count > 0
                                     ? `This checklist has been forked ${repository.fork_count} times. Forks will not be deleted.`
                                     : 'All data will be lost permanently.'}
                             </p>
@@ -186,12 +187,12 @@ export function ShareSettingsModal({
                         >
                             {deleting ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <Icon icon={Loading02Icon} className="mr-2 h-4 w-4 animate-spin" />
                                     Deleting...
                                 </>
                             ) : (
                                 <>
-                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    <Icon icon={Delete02Icon} className="mr-2 h-4 w-4" />
                                     Delete Permanently
                                 </>
                             )}
@@ -209,7 +210,7 @@ export function ShareSettingsModal({
                     <DialogHeader>
                         <div className="flex items-center gap-3 mb-2">
                             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                <Building2 className="h-5 w-5 text-primary" />
+                                <Icon icon={Building03Icon} className="h-5 w-5 text-primary" />
                             </div>
                             <div>
                                 <DialogTitle>Transfer Ownership</DialogTitle>
@@ -242,11 +243,11 @@ export function ShareSettingsModal({
                                         )}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <Building2 className="h-4 w-4 text-muted-foreground" />
+                                            <Icon icon={Building03Icon} className="h-4 w-4 text-muted-foreground" />
                                             <span className="font-medium">{org.name}</span>
                                         </div>
                                         {selectedOrgId === org.id && (
-                                            <Check className="h-4 w-4 text-primary" />
+                                            <Icon icon={Tick01Icon} className="h-4 w-4 text-primary" />
                                         )}
                                     </button>
                                 ))
@@ -256,7 +257,7 @@ export function ShareSettingsModal({
                         {selectedOrgId && (
                             <div className="p-3 bg-amber-50 text-amber-900 border border-amber-200 rounded-md text-sm">
                                 <p className="font-medium flex items-center gap-2">
-                                    <AlertTriangle className="h-4 w-4" />
+                                    <Icon icon={Alert02Icon} className="h-4 w-4" />
                                     Warning
                                 </p>
                                 <p className="mt-1 text-xs opacity-90">
@@ -280,18 +281,18 @@ export function ShareSettingsModal({
                         >
                             {transferring ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <Icon icon={Loading02Icon} className="mr-2 h-4 w-4 animate-spin" />
                                     Transferring...
                                 </>
                             ) : transferSuccess ? (
                                 <>
-                                    <Check className="mr-2 h-4 w-4" />
+                                    <Icon icon={Tick01Icon} className="mr-2 h-4 w-4" />
                                     Transferred!
                                 </>
                             ) : (
                                 <>
                                     Transfer
-                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                    <Icon icon={ArrowRight01Icon} className="ml-2 h-4 w-4" />
                                 </>
                             )}
                         </Button>
@@ -307,7 +308,7 @@ export function ShareSettingsModal({
                 <DialogHeader>
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <Share2 className="h-5 w-5 text-primary" />
+                            <Icon icon={Share08Icon} className="h-5 w-5 text-primary" />
                         </div>
                         <div>
                             <DialogTitle>Share & Settings</DialogTitle>
@@ -335,9 +336,9 @@ export function ShareSettingsModal({
                                             isPublic ? "bg-success/10" : "bg-muted"
                                         )}>
                                             {isPublic ? (
-                                                <Globe className="h-5 w-5 text-success" />
+                                                <Icon icon={Globe02Icon} className="h-5 w-5 text-success" />
                                             ) : (
-                                                <Lock className="h-5 w-5 text-muted-foreground" />
+                                                <Icon icon={LockKeyIcon} className="h-5 w-5 text-muted-foreground" />
                                             )}
                                         </div>
                                         <div>
@@ -362,7 +363,7 @@ export function ShareSettingsModal({
                                             isPublic ? "translate-x-5" : "translate-x-0.5"
                                         )} />
                                         {changingVisibility && (
-                                            <Loader2 className="absolute inset-0 m-auto h-4 w-4 animate-spin text-white" />
+                                            <Icon icon={Loading02Icon} className="absolute inset-0 m-auto h-4 w-4 animate-spin text-white" />
                                         )}
                                     </div>
                                 </div>
@@ -373,7 +374,7 @@ export function ShareSettingsModal({
                     {/* Share Link Section */}
                     <div>
                         <label className="text-sm font-medium mb-3 block flex items-center gap-2">
-                            <Link2 className="h-4 w-4" />
+                            <Icon icon={Link01Icon} className="h-4 w-4" />
                             Share Link
                         </label>
                         <div className="flex gap-2">
@@ -392,12 +393,12 @@ export function ShareSettingsModal({
                             >
                                 {copied ? (
                                     <>
-                                        <Check className="mr-2 h-4 w-4" />
+                                        <Icon icon={Tick01Icon} className="mr-2 h-4 w-4" />
                                         Copied!
                                     </>
                                 ) : (
                                     <>
-                                        <Copy className="mr-2 h-4 w-4" />
+                                        <Icon icon={Copy01Icon} className="mr-2 h-4 w-4" />
                                         Copy
                                     </>
                                 )}
@@ -405,7 +406,7 @@ export function ShareSettingsModal({
                         </div>
                         {!isPublic && (
                             <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                                <Lock className="h-3 w-3" />
+                                <Icon icon={LockKeyIcon} className="h-3 w-3" />
                                 This link is private. Only you can access it.
                             </p>
                         )}
@@ -414,9 +415,9 @@ export function ShareSettingsModal({
                     {/* Team Access (Only for Organization Repos) */}
                     {repository.organization_id && (
                         <div className="pt-4 border-t">
-                            <TeamAccessManager 
-                                repoId={repository.id} 
-                                organizationId={repository.organization_id} 
+                            <TeamAccessManager
+                                repoId={repository.id}
+                                organizationId={repository.organization_id}
                             />
                         </div>
                     )}
@@ -430,7 +431,7 @@ export function ShareSettingsModal({
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className="h-10 w-10 rounded-lg bg-background border flex items-center justify-center">
-                                                <Building2 className="h-5 w-5 text-muted-foreground" />
+                                                <Icon icon={Building03Icon} className="h-5 w-5 text-muted-foreground" />
                                             </div>
                                             <div>
                                                 <p className="font-medium text-sm">Transfer to Organization</p>
@@ -457,7 +458,7 @@ export function ShareSettingsModal({
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <Badge variant="success" className="gap-1">
-                                                <Globe className="h-3 w-3" />
+                                                <Icon icon={Globe02Icon} className="h-3 w-3" />
                                                 Live
                                             </Badge>
                                             <p className="text-sm text-muted-foreground">
@@ -469,7 +470,7 @@ export function ShareSettingsModal({
                                             size="sm"
                                             onClick={() => window.open(`/repo/${repository.id}`, '_blank')}
                                         >
-                                            <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                                            <Icon icon={LinkSquare02Icon} className="mr-1.5 h-3.5 w-3.5" />
                                             Preview
                                         </Button>
                                     </div>
@@ -481,7 +482,7 @@ export function ShareSettingsModal({
                     {/* Danger Zone */}
                     <div className="pt-4 border-t border-dashed">
                         <label className="text-sm font-medium text-destructive mb-3 block flex items-center gap-2">
-                            <AlertTriangle className="h-4 w-4" />
+                            <Icon icon={Alert02Icon} className="h-4 w-4" />
                             Danger Zone
                         </label>
                         <Card className="border-destructive/30 bg-destructive/5">
@@ -499,7 +500,7 @@ export function ShareSettingsModal({
                                         className="border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground"
                                         onClick={() => setShowDeleteConfirm(true)}
                                     >
-                                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                                        <Icon icon={Delete02Icon} className="mr-1.5 h-3.5 w-3.5" />
                                         Delete
                                     </Button>
                                 </div>

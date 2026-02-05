@@ -5,7 +5,8 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Info } from 'lucide-react'
+import { Icon } from '@/components/ui/icon'
+import { InformationCircleIcon } from '@hugeicons/core-free-icons'
 import { COLOR_LEGEND, type ColorStatus, type FilterState, type SortOption, getDefaultFilters } from '@/lib/dashboard-utils'
 
 interface DashboardFiltersProps {
@@ -24,7 +25,7 @@ function ColorLegend() {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground">
-                    <Info className="h-4 w-4" />
+                    <Icon icon={InformationCircleIcon} className="h-4 w-4" />
                     <span className="sr-only">Color Guide</span>
                 </Button>
             </DropdownMenuTrigger>
