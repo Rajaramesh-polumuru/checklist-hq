@@ -462,7 +462,7 @@ export async function removeTagFromRepository(repoId: string, tagId: string): Pr
 // Team Access Operations
 // ============================================
 
-export interface RepositoryTeamAccess {
+export interface RepositoryTeamAccessWithDetails {
   id: string
   repository_id: string
   team_id: string
@@ -477,7 +477,7 @@ export interface RepositoryTeamAccess {
 /**
  * Get teams with access to a repository
  */
-export async function getRepositoryTeams(repoId: string): Promise<RepositoryTeamAccess[]> {
+export async function getRepositoryTeams(repoId: string): Promise<RepositoryTeamAccessWithDetails[]> {
   const { data, error } = await supabase
     .from('repository_team_access')
     .select(`

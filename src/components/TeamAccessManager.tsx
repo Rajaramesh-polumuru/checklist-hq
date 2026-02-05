@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent } from '@/components/ui/card'
+
 import { Loader2, Users, Plus, Trash2, Shield } from 'lucide-react'
-import { 
-  getRepositoryTeams, 
-  addTeamAccess, 
-  updateTeamAccess, 
+import {
+  getRepositoryTeams,
+  addTeamAccess,
+  updateTeamAccess,
   removeTeamAccess,
-  type RepositoryTeamAccess 
+  type RepositoryTeamAccessWithDetails
 } from '@/services/repository'
 import { getOrganizationTeams } from '@/services/organization'
 import type { Team } from '@/types/database'
@@ -19,10 +19,10 @@ interface TeamAccessManagerProps {
 }
 
 export function TeamAccessManager({ repoId, organizationId }: TeamAccessManagerProps) {
-  const [accessList, setAccessList] = useState<RepositoryTeamAccess[]>([])
+  const [accessList, setAccessList] = useState<RepositoryTeamAccessWithDetails[]>([])
   const [availableTeams, setAvailableTeams] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
-  
+
   // Add Team State
   const [selectedTeamId, setSelectedTeamId] = useState<string>('')
   const [selectedPermission, setSelectedPermission] = useState<'read' | 'write' | 'admin'>('read')
@@ -50,7 +50,7 @@ export function TeamAccessManager({ repoId, organizationId }: TeamAccessManagerP
   }, [repoId, organizationId])
 
   // Filter out teams that already have access
-  const unusedTeams = availableTeams.filter(team => 
+  const unusedTeams = availableTeams.filter(team =>
     !accessList.some(access => access.team_id === team.id)
   )
 
@@ -70,7 +70,7 @@ export function TeamAccessManager({ repoId, organizationId }: TeamAccessManagerP
 
   const handleUpdatePermission = async (teamId: string, newPermission: 'read' | 'write' | 'admin') => {
     // Optimistic update
-    setAccessList(prev => prev.map(item => 
+    setAccessList(prev => prev.map(item =>
       item.team_id === teamId ? { ...item, permission: newPermission } : item
     ))
 
@@ -129,8 +129,8 @@ export function TeamAccessManager({ repoId, organizationId }: TeamAccessManagerP
               </div>
 
               <div className="flex items-center gap-2">
-                <Select 
-                  value={item.permission} 
+                <Select
+                  value={item.permission}
                   onValueChange={(v: any) => handleUpdatePermission(item.team_id, v)}
                 >
                   <SelectTrigger className="w-[100px] h-8 text-xs">
@@ -143,9 +143,9 @@ export function TeamAccessManager({ repoId, organizationId }: TeamAccessManagerP
                   </SelectContent>
                 </Select>
 
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="h-8 w-8 text-muted-foreground hover:text-destructive"
                   onClick={() => handleRemoveTeam(item.team_id)}
                 >
