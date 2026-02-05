@@ -1,6 +1,7 @@
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { X } from "lucide-react"
+import { Cancel01Icon } from "@hugeicons/core-free-icons"
+import { Icon } from "@/components/ui/icon"
 
 import { cn } from "@/lib/utils"
 
@@ -62,7 +63,7 @@ const DialogContent = React.forwardRef<
           "data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
         )}
       >
-        <X className="h-4 w-4" />
+        <Icon icon={Cancel01Icon} className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>

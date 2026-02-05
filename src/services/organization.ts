@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { logAuditEvent } from '@/services/audit'
 import type { Organization, OrganizationMember, Team } from '@/types/database'
 
 import { useAuthStore } from '@/stores/auth-store'
@@ -36,7 +37,18 @@ export async function createOrganization(params: {
     throw error
   }
 
-  return data as string // Returns the new org ID
+  const orgId = data as string
+  
+  // Log audit event
+  logAuditEvent({
+    organizationId: orgId,
+    action: 'organization.created',
+    resourceType: 'organization',
+    resourceId: orgId,
+    newValues: { name, slug, description },
+  }).catch(err => console.error('Audit log failed:', err))
+
+  return orgId
 }
 
 /**
@@ -131,6 +143,23 @@ export async function updateOrganization(
     .single()
 
   if (error) throw error
+  
+  // Log audit event
+  logAuditEvent({
+    organizationId: id,
+    action: 'organization.updated',
+    resourceType: 'organization',
+    resourceId: id,
+    newValues: updates,
+    changes: Object.keys(updates).reduce(
+      (acc, key) => ({
+        ...acc,
+        [key]: { old: '***', new: updates[key as keyof typeof updates] },
+      }),
+      {}
+    ),
+  }).catch(err => console.error('Audit log failed:', err))
+  
   return data as Organization
 }
 
@@ -150,6 +179,14 @@ export async function deleteOrganization(id: string): Promise<void> {
     .eq('id', id)
 
   if (error) throw error
+  
+  // Log audit event
+  logAuditEvent({
+    organizationId: id,
+    action: 'organization.deleted',
+    resourceType: 'organization',
+    resourceId: id,
+  }).catch(err => console.error('Audit log failed:', err))
 }
 
 /**

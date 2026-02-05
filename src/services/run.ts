@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { notifyRunCompletion, notifyRunStart } from '@/services/runNotifications'
 import type {
   Run,
   RunInsert,
@@ -54,6 +55,28 @@ export async function createRun(data: RunInsert): Promise<Run> {
     .single()
 
   if (error) throw error
+
+  // Trigger run.started notifications (async, fire and forget)
+  if (run) {
+    const runData = run as Run
+    const { data: repo } = await supabase
+      .from('repositories')
+      .select('id, owner_id, organization_id, name')
+      .eq('id', runData.repo_id)
+      .single()
+
+    if (repo) {
+      notifyRunStart({
+        repositoryId: runData.repo_id,
+        organizationId: repo.organization_id || undefined,
+        runId: runData.id,
+        runName: runData.name || 'Untitled Run',
+        checklistName: repo.name,
+        startedAt: runData.started_at || new Date().toISOString(),
+      }).catch(err => console.error('Failed to send run start notifications:', err))
+    }
+  }
+
   return run as Run
 }
 
@@ -123,6 +146,35 @@ export async function updateRun(id: string, updates: RunUpdate): Promise<Run> {
     .single()
 
   if (error) throw error
+
+  // Trigger run.completed notifications if status changed to completed
+  if (data && updates.status === 'completed' && data.completed_at) {
+    const runData = data as Run
+    const { data: repo } = await supabase
+      .from('repositories')
+      .select('id, owner_id, organization_id, name')
+      .eq('id', runData.repo_id)
+      .single()
+
+    if (repo) {
+      // Count completed items from progress
+      const progress = runData.progress || {}
+      const itemsCompleted = Object.values(progress).filter((v: any) => v.completed === true).length
+      const itemsTotal = Object.keys(progress).length
+
+      notifyRunCompletion({
+        repositoryId: runData.repo_id,
+        organizationId: repo.organization_id || undefined,
+        runId: runData.id,
+        runName: runData.name || 'Untitled Run',
+        checklistName: repo.name,
+        itemsCompleted,
+        itemsTotal,
+        completedAt: runData.completed_at!,
+      }).catch(err => console.error('Failed to send run completion notifications:', err))
+    }
+  }
+
   return data as Run
 }
 

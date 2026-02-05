@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { AlertCircleIcon, Loading02Icon } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
+import { lookupSSOByEmail, signInWithSSO, type SSODomainLookup } from '@/services/sso'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +18,28 @@ export function LoginForm() {
         email: '',
         password: '',
     })
+
+    // SSO auto-detect
+    const [ssoMatch, setSsoMatch] = useState<SSODomainLookup | null>(null)
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    useEffect(() => {
+        if (debounceRef.current) clearTimeout(debounceRef.current)
+        const email = formData.email.trim()
+        if (!email.includes('@') || email.split('@')[1].length < 3) {
+            setSsoMatch(null)
+            return
+        }
+        debounceRef.current = setTimeout(async () => {
+            try {
+                const match = await lookupSSOByEmail(email)
+                setSsoMatch(match)
+            } catch {
+                setSsoMatch(null)
+            }
+        }, 600)
+        return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+    }, [formData.email])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -73,6 +96,38 @@ export function LoginForm() {
                         className="h-11"
                     />
                 </div>
+                {/* SSO auto-detect banner */}
+                {ssoMatch && ssoMatch.supabase_provider_id && (
+                    <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-3 flex items-center justify-between gap-3">
+                        <div>
+                            <p className="text-sm font-semibold text-indigo-800">
+                                {ssoMatch.organization_name} uses Single Sign-On
+                            </p>
+                            <p className="text-xs text-indigo-600">
+                                Sign in with your corporate identity provider
+                            </p>
+                        </div>
+                        <Button
+                            type="button"
+                            size="sm"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white flex-shrink-0"
+                            onClick={async () => {
+                                setLoading(true)
+                                setError(null)
+                                try {
+                                    await signInWithSSO(ssoMatch.supabase_provider_id!)
+                                } catch (e) {
+                                    setError(e instanceof Error ? e.message : 'SSO sign-in failed')
+                                    setLoading(false)
+                                }
+                            }}
+                            disabled={loading || authLoading}
+                        >
+                            {loading ? <Icon icon={Loading02Icon} className="h-4 w-4 animate-spin" /> : 'Continue with SSO'}
+                        </Button>
+                    </div>
+                )}
+
                 <div className="space-y-2">
                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="password">
                         Password
@@ -82,8 +137,9 @@ export function LoginForm() {
                         type="password"
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        required
+                        required={!ssoMatch}
                         className="h-11"
+                        disabled={!!ssoMatch}
                     />
                 </div>
 

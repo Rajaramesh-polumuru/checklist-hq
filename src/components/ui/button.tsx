@@ -1,7 +1,8 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-import { Loader2 } from "lucide-react"
+import { Loading02Icon } from "@hugeicons/core-free-icons"
+import { Icon } from "@/components/ui/icon"
 
 import { cn } from "@/lib/utils"
 
@@ -65,7 +66,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         {...props}
       >
-        {loading && <Loader2 className="animate-spin" />}
+        {loading && <Icon icon={Loading02Icon} className="animate-spin" />}
         {children}
       </Comp>
     )

@@ -11,6 +11,12 @@ import type { Organization } from '@/types/database'
 import { useNavigate } from 'react-router-dom'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
+import { WebhookManager } from '@/components/WebhookManager'
+import { SlackIntegration } from '@/components/SlackIntegration'
+import { SSOSettings } from '@/components/SSOSettings'
+import { IPAllowlistSettings } from '@/components/IPAllowlistSettings'
+import { RetentionSettings } from '@/components/RetentionSettings'
+import { AuditLogViewer } from '@/components/AuditLogViewer'
 
 interface OrganizationSettingsProps {
   org: Organization
@@ -121,6 +127,69 @@ export function OrganizationSettings({ org, onUpdate }: OrganizationSettingsProp
               </Button>
             </div>
           </form>
+        </CardContent>
+      </Card>
+
+      {/* Webhooks */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Integrations</CardTitle>
+          <CardDescription>Manage webhooks and external connections.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <h4 className="font-medium mb-3 text-sm">Webhooks</h4>
+            <WebhookManager orgId={org.id} />
+          </div>
+
+          <div className="border-t pt-4">
+            <h4 className="font-medium mb-3 text-sm">Slack</h4>
+            <SlackIntegration orgId={org.id} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* SSO */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Single Sign-On</CardTitle>
+          <CardDescription>Connect a SAML 2.0 identity provider for enterprise authentication.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SSOSettings organizationId={org.id} />
+        </CardContent>
+      </Card>
+
+      {/* IP Allowlisting */}
+      <Card>
+        <CardHeader>
+          <CardTitle>IP Allowlisting</CardTitle>
+          <CardDescription>Restrict API access to approved IP addresses and CIDR ranges.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <IPAllowlistSettings organizationId={org.id} />
+        </CardContent>
+      </Card>
+
+      {/* Data Retention */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Data Retention</CardTitle>
+          <CardDescription>Configure how long historical data is kept before automatic deletion.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <RetentionSettings organizationId={org.id} />
+        </CardContent>
+      </Card>
+
+      {/* Audit Logs */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Security & Compliance</CardTitle>
+          <CardDescription>Activity logs for audit trails and compliance reporting.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AuditLogViewer organizationId={org.id} />
         </CardContent>
       </Card>
 

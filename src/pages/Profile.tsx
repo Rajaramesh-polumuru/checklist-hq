@@ -19,6 +19,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { formatRelativeTime } from '@/lib/date-utils'
+import { GDPRTools } from '@/components/GDPRTools'
 import {
     Loading02Icon,
     GitForkIcon,
@@ -209,6 +210,7 @@ function ActivityTimelineItem({ item, isLast }: { item: ActivityItem; isFirst?: 
 function SettingsPanel({ onExport, isExporting }: { onExport: () => void; isExporting: boolean }) {
     const { signOut } = useAuthStore()
     const navigate = useNavigate()
+    const [privacyOpen, setPrivacyOpen] = useState(false)
 
     const handleSignOut = async () => {
         await signOut()
@@ -248,22 +250,33 @@ function SettingsPanel({ onExport, isExporting }: { onExport: () => void; isExpo
                         )}
                     </button>
 
-                    {/* Privacy */}
-                    <div className="p-4 flex items-center justify-between">
+                    {/* Privacy — collapsible with GDPR tools */}
+                    <button
+                        onClick={() => setPrivacyOpen(o => !o)}
+                        className="w-full p-4 flex items-center justify-between hover:bg-sky-50 transition-colors text-left"
+                    >
                         <div className="flex items-center gap-3">
                             <div className="h-10 w-10 rounded-lg bg-sky-100 flex items-center justify-center">
                                 <Icon icon={Shield01Icon} className="h-5 w-5 text-sky-600" />
                             </div>
                             <div>
                                 <p className="font-medium">Privacy & Security</p>
-                                <p className="text-sm text-muted-foreground">Signed in with Google</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {privacyOpen ? 'Data export · Account deletion' : 'Signed in with Google'}
+                                </p>
                             </div>
                         </div>
-                        <Badge variant="outline" className="text-emerald-600 border-emerald-300 bg-emerald-50">
+                        <Badge variant="outline" className={privacyOpen ? 'text-sky-600 border-sky-300 bg-sky-50' : 'text-emerald-600 border-emerald-300 bg-emerald-50'}>
                             <Icon icon={CheckmarkCircle02Icon} className="h-3 w-3 mr-1" />
-                            Secured
+                            {privacyOpen ? 'Close ▲' : 'Secured'}
                         </Badge>
-                    </div>
+                    </button>
+
+                    {privacyOpen && (
+                        <div className="px-4 pb-4 border-t border-sky-100 pt-4 bg-sky-50/30">
+                            <GDPRTools />
+                        </div>
+                    )}
 
                     {/* Notifications */}
                     <div className="p-4 flex items-center justify-between">

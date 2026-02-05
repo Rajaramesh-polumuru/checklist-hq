@@ -16,7 +16,8 @@ import {
   PlusSignIcon,
   Shield01Icon,
   Search01Icon,
-  LayoutGridIcon
+  LayoutGridIcon,
+  Analytics01Icon
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { RepositoryCard } from '@/pages/dashboard/RepositoryCard'
@@ -24,6 +25,7 @@ import { Input } from '@/components/ui/input'
 import { CreateTeamModal } from '@/components/CreateTeamModal'
 import { InviteMemberModal } from '@/components/InviteMemberModal'
 import { OrganizationSettings } from '@/components/OrganizationSettings'
+import { AnalyticsDashboard } from '@/components/AnalyticsDashboard'
 
 export function OrganizationDashboard() {
   const { orgId } = useParams()
@@ -176,6 +178,10 @@ export function OrganizationDashboard() {
                   People
                   <span className="ml-1 bg-muted px-1.5 py-0.5 rounded-full text-xs">{members.length}</span>
                 </TabsTrigger>
+                <TabsTrigger value="analytics" className="gap-2">
+                  <Icon icon={Analytics01Icon} className="h-4 w-4" />
+                  Analytics
+                </TabsTrigger>
                 <TabsTrigger value="settings" className="gap-2">
                   <Icon icon={Settings02Icon} className="h-4 w-4" />
                   Settings
@@ -313,6 +319,11 @@ export function OrganizationDashboard() {
               </div>
             </Card>
           </TabsContent>
+          {/* Analytics Tab */}
+          <TabsContent value="analytics">
+            {orgId && <AnalyticsDashboard organizationId={orgId} />}
+          </TabsContent>
+
           {/* Settings Tab */}
           <TabsContent value="settings">
             {org && <OrganizationSettings org={org} onUpdate={setOrg} />}

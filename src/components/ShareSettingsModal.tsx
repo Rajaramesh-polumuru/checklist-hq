@@ -31,6 +31,7 @@ import type { Repository } from '@/types/database'
 import { getMyOrganizations } from '@/services/organization'
 import { transferRepoToOrg } from '@/services/organization'
 import { TeamAccessManager } from '@/components/TeamAccessManager'
+import { WebhookManager } from '@/components/WebhookManager'
 
 interface ShareSettingsModalProps {
     repository: Repository
@@ -415,12 +416,17 @@ export function ShareSettingsModal({
                     {/* Team Access (Only for Organization Repos) */}
                     {repository.organization_id && (
                         <div className="pt-4 border-t">
-                            <TeamAccessManager
-                                repoId={repository.id}
-                                organizationId={repository.organization_id}
+                            <TeamAccessManager 
+                                repoId={repository.id} 
+                                organizationId={repository.organization_id} 
                             />
                         </div>
                     )}
+
+                    {/* Webhooks Section */}
+                    <div className="pt-4 border-t">
+                        <WebhookManager repoId={repository.id} />
+                    </div>
 
                     {/* Organization Transfer */}
                     {!repository.organization_id && (
