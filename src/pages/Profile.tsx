@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth-store'
 import { getUserRepositories, deleteRepository } from '@/services/repository'
+import type { Repository } from '@/types/database'
 import { getMyActiveRuns, getMyCompletedRuns } from '@/services/run'
 import { getUserActivity, type ActivityItem } from '@/services/activity'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -983,7 +984,7 @@ export function Profile() {
                 {/* Integrations Tab */}
                 {activeTab === 'integrations' && (
                     <div className="max-w-3xl space-y-6 animate-fade-in">
-                         <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-xl font-semibold flex items-center gap-2">
                                     <Zap className="h-5 w-5 text-primary" />

@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Trash2, AlertTriangle, Save } from 'lucide-react'
-import { updateOrganization, deleteOrganization, isSlugAvailable } from '@/services/organization'
+import { updateOrganization, deleteOrganization } from '@/services/organization'
 import type { Organization } from '@/types/database'
-import { useDebounce } from '@/hooks/useDebounce'
+
 import { useNavigate } from 'react-router-dom'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
@@ -18,7 +18,7 @@ interface OrganizationSettingsProps {
 
 export function OrganizationSettings({ org, onUpdate }: OrganizationSettingsProps) {
   const navigate = useNavigate()
-  
+
   // Edit State
   const [name, setName] = useState(org.name)
   const [description, setDescription] = useState(org.description || '')
@@ -156,7 +156,7 @@ export function OrganizationSettings({ org, onUpdate }: OrganizationSettingsProp
           <DialogHeader>
             <DialogTitle>Are you absolutely sure?</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete the 
+              This action cannot be undone. This will permanently delete the
               <span className="font-semibold text-foreground"> {org.name} </span>
               organization and remove all data associated with it.
             </DialogDescription>
@@ -177,9 +177,9 @@ export function OrganizationSettings({ org, onUpdate }: OrganizationSettingsProp
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={isDeleting}>
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDelete} 
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
               disabled={deleteConfirmation !== org.slug || isDeleting}
             >
               {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

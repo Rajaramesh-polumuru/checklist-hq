@@ -3,9 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, Users, Shield, Globe, Lock } from 'lucide-react'
-import { createTeam, isSlugAvailable } from '@/services/organization' // We might need to implement team slug check
-import { useDebounce } from '@/hooks/useDebounce'
+import { Loader2, Users, Shield } from 'lucide-react'
+import { createTeam } from '@/services/organization' // We might need to implement team slug check
+
 
 interface CreateTeamModalProps {
   organizationId: string
@@ -19,7 +19,7 @@ export function CreateTeamModal({ organizationId, isOpen, onClose, onTeamCreated
   const [slug, setSlug] = useState('')
   const [description, setDescription] = useState('')
   const [visibility, setVisibility] = useState<'visible' | 'secret'>('visible')
-  
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -118,11 +118,10 @@ export function CreateTeamModal({ organizationId, isOpen, onClose, onTeamCreated
               <button
                 type="button"
                 onClick={() => setVisibility('visible')}
-                className={`p-3 rounded-lg border flex flex-col items-center gap-2 text-center transition-colors ${
-                  visibility === 'visible' 
-                    ? 'border-primary bg-primary/5 text-primary' 
+                className={`p-3 rounded-lg border flex flex-col items-center gap-2 text-center transition-colors ${visibility === 'visible'
+                    ? 'border-primary bg-primary/5 text-primary'
                     : 'hover:bg-muted'
-                }`}
+                  }`}
               >
                 <Users className="h-5 w-5" />
                 <div>
@@ -130,15 +129,14 @@ export function CreateTeamModal({ organizationId, isOpen, onClose, onTeamCreated
                   <div className="text-[10px] opacity-70">Visible to all org members</div>
                 </div>
               </button>
-              
+
               <button
                 type="button"
                 onClick={() => setVisibility('secret')}
-                className={`p-3 rounded-lg border flex flex-col items-center gap-2 text-center transition-colors ${
-                  visibility === 'secret' 
-                    ? 'border-primary bg-primary/5 text-primary' 
+                className={`p-3 rounded-lg border flex flex-col items-center gap-2 text-center transition-colors ${visibility === 'secret'
+                    ? 'border-primary bg-primary/5 text-primary'
                     : 'hover:bg-muted'
-                }`}
+                  }`}
               >
                 <Shield className="h-5 w-5" />
                 <div>

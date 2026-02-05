@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getOrganization, getOrganizationMembers, getOrganizationTeams } from '@/services/organization'
 import { getOrganizationRepositories } from '@/services/repository'
 import type { Organization, OrganizationMember, Team, Repository } from '@/types/database'
@@ -26,6 +26,7 @@ import { OrganizationSettings } from '@/components/OrganizationSettings'
 
 export function OrganizationDashboard() {
   const { orgId } = useParams()
+  const navigate = useNavigate()
   // const { user } = useAuthStore() // Potentially used for permission checks later
   const [org, setOrg] = useState<Organization | null>(null)
   const [members, setMembers] = useState<OrganizationMember[]>([])
@@ -33,7 +34,7 @@ export function OrganizationDashboard() {
   const [repos, setRepos] = useState<Repository[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('repositories')
-  
+
   // Modals
   const [createTeamOpen, setCreateTeamOpen] = useState(false)
   const [inviteMemberOpen, setInviteMemberOpen] = useState(false)
@@ -76,6 +77,24 @@ export function OrganizationDashboard() {
     if (!orgId) return
     const membersData = await getOrganizationMembers(orgId)
     setMembers(membersData)
+  }
+
+  const handleRun = (repo: Repository) => {
+    navigate(`/app/run/start/${repo.id}`)
+  }
+
+  const handleShare = (repo: Repository) => {
+    console.log('Share', repo)
+  }
+
+  const handleDuplicate = (repo: Repository) => {
+    console.log('Duplicate', repo)
+  }
+
+  const handleDelete = async (repoId: string, title: string) => {
+    if (window.confirm(`Are you sure you want to delete ${title}?`)) {
+      console.log('Delete', repoId)
+    }
   }
 
   if (loading) {
@@ -198,7 +217,14 @@ export function OrganizationDashboard() {
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredRepos.map(repo => (
-                  <RepositoryCard key={repo.id} repo={repo} />
+                  <RepositoryCard
+                    key={repo.id}
+                    repo={repo}
+                    onRun={handleRun}
+                    onShare={handleShare}
+                    onDuplicate={handleDuplicate}
+                    onDelete={handleDelete}
+                  />
                 ))}
               </div>
             )}

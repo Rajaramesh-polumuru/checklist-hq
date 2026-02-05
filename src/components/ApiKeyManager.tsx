@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, Key, Trash2, Copy, Check, Eye, EyeOff, Plus, AlertTriangle } from 'lucide-react'
+import { Loader2, Key, Trash2, Copy, Check, Plus } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { useAuthStore } from '@/stores/auth-store'
+
 
 interface ApiKey {
   id: string
@@ -26,7 +26,7 @@ export function ApiKeyManager() {
 
   const loadKeys = async () => {
     setLoading(true)
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('api_keys')
       .select('*')
       .is('revoked_at', null) // Only active keys
@@ -51,7 +51,7 @@ export function ApiKeyManager() {
       .map(b => b.toString(16).padStart(2, '0')).join('')
     const secretKey = `sk_live_${randomPart}`
     const prefix = secretKey.slice(0, 12) + '...'
-    
+
     // In a real app, you'd hash this before sending.
     // For MVP, we're storing a placeholder hash logic (simple sha256)
     const encoder = new TextEncoder()
@@ -76,12 +76,12 @@ export function ApiKeyManager() {
 
   const handleRevoke = async (id: string) => {
     if (!confirm('Are you sure? This will immediately disable this API key.')) return
-    
+
     await supabase
       .from('api_keys')
       .update({ revoked_at: new Date().toISOString() })
       .eq('id', id)
-    
+
     loadKeys()
   }
 
@@ -113,8 +113,8 @@ export function ApiKeyManager() {
           <form onSubmit={handleCreateKey} className="flex gap-4 items-end">
             <div className="flex-1 space-y-2">
               <label className="text-sm font-medium">New Key Name</label>
-              <Input 
-                placeholder="e.g. CI/CD Pipeline, Zapier" 
+              <Input
+                placeholder="e.g. CI/CD Pipeline, Zapier"
                 value={newKeyName}
                 onChange={(e) => setNewKeyName(e.target.value)}
               />
@@ -139,11 +139,11 @@ export function ApiKeyManager() {
               <p className="text-sm text-green-700 mt-1 mb-3">
                 Copy this key now. You won't be able to see it again!
               </p>
-              
+
               <div className="flex items-center gap-2">
-                <Input 
-                  value={newKeySecret} 
-                  readOnly 
+                <Input
+                  value={newKeySecret}
+                  readOnly
                   className="font-mono text-sm bg-white border-green-200"
                 />
                 <Button variant="outline" onClick={copyToClipboard} className="shrink-0 bg-white">
@@ -181,8 +181,8 @@ export function ApiKeyManager() {
                   {key.last_used_at && ` • Last used ${new Date(key.last_used_at).toLocaleDateString()}`}
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="icon"
                 className="text-muted-foreground hover:text-destructive"
                 onClick={() => handleRevoke(key.id)}
