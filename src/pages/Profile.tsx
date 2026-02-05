@@ -52,9 +52,9 @@ import {
     Mail,
     LogOut,
 } from 'lucide-react'
-import type { Repository } from '@/types/database'
+import { ApiKeyManager } from '@/components/ApiKeyManager'
 
-// Achievement definitions
+// ... existing code ...
 interface Achievement {
     id: string
     title: string
@@ -407,7 +407,7 @@ export function Profile() {
     const [loading, setLoading] = useState(true)
     const [isExporting, setIsExporting] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
-    const [activeTab, setActiveTab] = useState<'overview' | 'checklists' | 'activity' | 'settings'>('overview')
+    const [activeTab, setActiveTab] = useState<'overview' | 'checklists' | 'activity' | 'settings' | 'integrations'>('overview')
 
     // Filtered repos based on search
     const filteredRepos = useMemo(() => {
@@ -700,12 +700,12 @@ export function Profile() {
                     </div>
 
                     {/* Tab Navigation */}
-                    <div className="flex gap-1 mt-8 p-1 bg-muted/50 rounded-xl w-fit">
-                        {(['overview', 'checklists', 'activity', 'settings'] as const).map((tab) => (
+                    <div className="flex gap-1 mt-8 p-1 bg-muted/50 rounded-xl w-fit overflow-x-auto">
+                        {(['overview', 'checklists', 'activity', 'integrations', 'settings'] as const).map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-all ${activeTab === tab
+                                className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${activeTab === tab
                                     ? 'bg-background text-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
                                     }`}
@@ -977,6 +977,25 @@ export function Profile() {
                                 ))}
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* Integrations Tab */}
+                {activeTab === 'integrations' && (
+                    <div className="max-w-3xl space-y-6 animate-fade-in">
+                         <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-semibold flex items-center gap-2">
+                                    <Zap className="h-5 w-5 text-primary" />
+                                    Integrations & API
+                                </h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Connect Checklist HQ with your external tools
+                                </p>
+                            </div>
+                        </div>
+
+                        <ApiKeyManager />
                     </div>
                 )}
 

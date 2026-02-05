@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import type { Organization, OrganizationMember } from '@/types/database'
+import type { Organization, OrganizationMember, Team } from '@/types/database'
 
 /**
  * Create a new organization using the RPC function.
@@ -146,4 +146,72 @@ export async function isSlugAvailable(slug: string): Promise<boolean> {
   if (error?.code === 'PGRST116') return true // Not found = available
   if (error) throw error
   return !data
+}
+
+/**
+ * Get teams for an organization
+ */
+export async function getOrganizationTeams(organizationId: string): Promise<Team[]> {
+  const { data, error } = await supabase
+    .from('teams')
+    .select()
+    .eq('organization_id', organizationId)
+    .order('name')
+
+  if (error) throw error
+  return (data || []) as Team[]
+}
+
+/**
+ * Create a new team within an organization
+ */
+export async function createTeam(params: {
+  organizationId: string
+  name: string
+  slug: string
+  description?: string
+  visibility?: 'visible' | 'secret'
+}): Promise<string> {
+  const { organizationId, name, slug, description, visibility = 'visible' } = params
+
+  const { data, error } = await supabase.rpc('create_team', {
+    p_organization_id: organizationId,
+    p_name: name,
+    p_slug: slug,
+    p_description: description ?? null,
+    p_visibility: visibility,
+  })
+
+  if (error) throw error
+  return data as string // Returns the new team ID
+}
+
+/**
+ * Add a member to an organization by email
+ */
+export async function addMemberByEmail(
+  organizationId: string,
+  email: string,
+  role: 'admin' | 'member' | 'viewer' = 'member'
+): Promise<{ success: boolean; message?: string }> {
+  const { data, error } = await supabase.rpc('add_member_by_email', {
+    p_organization_id: organizationId,
+    p_email: email,
+    p_role: role,
+  })
+
+  if (error) throw error
+  return data as { success: boolean; message?: string }
+}
+
+/**
+ * Transfer a repository to an organization
+ */
+export async function transferRepoToOrg(repoId: string, orgId: string): Promise<void> {
+  const { error } = await supabase
+    .from('repositories')
+    .update({ organization_id: orgId })
+    .eq('id', repoId)
+
+  if (error) throw error
 }

@@ -52,6 +52,17 @@ export async function getUserRepositories(userId: string): Promise<Repository[]>
   return (data || []) as Repository[]
 }
 
+export async function getOrganizationRepositories(orgId: string): Promise<Repository[]> {
+  const { data, error } = await supabase
+    .from('repositories')
+    .select()
+    .eq('organization_id', orgId)
+    .order('updated_at', { ascending: false })
+
+  if (error) throw error
+  return (data || []) as Repository[]
+}
+
 export async function updateRepository(
   id: string,
   updates: RepositoryUpdate
@@ -443,6 +454,95 @@ export async function removeTagFromRepository(repoId: string, tagId: string): Pr
     .delete()
     .eq('repository_id', repoId)
     .eq('tag_id', tagId)
+
+  if (error) throw error
+}
+
+// ============================================
+// Team Access Operations
+// ============================================
+
+export interface RepositoryTeamAccess {
+  id: string
+  repository_id: string
+  team_id: string
+  permission: 'read' | 'write' | 'admin'
+  team: {
+    id: string
+    name: string
+    slug: string
+  }
+}
+
+/**
+ * Get teams with access to a repository
+ */
+export async function getRepositoryTeams(repoId: string): Promise<RepositoryTeamAccess[]> {
+  const { data, error } = await supabase
+    .from('repository_team_access')
+    .select(`
+      id,
+      repository_id,
+      team_id,
+      permission,
+      team:teams (
+        id,
+        name,
+        slug
+      )
+    `)
+    .eq('repository_id', repoId)
+
+  if (error) throw error
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data || []) as any[]
+}
+
+/**
+ * Grant team access to a repository
+ */
+export async function addTeamAccess(
+  repoId: string,
+  teamId: string,
+  permission: 'read' | 'write' | 'admin'
+): Promise<void> {
+  const { error } = await supabase
+    .from('repository_team_access')
+    .insert({
+      repository_id: repoId,
+      team_id: teamId,
+      permission
+    })
+
+  if (error) throw error
+}
+
+/**
+ * Update team access permission
+ */
+export async function updateTeamAccess(
+  repoId: string,
+  teamId: string,
+  permission: 'read' | 'write' | 'admin'
+): Promise<void> {
+  const { error } = await supabase
+    .from('repository_team_access')
+    .update({ permission })
+    .eq('repository_id', repoId)
+    .eq('team_id', teamId)
+
+  if (error) throw error
+}
+
+/**
+ * Remove team access from a repository
+ */
+export async function removeTeamAccess(repoId: string, teamId: string): Promise<void> {
+  const { error } = await supabase
+    .from('repository_team_access')
+    .delete()
+    .eq('repository_id', repoId)
+    .eq('team_id', teamId)
 
   if (error) throw error
 }

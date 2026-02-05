@@ -44,6 +44,9 @@ import {
   restoreToCommit,
   deleteRepository,
 } from '@/services/repository'
+import { getMyActiveAndPausedRunsForRepo } from '@/services/run'
+import { ActiveRunsPanel } from '@/components/ActiveRunsPanel'
+import type { Run } from '@/types/database'
 
 export function Editor() {
   const { repoId } = useParams()
@@ -58,6 +61,7 @@ export function Editor() {
 
   // Repository state
   const [repository, setRepository] = useState<Repository | null>(null)
+  const [activeRuns, setActiveRuns] = useState<Run[]>([])
   const [latestCommit, setLatestCommit] = useState<Commit | null>(null)
   const [title, setTitle] = useState('Untitled Checklist')
   const [isPublic, setIsPublic] = useState(false)
@@ -140,6 +144,12 @@ export function Editor() {
           console.warn('[Editor] No commit found for repo, starting with empty content')
           // No commits yet, start with empty content
           setContent({ version: '1.0', items: {} })
+        }
+
+        // Fetch active runs
+        if (user?.id) {
+          const runs = await getMyActiveAndPausedRunsForRepo(user.id, repoId!)
+          setActiveRuns(runs)
         }
       } catch (err) {
         console.error('Error loading repository:', err)
@@ -603,9 +613,28 @@ export function Editor() {
       {/* Error banner - Now with ARIA live region */}
       <ErrorBanner error={error} onDismiss={() => setError(null)} priority="polite" />
 
-      {/* Editor */}
-      <main className="container mx-auto px-4 py-6 max-w-3xl">
-        <ChecklistEditor />
+      {/* Editor Content with Sidebar */}
+      <main className="container mx-auto px-4 py-6 max-w-6xl">
+        <div className="flex flex-col-reverse lg:flex-row gap-8">
+          {/* Main Editor Column */}
+          <div className="flex-1 min-w-0">
+            <ChecklistEditor />
+          </div>
+
+          {/* Sidebar */}
+          <div className="w-full lg:w-80 shrink-0 space-y-6">
+            {/* Active Runs Panel */}
+            {repository && (
+              <ActiveRunsPanel
+                runs={activeRuns.map(r => ({
+                  ...r,
+                  repository: { title: repository.title, owner_id: repository.owner_id }
+                }))}
+                loading={loading}
+              />
+            )}
+          </div>
+        </div>
       </main>
 
       {/* Version History Panel */}

@@ -261,6 +261,26 @@ export async function getMyCompletedRuns(userId: string): Promise<(Run & { repos
   }))
 }
 
+
+export async function getMyActiveAndPausedRunsForRepo(userId: string, repoId: string): Promise<(Run & { repository: { title: string; owner_id: string } })[]> {
+  const { data, error } = await supabase
+    .from('runs')
+    .select(`
+      *,
+      repositories (title, owner_id)
+    `)
+    .eq('user_id', userId)
+    .eq('repo_id', repoId)
+    .in('status', ['active', 'paused'])
+    .order('last_activity_at', { ascending: false })
+
+  if (error) throw error
+  return (data || []).map((d: Run & { repositories: { title: string; owner_id: string } }) => ({
+    ...d,
+    repository: d.repositories
+  }))
+}
+
 // ============================================
 // Combined Operations
 // ============================================

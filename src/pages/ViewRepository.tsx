@@ -16,14 +16,13 @@ import {
   Clock,
   ListChecks,
   ChevronRight,
-  Sparkles,
   Play,
   Pencil,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { getRepository, getLatestCommit } from '@/services/repository'
-import { getActiveRunsForRepo } from '@/services/run'
-import { RunCard } from '@/components/RunCard'
+import { getMyActiveAndPausedRunsForRepo } from '@/services/run'
+import { ActiveRunsPanel } from '@/components/ActiveRunsPanel'
 import type { Repository, Commit, ChecklistItem, Run } from '@/types/database'
 import { cn } from '@/lib/utils'
 
@@ -77,9 +76,9 @@ export function ViewRepository() {
         const latestCommit = await getLatestCommit(repoId)
         setCommit(latestCommit)
 
-        // If owner, load active runs
-        if (user?.id && repo.owner_id === user.id) {
-          const runs = await getActiveRunsForRepo(repoId)
+        // Load user's active/paused runs for this repo
+        if (user?.id) {
+          const runs = await getMyActiveAndPausedRunsForRepo(user.id, repoId)
           setActiveRuns(runs)
         }
       } catch (err) {
@@ -225,88 +224,81 @@ export function ViewRepository() {
       </header>
 
       {/* Content */}
-      <main className="container mx-auto px-4 py-8 max-w-3xl">
-        {/* Fork info banner */}
-        {repository.upstream_repo_id && (
-          <Card className="mb-6 bg-muted/50">
-            <CardContent className="py-4">
-              <p className="text-sm text-muted-foreground flex items-center gap-2">
-                <GitFork className="h-4 w-4" />
-                This is a forked checklist
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Active Runs Section */}
-        {activeRuns.length > 0 && repository && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Play className="h-5 w-5 text-primary" />
-              Active Runs
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {activeRuns.map(run => (
-                <RunCard
-                  key={run.id}
-                  run={{
-                    ...run,
-                    repository: { title: repository.title, owner_id: repository.owner_id }
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Checklist preview */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ListChecks className="h-5 w-5" />
-              Checklist Preview
-            </CardTitle>
-            <CardDescription>
-              {items.length} items in this checklist
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {items.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">
-                This checklist has no items yet.
-              </p>
-            ) : (
-              <div className="space-y-1">
-                {renderItems(null)}
-              </div>
+      <main className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="flex flex-col-reverse lg:flex-row gap-8">
+          {/* Main Column */}
+          <div className="flex-1 min-w-0">
+            {/* Fork info banner */}
+            {repository.upstream_repo_id && (
+              <Card className="mb-6 bg-muted/50">
+                <CardContent className="py-4">
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <GitFork className="h-4 w-4" />
+                    This is a forked checklist
+                  </p>
+                </CardContent>
+              </Card>
             )}
-          </CardContent>
-        </Card>
 
-        {/* Fork CTA */}
-        {!isOwner && (
-          <Card className="mt-6 relative overflow-hidden">
-            {/* Gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
-            <CardContent className="py-8 text-center relative">
-              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <GitFork className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Use this checklist</h3>
-              <p className="text-muted-foreground text-sm mb-2">
-                Fork this checklist to your account to customize and run it.
-              </p>
-              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mb-6">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                <span>All {items.length} items will be copied</span>
-              </div>
-              <Button onClick={handleForkClick} size="lg" className="gap-2">
-                <GitFork className="h-4 w-4" />
-                {user ? 'Fork Checklist' : 'Sign in to Fork'}
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+            {/* Checklist preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ListChecks className="h-5 w-5" />
+                  Checklist Preview
+                </CardTitle>
+                <CardDescription>
+                  {items.length} items in this checklist
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {items.length === 0 ? (
+                  <p className="text-center py-8 text-muted-foreground">
+                    This checklist has no items yet.
+                  </p>
+                ) : (
+                  <div className="space-y-1">
+                    {renderItems(null)}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+          </div>
+
+          {/* Sidebar */}
+          <div className="w-full lg:w-80 shrink-0 space-y-6">
+            {/* Active Runs Panel */}
+            {repository && (
+              <ActiveRunsPanel
+                runs={activeRuns.map(r => ({
+                  ...r,
+                  repository: { title: repository.title, owner_id: repository.owner_id }
+                }))}
+                loading={loading}
+              />
+            )}
+
+            {/* Fork CTA in Sidebar for non-owners */}
+            {!isOwner && (
+              <Card className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-primary/5">
+                <CardContent className="p-6 text-center">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                    <GitFork className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-base mb-1">Fork & customize</h3>
+                  <p className="text-muted-foreground text-xs mb-4">
+                    Copy this checklist to your account to edit and run it.
+                  </p>
+                  <Button onClick={handleForkClick} className="w-full gap-2 text-sm">
+                    <GitFork className="h-4 w-4" />
+                    {user ? 'Fork Checklist' : 'Sign in to Fork'}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
       </main>
 
       {/* Fork Modal */}

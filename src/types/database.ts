@@ -134,6 +134,57 @@ export interface OrganizationInsert {
   description?: string | null
 }
 
+// Team types
+export interface Team {
+  id: string
+  organization_id: string
+  slug: string
+  name: string
+  description: string | null
+  visibility: 'visible' | 'secret'
+  default_permission: 'read' | 'write' | 'admin'
+  settings: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+export interface TeamMember {
+  id: string
+  team_id: string
+  user_id: string
+  role: 'maintainer' | 'member'
+  added_at: string
+  added_by: string | null
+}
+
+export interface RepositoryTeamAccess {
+  id: string
+  repository_id: string
+  team_id: string
+  permission: 'read' | 'write' | 'admin'
+  granted_at: string
+  granted_by: string | null
+}
+
+export interface TeamInsert {
+  organization_id: string
+  slug: string
+  name: string
+  description?: string | null
+  visibility?: 'visible' | 'secret'
+  default_permission?: 'read' | 'write' | 'admin'
+  settings?: Record<string, unknown>
+}
+
+export interface TeamUpdate {
+  slug?: string
+  name?: string
+  description?: string | null
+  visibility?: 'visible' | 'secret'
+  default_permission?: 'read' | 'write' | 'admin'
+  settings?: Record<string, unknown>
+}
+
 // Repository with tags (for display purposes)
 export interface RepositoryWithTags extends Repository {
   tags?: Tag[]
@@ -147,6 +198,7 @@ export interface RepositoryInsert {
   is_public?: boolean
   origin_repo_id?: string | null
   upstream_repo_id?: string | null
+  organization_id?: string | null
 }
 
 export interface CommitInsert {
@@ -173,6 +225,7 @@ export interface RepositoryUpdate {
   title?: string
   description?: string | null
   is_public?: boolean
+  organization_id?: string | null
 }
 
 export interface RunUpdate {
@@ -229,6 +282,31 @@ export interface Database {
         Row: RepositoryTag
         Insert: { repository_id: string; tag_id: string }
         Update: never
+      }
+      organizations: {
+        Row: Organization
+        Insert: OrganizationInsert
+        Update: Partial<Omit<OrganizationInsert, 'slug'>> // Slug usually shouldn't change
+      }
+      organization_members: {
+        Row: OrganizationMember
+        Insert: Omit<OrganizationMember, 'id' | 'joined_at' | 'invited_at'>
+        Update: Pick<OrganizationMember, 'role'>
+      }
+      teams: {
+        Row: Team
+        Insert: TeamInsert
+        Update: TeamUpdate
+      }
+      team_members: {
+        Row: TeamMember
+        Insert: Omit<TeamMember, 'id' | 'added_at'>
+        Update: Pick<TeamMember, 'role'>
+      }
+      repository_team_access: {
+        Row: RepositoryTeamAccess
+        Insert: Omit<RepositoryTeamAccess, 'id' | 'granted_at'>
+        Update: Pick<RepositoryTeamAccess, 'permission'>
       }
     }
   }

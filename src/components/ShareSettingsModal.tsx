@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -21,10 +21,15 @@ import {
     AlertTriangle,
     Share2,
     ExternalLink,
-    Loader2
+    Loader2,
+    Building2,
+    ArrowRight
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Repository } from '@/types/database'
+import { getMyOrganizations } from '@/services/organization'
+import { transferRepoToOrg } from '@/services/organization'
+import { TeamAccessManager } from '@/components/TeamAccessManager'
 
 interface ShareSettingsModalProps {
     repository: Repository
@@ -48,7 +53,25 @@ export function ShareSettingsModal({
     const [deleting, setDeleting] = useState(false)
     const [deleteConfirmText, setDeleteConfirmText] = useState('')
 
+    // Transfer State
+    const [showTransfer, setShowTransfer] = useState(false)
+    const [organizations, setOrganizations] = useState<{ id: string, name: string }[]>([])
+    const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null)
+    const [transferring, setTransferring] = useState(false)
+    const [transferSuccess, setTransferSuccess] = useState(false)
+
     const shareUrl = `${window.location.origin}/repo/${repository.id}`
+
+    useEffect(() => {
+        if (showTransfer && organizations.length === 0) {
+            getMyOrganizations().then((orgs) => {
+                // Only show orgs where the user is admin or owner
+                // Note: The service already includes roles
+                const adminOrgs = orgs.filter((o: any) => o.role === 'owner' || o.role === 'admin')
+                setOrganizations(adminOrgs)
+            }).catch(console.error)
+        }
+    }, [showTransfer])
 
     const handleCopyLink = async () => {
         try {
@@ -84,6 +107,24 @@ export function ShareSettingsModal({
             console.error('Failed to delete:', err)
         } finally {
             setDeleting(false)
+        }
+    }
+
+    const handleTransfer = async () => {
+        if (!selectedOrgId) return
+
+        setTransferring(true)
+        try {
+            await transferRepoToOrg(repository.id, selectedOrgId)
+            setTransferSuccess(true)
+            setTimeout(() => {
+                window.location.href = `/app/orgs/${selectedOrgId}` // Hard reload to org page
+            }, 1000)
+        } catch (err) {
+            console.error('Failed to transfer:', err)
+            alert('Failed to transfer repository. Please try again.')
+        } finally {
+            setTransferring(false)
         }
     }
 
@@ -152,6 +193,105 @@ export function ShareSettingsModal({
                                 <>
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     Delete Permanently
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        )
+    }
+
+    if (showTransfer) {
+        return (
+            <Dialog open={isOpen} onOpenChange={onClose}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                <Building2 className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                                <DialogTitle>Transfer Ownership</DialogTitle>
+                                <DialogDescription>Move this checklist to an organization</DialogDescription>
+                            </div>
+                        </div>
+                    </DialogHeader>
+
+                    <div className="py-4 space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                            Select an organization to transfer <strong>"{repository.title}"</strong> to.
+                            You must be an owner or admin of the organization.
+                        </p>
+
+                        <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2">
+                            {organizations.length === 0 ? (
+                                <p className="text-sm text-muted-foreground text-center py-4 bg-muted/20 rounded-md">
+                                    No organizations found where you are an admin.
+                                </p>
+                            ) : (
+                                organizations.map(org => (
+                                    <button
+                                        key={org.id}
+                                        onClick={() => setSelectedOrgId(org.id)}
+                                        className={cn(
+                                            "w-full flex items-center justify-between p-3 rounded-lg border text-sm transition-all",
+                                            selectedOrgId === org.id
+                                                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                                : "hover:bg-muted/50"
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Building2 className="h-4 w-4 text-muted-foreground" />
+                                            <span className="font-medium">{org.name}</span>
+                                        </div>
+                                        {selectedOrgId === org.id && (
+                                            <Check className="h-4 w-4 text-primary" />
+                                        )}
+                                    </button>
+                                ))
+                            )}
+                        </div>
+
+                        {selectedOrgId && (
+                            <div className="p-3 bg-amber-50 text-amber-900 border border-amber-200 rounded-md text-sm">
+                                <p className="font-medium flex items-center gap-2">
+                                    <AlertTriangle className="h-4 w-4" />
+                                    Warning
+                                </p>
+                                <p className="mt-1 text-xs opacity-90">
+                                    Transferring ownership is permanent. The organization will own this checklist, and its visibility may change based on organization settings.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setShowTransfer(false)}
+                            disabled={transferring}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleTransfer}
+                            disabled={!selectedOrgId || transferring || transferSuccess}
+                        >
+                            {transferring ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Transferring...
+                                </>
+                            ) : transferSuccess ? (
+                                <>
+                                    <Check className="mr-2 h-4 w-4" />
+                                    Transferred!
+                                </>
+                            ) : (
+                                <>
+                                    Transfer
+                                    <ArrowRight className="ml-2 h-4 w-4" />
                                 </>
                             )}
                         </Button>
@@ -270,6 +410,43 @@ export function ShareSettingsModal({
                             </p>
                         )}
                     </div>
+
+                    {/* Team Access (Only for Organization Repos) */}
+                    {repository.organization_id && (
+                        <div className="pt-4 border-t">
+                            <TeamAccessManager 
+                                repoId={repository.id} 
+                                organizationId={repository.organization_id} 
+                            />
+                        </div>
+                    )}
+
+                    {/* Organization Transfer */}
+                    {!repository.organization_id && (
+                        <div>
+                            <label className="text-sm font-medium mb-3 block">Organization</label>
+                            <Card className="bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setShowTransfer(true)}>
+                                <CardContent className="p-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-lg bg-background border flex items-center justify-center">
+                                                <Building2 className="h-5 w-5 text-muted-foreground" />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-sm">Transfer to Organization</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Move this checklist to a team workspace
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Button variant="ghost" size="sm">
+                                            Transfer
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    )}
 
                     {/* Preview in Explore */}
                     {isPublic && (
