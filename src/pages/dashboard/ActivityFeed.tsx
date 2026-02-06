@@ -88,32 +88,27 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
                                 let IconComponent = Activity01Icon
                                 let iconColor = 'text-muted-foreground'
                                 let bgColor = 'bg-muted'
-                                let ringColor = 'ring-background'
 
                                 switch (item.type) {
                                     case 'run_started':
                                         IconComponent = PlayIcon
                                         iconColor = 'text-info'
                                         bgColor = 'bg-info/10'
-                                        ringColor = 'ring-info/20'
                                         break
                                     case 'run_completed':
                                         IconComponent = CheckmarkCircle02Icon
                                         iconColor = 'text-success'
                                         bgColor = 'bg-success/10'
-                                        ringColor = 'ring-success/20'
                                         break
                                     case 'repo_forked':
                                         IconComponent = GitForkIcon
                                         iconColor = 'text-violet-500'
                                         bgColor = 'bg-violet-500/10'
-                                        ringColor = 'ring-violet-500/20'
                                         break
                                     case 'repo_created':
                                         IconComponent = GitCommitIcon
                                         iconColor = 'text-amber-500'
                                         bgColor = 'bg-amber-500/10'
-                                        ringColor = 'ring-amber-500/20'
                                         break
                                 }
 
@@ -134,7 +129,6 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
                                                     IconComponent={IconComponent}
                                                     iconColor={iconColor}
                                                     bgColor={bgColor}
-                                                    ringColor={ringColor}
                                                     item={item}
                                                     hasLink
                                                 />
@@ -145,7 +139,6 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
                                                     IconComponent={IconComponent}
                                                     iconColor={iconColor}
                                                     bgColor={bgColor}
-                                                    ringColor={ringColor}
                                                     item={item}
                                                 />
                                             </div>
@@ -162,10 +155,9 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
 }
 
 interface ActivityItemContentProps {
-    IconComponent: React.FC<any>
+    IconComponent: any
     iconColor: string
     bgColor: string
-    ringColor: string
     item: ActivityItem
     hasLink?: boolean
 }
@@ -174,7 +166,6 @@ function ActivityItemContent({
     IconComponent,
     iconColor,
     bgColor,
-    ringColor,
     item,
     hasLink
 }: ActivityItemContentProps) {
