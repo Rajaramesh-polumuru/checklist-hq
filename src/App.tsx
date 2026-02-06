@@ -23,6 +23,7 @@ const Signup = lazy(() => import('@/pages/Signup').then(module => ({ default: mo
 const Profile = lazy(() => import('@/pages/Profile').then(module => ({ default: module.Profile })))
 const OrganizationDashboard = lazy(() => import('@/pages/OrganizationDashboard').then(module => ({ default: module.OrganizationDashboard })))
 const NewOrganization = lazy(() => import('@/pages/NewOrganization').then(module => ({ default: module.NewOrganization })))
+const Organizations = lazy(() => import('@/pages/Organizations').then(module => ({ default: module.Organizations })))
 // const OrganizationSettings = lazy(() => import('@/components/OrganizationSettings').then(module => ({ default: module.OrganizationSettings }))) // OrganizationSettings path?
 const RunHistory = lazy(() => import('@/pages/RunHistory').then(module => ({ default: module.RunHistory })))
 const RunAnalytics = lazy(() => import('@/pages/RunAnalytics')) // Default export
@@ -201,6 +202,16 @@ function App() {
                   <ProtectedRoute>
                     <Suspense fallback={<PageLoader />}>
                       <RunAnalytics />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="app/orgs"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<PageLoader />}>
+                      <Organizations />
                     </Suspense>
                   </ProtectedRoute>
                 }

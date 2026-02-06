@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
@@ -19,9 +19,14 @@ import {
     Sun03Icon,
     Moon02Icon,
     ComputerIcon,
+    Building02Icon,
+    ArrowDown01Icon,
+    ArrowUp01Icon,
 } from '@hugeicons/core-free-icons'
 import { useThemeStore } from '@/stores/theme-store'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { getMyOrganizations } from '@/services/organization'
+import type { Organization } from '@/types/database'
 
 interface SidebarProps {
     collapsed: boolean
@@ -101,6 +106,22 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
     const { user, signOut } = useAuthStore()
     const { theme, setTheme } = useThemeStore()
     const isMobile = useIsMobile()
+    const [orgs, setOrgs] = useState<(Organization & { role: string })[]>([])
+    const [orgsExpanded, setOrgsExpanded] = useState(true)
+    const [orgsLoading, setOrgsLoading] = useState(false)
+
+    // Fetch user's organizations
+    useEffect(() => {
+        if (user) {
+            setOrgsLoading(true)
+            getMyOrganizations()
+                .then(setOrgs)
+                .catch(console.error)
+                .finally(() => setOrgsLoading(false))
+        } else {
+            setOrgs([])
+        }
+    }, [user])
 
     const cycleTheme = () => {
         if (theme === 'light') setTheme('dark')
@@ -155,15 +176,72 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
                             <span className="font-bold text-lg">Checklist HQ</span>
                         </div>
 
-                        <nav className="flex-1 space-y-2">
+                        <nav className="flex-1 space-y-2 overflow-y-auto">
                             {links.map((link) => (
                                 <SidebarLink
                                     key={link.to}
                                     {...link}
                                     collapsed={false}
-                                    active={location.pathname === link.to} // strict match tailored for now, improve later
+                                    active={location.pathname === link.to}
                                 />
                             ))}
+
+                            {/* Organizations Section */}
+                            {user && (
+                                <div className="pt-4 mt-4 border-t">
+                                    <button
+                                        onClick={() => setOrgsExpanded(!orgsExpanded)}
+                                        className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        <span className="flex items-center gap-2">
+                                            <Icon icon={Building02Icon} className="h-4 w-4" />
+                                            Organizations
+                                        </span>
+                                        <Icon icon={orgsExpanded ? ArrowUp01Icon : ArrowDown01Icon} className="h-4 w-4" />
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {orgsExpanded && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="space-y-1 pl-2">
+                                                    {orgsLoading ? (
+                                                        <div className="px-3 py-2 text-sm text-muted-foreground">Loading...</div>
+                                                    ) : orgs.length === 0 ? (
+                                                        <div className="px-3 py-2 text-sm text-muted-foreground">No organizations yet</div>
+                                                    ) : (
+                                                        orgs.map((org) => (
+                                                            <Link
+                                                                key={org.id}
+                                                                to={`/app/orgs/${org.id}`}
+                                                                className={cn(
+                                                                    "flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors",
+                                                                    location.pathname === `/app/orgs/${org.id}`
+                                                                        ? "bg-primary/10 text-primary"
+                                                                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                                                                )}
+                                                            >
+                                                                <span className="truncate">{org.name}</span>
+                                                            </Link>
+                                                        ))
+                                                    )}
+                                                    <Link
+                                                        to="/app/orgs/new"
+                                                        className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md text-primary hover:bg-primary/10 transition-colors"
+                                                    >
+                                                        <Icon icon={PlusSignIcon} className="h-3.5 w-3.5" />
+                                                        <span>New Organization</span>
+                                                    </Link>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            )}
                         </nav>
 
                         <div className="pt-6 border-t mt-auto space-y-2">
@@ -235,7 +313,7 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 space-y-2">
+                <nav className="flex-1 space-y-2 overflow-y-auto">
                     {links.map((link) => (
                         <SidebarLink
                             key={link.to}
@@ -244,6 +322,86 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
                             active={location.pathname === link.to || (link.to !== '/app' && location.pathname.startsWith(link.to))}
                         />
                     ))}
+
+                    {/* Organizations Section */}
+                    {user && (
+                        <div className="pt-4 mt-4 border-t">
+                            {collapsed ? (
+                                <TooltipProvider delayDuration={0}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Link
+                                                to="/app/orgs"
+                                                className={cn(
+                                                    "flex items-center justify-center w-10 h-10 rounded-lg transition-all mx-auto",
+                                                    location.pathname.startsWith('/app/orgs')
+                                                        ? "bg-primary text-primary-foreground shadow-md"
+                                                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                                                )}
+                                            >
+                                                <Icon icon={Building02Icon} className="h-5 w-5" />
+                                            </Link>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="right">Organizations</TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={() => setOrgsExpanded(!orgsExpanded)}
+                                        className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        <span className="flex items-center gap-2">
+                                            <Icon icon={Building02Icon} className="h-4 w-4" />
+                                            Organizations
+                                        </span>
+                                        <Icon icon={orgsExpanded ? ArrowUp01Icon : ArrowDown01Icon} className="h-4 w-4" />
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {orgsExpanded && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="space-y-1 pl-2">
+                                                    {orgsLoading ? (
+                                                        <div className="px-3 py-2 text-sm text-muted-foreground">Loading...</div>
+                                                    ) : orgs.length === 0 ? (
+                                                        <div className="px-3 py-2 text-sm text-muted-foreground">No organizations yet</div>
+                                                    ) : (
+                                                        orgs.map((org) => (
+                                                            <Link
+                                                                key={org.id}
+                                                                to={`/app/orgs/${org.id}`}
+                                                                className={cn(
+                                                                    "flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors",
+                                                                    location.pathname === `/app/orgs/${org.id}`
+                                                                        ? "bg-primary/10 text-primary"
+                                                                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                                                                )}
+                                                            >
+                                                                <span className="truncate">{org.name}</span>
+                                                            </Link>
+                                                        ))
+                                                    )}
+                                                    <Link
+                                                        to="/app/orgs/new"
+                                                        className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md text-primary hover:bg-primary/10 transition-colors"
+                                                    >
+                                                        <Icon icon={PlusSignIcon} className="h-3.5 w-3.5" />
+                                                        <span>New Organization</span>
+                                                    </Link>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </>
+                            )}
+                        </div>
+                    )}
                 </nav>
 
                 {/* Footer */}
