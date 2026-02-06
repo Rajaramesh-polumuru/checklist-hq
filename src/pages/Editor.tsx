@@ -602,8 +602,8 @@ export function Editor() {
       <ErrorBanner error={error} onDismiss={() => setError(null)} priority="polite" />
 
       {/* Editor Content with Sidebar */}
-      <main className="container mx-auto px-4 py-6 max-w-6xl">
-        <div className="flex flex-col-reverse lg:flex-row gap-8">
+      <main className="container mx-auto px-4 md:px-6 py-4 md:py-6 max-w-6xl">
+        <div className="flex flex-col-reverse lg:flex-row gap-4 md:gap-6 lg:gap-8">
           {/* Main Editor Column */}
           <div className="flex-1 min-w-0">
             <ChecklistEditor loading={loading} />

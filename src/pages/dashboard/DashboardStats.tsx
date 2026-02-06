@@ -22,13 +22,13 @@ export function DashboardStats({ loading = false, stats }: DashboardStatsProps) 
 
     if (loading) {
         return (
-            <div className="grid grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
                 {/* Large skeleton - spans 2 columns */}
-                <div className="col-span-4 sm:col-span-2 h-36 bg-gradient-to-br from-muted/30 to-muted/10 animate-pulse rounded-2xl border" />
+                <div className="col-span-1 sm:col-span-2 h-36 bg-gradient-to-br from-muted/30 to-muted/10 animate-pulse rounded-2xl border" />
                 {/* Medium skeleton */}
-                <div className="col-span-2 sm:col-span-1 h-28 bg-muted/20 animate-pulse rounded-xl border" />
+                <div className="col-span-1 sm:col-span-1 h-28 bg-muted/20 animate-pulse rounded-xl border" />
                 {/* Small skeletons stacked */}
-                <div className="col-span-2 sm:col-span-1 space-y-3">
+                <div className="col-span-1 sm:col-span-1 space-y-3">
                     <div className="h-[3.25rem] bg-muted/20 animate-pulse rounded-xl border" />
                     <div className="h-[3.25rem] bg-muted/20 animate-pulse rounded-xl border" />
                 </div>
@@ -40,13 +40,13 @@ export function DashboardStats({ loading = false, stats }: DashboardStatsProps) 
     const sparklineData = [40, 65, 45, 80, 55, 90, 75, 60, 85]
 
     return (
-        <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
             {/* Large stat - Total Checklists - spans 2 columns */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0 }}
-                className="col-span-4 sm:col-span-2 relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border p-5"
+                className="col-span-1 sm:col-span-2 relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border p-4 sm:p-5"
             >
                 {/* Decorative orb */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
@@ -90,7 +90,7 @@ export function DashboardStats({ loading = false, stats }: DashboardStatsProps) 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05 }}
-                className="col-span-2 sm:col-span-1 relative overflow-hidden rounded-xl bg-card border p-4 hover:shadow-md transition-shadow"
+                className="col-span-1 sm:col-span-1 relative overflow-hidden rounded-xl bg-card border p-4 hover:shadow-md transition-shadow"
             >
                 <div className="flex items-center justify-between mb-3">
                     <div className="h-7 w-7 rounded-lg bg-success/10 flex items-center justify-center">
@@ -117,7 +117,7 @@ export function DashboardStats({ loading = false, stats }: DashboardStatsProps) 
             </motion.div>
 
             {/* Small stats stacked */}
-            <div className="col-span-2 sm:col-span-1 space-y-3">
+            <div className="col-span-1 sm:col-span-1 space-y-3">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

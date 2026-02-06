@@ -258,7 +258,7 @@ export function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6"
             >
               Don't write checklists.
               <br />
@@ -271,7 +271,7 @@ export function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed px-4"
             >
               Checklist HQ is where teams version control their SOPs, fork proven templates,
               and evolve their operations with the community.
@@ -282,9 +282,9 @@ export function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-6 sm:mb-8 px-4"
             >
-              <Button size="lg" asChild className="text-lg px-8 py-6 shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 transition-shadow">
+              <Button size="lg" asChild className="text-base sm:text-lg px-6 sm:px-8 shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 transition-shadow w-full sm:w-auto">
                 <Link to="/signup">
                   Get Started Free
                   <Icon icon={ArrowRight01Icon} className="ml-2 h-5 w-5" />
@@ -294,7 +294,7 @@ export function Home() {
                 variant="outline"
                 size="lg"
                 onClick={handleTryDemo}
-                className="text-lg px-8 py-6 group"
+                className="text-base sm:text-lg px-6 sm:px-8 group w-full sm:w-auto"
               >
                 <Icon icon={PlayIcon} className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
                 Try Demo

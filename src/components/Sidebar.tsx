@@ -143,7 +143,7 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
             <Dialog open={openMobile} onOpenChange={setOpenMobile}>
                 {/* We reuse Dialog but style it as a sheet/drawer */}
                 <DialogContent
-                    className="fixed inset-y-0 left-0 z-50 h-full w-3/4 max-w-sm gap-4 border-r bg-background p-6 shadow-xl data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left sm:max-w-sm rounded-none border-none top-0 translate-y-0 left-[unset]"
+                    className="fixed inset-y-0 left-0 z-50 h-full w-3/4 max-w-sm gap-4 border-r bg-background p-6 shadow-xl data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left rounded-none border-none !top-0 !left-0 !translate-x-0 !translate-y-0"
                     aria-describedby={undefined}
                 >
                     <div className="flex flex-col h-full">

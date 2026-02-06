@@ -253,7 +253,7 @@ export function Explore() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="text-xl text-muted-foreground mb-10 leading-relaxed"
+              className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 md:mb-10 leading-relaxed px-4"
             >
               Discover battle-tested checklists from the community. Fork, customize, and make them yours.
             </motion.p>
@@ -280,7 +280,7 @@ export function Explore() {
           </div>
 
           {/* Enhanced stats row */}
-          <div className="flex justify-center gap-8 mt-12">
+          <div className="flex flex-col sm:flex-row justify-center gap-6 sm:gap-8 mt-8 sm:mt-12 px-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -296,7 +296,7 @@ export function Explore() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-center border-l border-r border-border px-8"
+              className="text-center sm:border-l sm:border-r border-border sm:px-8"
             >
               <p className="text-3xl font-bold text-gradient-primary">
                 {loading ? '—' : repositories.reduce((sum, r) => sum + r.fork_count, 0)}
