@@ -347,7 +347,7 @@ export function Home() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
@@ -646,9 +646,8 @@ export function Home() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   size="lg"
-                  variant="secondary"
                   asChild
-                  className="bg-white text-primary hover:bg-white/90 shadow-lg"
+                  className="bg-white text-primary hover:bg-white/90 shadow-lg border-0"
                 >
                   <Link to="/signup">
                     Start for Free
@@ -659,7 +658,7 @@ export function Home() {
                   size="lg"
                   variant="outline"
                   onClick={handleTryDemo}
-                  className="border-white/30 text-white hover:bg-white/10"
+                  className="border-white bg-transparent text-white hover:bg-white/10 hover:text-white"
                 >
                   <Icon icon={PlayIcon} className="mr-2 h-4 w-4" />
                   Try Demo First

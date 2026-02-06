@@ -16,7 +16,11 @@ import {
     ArrowLeftDoubleIcon,
     ArrowRightDoubleIcon,
     UserCircleIcon,
+    Sun03Icon,
+    Moon02Icon,
+    ComputerIcon,
 } from '@hugeicons/core-free-icons'
+import { useThemeStore } from '@/stores/theme-store'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 
 interface SidebarProps {
@@ -95,7 +99,26 @@ function SidebarLink({ to, icon, label, collapsed, active }: SidebarLinkProps) {
 export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: SidebarProps) {
     const location = useLocation()
     const { user, signOut } = useAuthStore()
+    const { theme, setTheme } = useThemeStore()
     const isMobile = useIsMobile()
+
+    const cycleTheme = () => {
+        if (theme === 'light') setTheme('dark')
+        else if (theme === 'dark') setTheme('system')
+        else setTheme('light')
+    }
+
+    const getThemeIcon = () => {
+        if (theme === 'light') return Sun03Icon
+        if (theme === 'dark') return Moon02Icon
+        return ComputerIcon
+    }
+
+    const getThemeLabel = () => {
+        if (theme === 'light') return 'Theme: Light'
+        if (theme === 'dark') return 'Theme: Dark'
+        return 'Theme: System'
+    }
 
     // Close mobile menu on navigation
     useEffect(() => {
@@ -144,6 +167,14 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
                         </nav>
 
                         <div className="pt-6 border-t mt-auto space-y-2">
+                            <button
+                                onClick={cycleTheme}
+                                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                            >
+                                <Icon icon={getThemeIcon()} className="h-5 w-5" />
+                                <span>{getThemeLabel()}</span>
+                            </button>
+
                             {user ? (
                                 <>
                                     {bottomLinks.map((link) => (
@@ -228,6 +259,31 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
                                 />
                             ))}
 
+                            {/* Theme Toggle */}
+                            {collapsed ? (
+                                <TooltipProvider delayDuration={0}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <button
+                                                onClick={cycleTheme}
+                                                className="flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors mx-auto"
+                                            >
+                                                <Icon icon={getThemeIcon()} className="h-5 w-5" />
+                                            </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="right">{getThemeLabel()}</TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            ) : (
+                                <button
+                                    onClick={cycleTheme}
+                                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                                >
+                                    <Icon icon={getThemeIcon()} className="h-5 w-5" />
+                                    <span>{getThemeLabel()}</span>
+                                </button>
+                            )}
+
                             {collapsed ? (
                                 <TooltipProvider delayDuration={0}>
                                     <Tooltip>
@@ -247,7 +303,32 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
                             )}
                         </>
                     ) : (
-                        <div className={cn(collapsed && "flex justify-center")}>
+                        <div className={cn(collapsed && "flex flex-col items-center gap-2")}>
+                            {/* Theme Toggle (Guest) */}
+                            {collapsed ? (
+                                <TooltipProvider delayDuration={0}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <button
+                                                onClick={cycleTheme}
+                                                className="flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                                            >
+                                                <Icon icon={getThemeIcon()} className="h-5 w-5" />
+                                            </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="right">{getThemeLabel()}</TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            ) : (
+                                <button
+                                    onClick={cycleTheme}
+                                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors mb-2"
+                                >
+                                    <Icon icon={getThemeIcon()} className="h-5 w-5" />
+                                    <span>{getThemeLabel()}</span>
+                                </button>
+                            )}
+
                             {collapsed ? (
                                 <TooltipProvider delayDuration={0}>
                                     <Tooltip>

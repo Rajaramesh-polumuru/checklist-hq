@@ -48,6 +48,14 @@ export const tokens = {
         2: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
         3: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
     },
+    typography: {
+        fontFamily: {
+            sans: "Inter Display, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif",
+        },
+        settings: {
+            default: '"salt" 1, "liga" 0, "clig" 0, "cv11" 1, "cv05" 1, "tnum" 1, "case" 1',
+        },
+    },
 } as const;
 
 export type Tokens = typeof tokens;

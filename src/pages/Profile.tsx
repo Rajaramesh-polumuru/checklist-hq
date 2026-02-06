@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '@/stores/auth-store'
 import { getUserRepositories, deleteRepository } from '@/services/repository'
 import type { Repository } from '@/types/database'
@@ -51,8 +52,9 @@ import {
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { ApiKeyManager } from '@/components/ApiKeyManager'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { variants, staticVariants, transitions } from '@/lib/motion'
 
-// ... existing code ...
 interface Achievement {
     id: string
     title: string
@@ -60,12 +62,14 @@ interface Achievement {
     icon: React.ReactNode
     color: string
     bgColor: string
+    borderColor: string
+    checkColor: string
     earned: boolean
     progress?: number
     total?: number
 }
 
-// Stats card component
+// Stats card component with motion
 function StatCard({
     icon: IconSymbol,
     label,
@@ -74,6 +78,7 @@ function StatCard({
     color,
     bgColor,
     trend,
+    index = 0,
 }: {
     icon: any
     label: string
@@ -82,13 +87,29 @@ function StatCard({
     color: string
     bgColor: string
     trend?: { value: number; positive: boolean }
+    index?: number
 }) {
+    const reducedMotion = useReducedMotion()
+    const cardVariants = reducedMotion ? staticVariants.cardHover : variants.cardHover
+
     return (
-        <div className="bg-card border rounded-2xl p-5 hover:shadow-lg hover:shadow-black/5 transition-all duration-300 hover:-translate-y-0.5 group">
+        <motion.div
+            className="bg-card border rounded-2xl p-5 group cursor-default"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...transitions.default, delay: index * 0.1 }}
+            variants={cardVariants}
+            whileHover="hover"
+            whileTap="tap"
+        >
             <div className="flex items-start justify-between">
-                <div className={`h-12 w-12 rounded-xl ${bgColor} flex items-center justify-center transition-transform group-hover:scale-110`}>
+                <motion.div
+                    className={`h-12 w-12 rounded-xl ${bgColor} flex items-center justify-center`}
+                    whileHover={reducedMotion ? {} : { scale: 1.1, rotate: 5 }}
+                    transition={transitions.fast}
+                >
                     <Icon icon={IconSymbol} className={`h-6 w-6 ${color}`} />
-                </div>
+                </motion.div>
                 {trend && (
                     <div className={`flex items-center gap-1 text-xs font-medium ${trend.positive ? 'text-emerald-500' : 'text-red-500'}`}>
                         <Icon icon={ArrowUpRight01Icon} className={`h-3 w-3 ${!trend.positive && 'rotate-180'}`} />
@@ -103,34 +124,49 @@ function StatCard({
                     <p className="text-xs text-muted-foreground/70 mt-1">{subLabel}</p>
                 )}
             </div>
-        </div>
+        </motion.div>
     )
 }
 
-// Achievement badge component
-function AchievementBadge({ achievement }: { achievement: Achievement }) {
+// Achievement badge component with motion - redesigned for accessibility
+function AchievementBadge({ achievement, index = 0 }: { achievement: Achievement; index?: number }) {
+    const reducedMotion = useReducedMotion()
+
     return (
-        <div
-            className={`relative p-4 rounded-2xl border transition-all duration-300 hover:shadow-lg ${achievement.earned
-                ? `${achievement.bgColor} border-transparent shadow-md`
-                : 'bg-muted/30 border-dashed opacity-60 hover:opacity-80'
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ ...transitions.default, delay: index * 0.05 }}
+            whileHover={reducedMotion ? {} : { scale: 1.02, y: -2 }}
+            className={`relative p-4 rounded-2xl border-2 cursor-default transition-colors ${achievement.earned
+                ? `bg-card ${achievement.borderColor} shadow-sm`
+                : 'bg-muted/20 border-dashed border-muted-foreground/20 opacity-70 hover:opacity-90'
                 }`}
         >
             <div className="flex items-start gap-3">
-                <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${achievement.earned ? 'bg-white/20' : 'bg-muted'
-                    }`}>
+                <motion.div
+                    className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ${achievement.earned ? achievement.bgColor : 'bg-muted'}`}
+                    whileHover={reducedMotion ? {} : { rotate: achievement.earned ? 10 : 0 }}
+                    transition={transitions.fast}
+                >
                     {achievement.icon}
-                </div>
+                </motion.div>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                        <h4 className={`font-semibold text-sm ${achievement.earned ? 'text-white' : ''}`}>
+                        <h4 className="font-semibold text-sm text-foreground">
                             {achievement.title}
                         </h4>
                         {achievement.earned && (
-                            <Icon icon={CheckmarkCircle02Icon} className="h-4 w-4 text-white/80" />
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.2 }}
+                            >
+                                <Icon icon={CheckmarkCircle02Icon} className={`h-4 w-4 ${achievement.checkColor}`} />
+                            </motion.div>
                         )}
                     </div>
-                    <p className={`text-xs mt-0.5 ${achievement.earned ? 'text-white/70' : 'text-muted-foreground'}`}>
+                    <p className="text-xs mt-0.5 text-muted-foreground">
                         {achievement.description}
                     </p>
                     {!achievement.earned && achievement.progress !== undefined && achievement.total !== undefined && (
@@ -144,7 +180,7 @@ function AchievementBadge({ achievement }: { achievement: Achievement }) {
                     )}
                 </div>
             </div>
-        </div>
+        </motion.div>
     )
 }
 
@@ -314,15 +350,26 @@ function SettingsPanel({ onExport, isExporting }: { onExport: () => void; isExpo
     )
 }
 
-// Checklist card component
-function ChecklistCard({ repo, onDelete }: { repo: Repository; onDelete: (id: string) => void }) {
+// Checklist card component with motion
+function ChecklistCard({ repo, onDelete, index = 0 }: { repo: Repository; onDelete: (id: string) => void; index?: number }) {
+    const reducedMotion = useReducedMotion()
+    const cardVariants = reducedMotion ? staticVariants.cardHover : variants.cardHover
+
     return (
-        <Card className="group relative hover:shadow-lg hover:shadow-black/5 transition-all duration-300 hover:-translate-y-0.5 overflow-hidden">
-            {/* Accent bar */}
-            <div className={`absolute top-0 left-0 right-0 h-1 ${repo.is_public
-                ? 'bg-gradient-to-r from-sky-400 to-cyan-400'
-                : 'bg-gradient-to-r from-violet-400 to-purple-400'
-                }`} />
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...transitions.default, delay: index * 0.05 }}
+            variants={cardVariants}
+            whileHover="hover"
+            whileTap="tap"
+        >
+            <Card className="group relative overflow-hidden h-full">
+                {/* Accent bar */}
+                <div className={`absolute top-0 left-0 right-0 h-1 ${repo.is_public
+                    ? 'bg-gradient-to-r from-sky-400 to-cyan-400'
+                    : 'bg-gradient-to-r from-violet-400 to-purple-400'
+                    }`} />
 
             <Link to={`/app/repo/${repo.id}`}>
                 <CardHeader className="pb-3 pt-5">
@@ -405,7 +452,8 @@ function ChecklistCard({ repo, onDelete }: { repo: Repository; onDelete: (id: st
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-        </Card>
+            </Card>
+        </motion.div>
     )
 }
 
@@ -442,27 +490,33 @@ export function Profile() {
                 id: 'first_checklist',
                 title: 'Getting Started',
                 description: 'Create your first checklist',
-                icon: <Icon icon={SparklesIcon} className="h-5 w-5 text-amber-500" />,
-                color: 'text-amber-500',
-                bgColor: 'bg-gradient-to-br from-amber-400 to-orange-500',
+                icon: <Icon icon={SparklesIcon} className="h-5 w-5 text-amber-600" />,
+                color: 'text-amber-600',
+                bgColor: 'bg-amber-100',
+                borderColor: 'border-amber-300',
+                checkColor: 'text-amber-600',
                 earned: totalChecklists >= 1,
             },
             {
                 id: 'first_run',
                 title: 'Runner',
                 description: 'Complete your first run',
-                icon: <Icon icon={Target01Icon} className="h-5 w-5 text-emerald-500" />,
-                color: 'text-emerald-500',
-                bgColor: 'bg-gradient-to-br from-emerald-400 to-green-500',
+                icon: <Icon icon={Target01Icon} className="h-5 w-5 text-emerald-600" />,
+                color: 'text-emerald-600',
+                bgColor: 'bg-emerald-100',
+                borderColor: 'border-emerald-300',
+                checkColor: 'text-emerald-600',
                 earned: totalCompleted >= 1,
             },
             {
                 id: 'five_checklists',
                 title: 'Organizer',
                 description: 'Create 5 checklists',
-                icon: <Icon icon={CheckListIcon} className="h-5 w-5 text-sky-500" />,
-                color: 'text-sky-500',
-                bgColor: 'bg-gradient-to-br from-sky-400 to-blue-500',
+                icon: <Icon icon={CheckListIcon} className="h-5 w-5 text-sky-600" />,
+                color: 'text-sky-600',
+                bgColor: 'bg-sky-100',
+                borderColor: 'border-sky-300',
+                checkColor: 'text-sky-600',
                 earned: totalChecklists >= 5,
                 progress: Math.min(totalChecklists, 5),
                 total: 5,
@@ -471,27 +525,33 @@ export function Profile() {
                 id: 'community_contributor',
                 title: 'Community Contributor',
                 description: 'Make a checklist public',
-                icon: <Icon icon={Globe02Icon} className="h-5 w-5 text-violet-500" />,
-                color: 'text-violet-500',
-                bgColor: 'bg-gradient-to-br from-violet-400 to-purple-500',
+                icon: <Icon icon={Globe02Icon} className="h-5 w-5 text-violet-600" />,
+                color: 'text-violet-600',
+                bgColor: 'bg-violet-100',
+                borderColor: 'border-violet-300',
+                checkColor: 'text-violet-600',
                 earned: publicChecklists >= 1,
             },
             {
                 id: 'template_user',
                 title: 'Template User',
                 description: 'Fork a community checklist',
-                icon: <Icon icon={GitForkIcon} className="h-5 w-5 text-pink-500" />,
-                color: 'text-pink-500',
-                bgColor: 'bg-gradient-to-br from-pink-400 to-rose-500',
+                icon: <Icon icon={GitForkIcon} className="h-5 w-5 text-rose-600" />,
+                color: 'text-rose-600',
+                bgColor: 'bg-rose-100',
+                borderColor: 'border-rose-300',
+                checkColor: 'text-rose-600',
                 earned: forkedChecklists >= 1,
             },
             {
                 id: 'influencer',
                 title: 'Influencer',
                 description: 'Get 10 forks on your checklists',
-                icon: <Icon icon={StarIcon} className="h-5 w-5 text-yellow-500" />,
-                color: 'text-yellow-500',
-                bgColor: 'bg-gradient-to-br from-yellow-400 to-amber-500',
+                icon: <Icon icon={StarIcon} className="h-5 w-5 text-primary" />,
+                color: 'text-primary',
+                bgColor: 'bg-primary/10',
+                borderColor: 'border-primary/30',
+                checkColor: 'text-primary',
                 earned: totalForks >= 10,
                 progress: Math.min(totalForks, 10),
                 total: 10,
@@ -500,9 +560,11 @@ export function Profile() {
                 id: 'productivity_master',
                 title: 'Productivity Master',
                 description: 'Complete 25 runs',
-                icon: <Icon icon={StarIcon} className="h-5 w-5 text-orange-500" />,
-                color: 'text-orange-500',
-                bgColor: 'bg-gradient-to-br from-orange-400 to-red-500',
+                icon: <Icon icon={StarIcon} className="h-5 w-5 text-orange-600" />,
+                color: 'text-orange-600',
+                bgColor: 'bg-orange-100',
+                borderColor: 'border-orange-300',
+                checkColor: 'text-orange-600',
                 earned: totalCompleted >= 25,
                 progress: Math.min(totalCompleted, 25),
                 total: 25,
@@ -511,9 +573,11 @@ export function Profile() {
                 id: 'streak_master',
                 title: 'On Fire',
                 description: 'Complete runs 7 days in a row',
-                icon: <Icon icon={FlashIcon} className="h-5 w-5 text-red-500" />,
-                color: 'text-red-500',
-                bgColor: 'bg-gradient-to-br from-red-400 to-orange-500',
+                icon: <Icon icon={FlashIcon} className="h-5 w-5 text-red-600" />,
+                color: 'text-red-600',
+                bgColor: 'bg-red-100',
+                borderColor: 'border-red-300',
+                checkColor: 'text-red-600',
                 earned: false, // Would need streak tracking
             },
         ]
@@ -634,43 +698,38 @@ export function Profile() {
     }
 
     return (
-        <div className="min-h-screen">
-            {/* Premium Hero Section */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-violet-500/5 border-b">
-                {/* Decorative elements */}
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-60" />
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-violet-400/10 to-transparent rounded-full blur-3xl -translate-y-1/4 translate-x-1/4" />
-                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-primary/10 to-transparent rounded-full blur-3xl translate-y-1/4 -translate-x-1/4" />
-
-                <div className="container mx-auto px-4 py-12 relative">
-                    <div className="flex flex-col md:flex-row md:items-center gap-6">
-                        {/* Avatar with gradient ring */}
-                        <div className="relative">
-                            <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary via-violet-500 to-purple-500 p-1 shadow-2xl shadow-primary/30">
-                                <div className="h-full w-full rounded-full bg-background flex items-center justify-center">
-                                    <span className="text-4xl font-bold bg-gradient-to-br from-primary to-violet-500 bg-clip-text text-transparent">
-                                        {user?.email?.[0]?.toUpperCase() || 'U'}
-                                    </span>
+        <div className="min-h-screen bg-background">
+            {/* Clean Hero Section */}
+            <div className="border-b bg-card">
+                <div className="container mx-auto px-4 py-8">
+                    <div className="flex flex-col md:flex-row md:items-start gap-6">
+                        {/* Avatar - clean, simple design */}
+                        <div className="relative shrink-0">
+                            <div className="h-20 w-20 rounded-2xl bg-primary/10 border-2 border-primary/20 flex items-center justify-center shadow-sm">
+                                <span className="text-3xl font-bold text-primary">
+                                    {user?.email?.[0]?.toUpperCase() || 'U'}
+                                </span>
+                            </div>
+                            {/* Achievement indicator */}
+                            {earnedCount > 0 && (
+                                <div className="absolute -bottom-2 -right-2 h-7 w-7 rounded-lg bg-amber-100 border-2 border-card flex items-center justify-center shadow-sm">
+                                    <Icon icon={StarIcon} className="h-3.5 w-3.5 text-amber-600" />
                                 </div>
-                            </div>
-                            {/* Achievement badge on avatar */}
-                            <div className="absolute -bottom-1 -right-1 h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center border-4 border-background shadow-lg">
-                                <Icon icon={StarIcon} className="h-5 w-5 text-white" />
-                            </div>
+                            )}
                         </div>
 
                         {/* User info */}
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-3">
-                                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+                                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                                     {user?.email?.split('@')[0]}
                                 </h1>
-                                <Badge className="bg-gradient-to-r from-primary to-violet-500 text-white border-0 shadow-lg">
-                                    <Icon icon={StarIcon} className="h-3 w-3 mr-1" />
-                                    Pro User
+                                <Badge className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20">
+                                    <Icon icon={CheckmarkCircle02Icon} className="h-3 w-3 mr-1" />
+                                    Pro
                                 </Badge>
                             </div>
-                            <div className="flex flex-wrap items-center gap-4 mt-2 text-muted-foreground">
+                            <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
                                 <span className="flex items-center gap-1.5">
                                     <Icon icon={Mail01Icon} className="h-4 w-4" />
                                     {user?.email}
@@ -680,21 +739,25 @@ export function Profile() {
                                     Joined {joinDate}
                                 </span>
                             </div>
-                            <div className="flex items-center gap-2 mt-4">
-                                <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
-                                    <Icon icon={StarIcon} className="h-3 w-3 mr-1" />
+                            <div className="flex flex-wrap items-center gap-2 mt-3">
+                                <Badge variant="outline" className="text-foreground border-border bg-muted/50 font-normal">
+                                    <Icon icon={StarIcon} className="h-3 w-3 mr-1 text-amber-500" />
                                     {earnedCount} Achievement{earnedCount !== 1 ? 's' : ''}
                                 </Badge>
-                                <Badge variant="outline" className="text-emerald-600 border-emerald-300 bg-emerald-50">
-                                    <Icon icon={FlashIcon} className="h-3 w-3 mr-1" />
-                                    {stats.completedRuns} Runs Completed
+                                <Badge variant="outline" className="text-foreground border-border bg-muted/50 font-normal">
+                                    <Icon icon={CheckmarkCircle02Icon} className="h-3 w-3 mr-1 text-emerald-500" />
+                                    {stats.completedRuns} Completed
+                                </Badge>
+                                <Badge variant="outline" className="text-foreground border-border bg-muted/50 font-normal">
+                                    <Icon icon={CheckListIcon} className="h-3 w-3 mr-1 text-primary" />
+                                    {repos.length} Checklist{repos.length !== 1 ? 's' : ''}
                                 </Badge>
                             </div>
                         </div>
 
                         {/* Quick actions */}
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            <Button asChild className="shadow-lg shadow-primary/25">
+                        <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+                            <Button asChild>
                                 <Link to="/app/new">
                                     <Icon icon={PlusSignIcon} className="mr-2 h-4 w-4" />
                                     New Checklist
@@ -709,15 +772,15 @@ export function Profile() {
                         </div>
                     </div>
 
-                    {/* Tab Navigation */}
-                    <div className="flex gap-1 mt-8 p-1 bg-muted/50 rounded-xl w-fit overflow-x-auto">
+                    {/* Tab Navigation - cleaner design */}
+                    <div className="flex gap-1 mt-6 -mb-px overflow-x-auto">
                         {(['overview', 'checklists', 'activity', 'integrations', 'settings'] as const).map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${activeTab === tab
-                                    ? 'bg-background text-foreground shadow-sm'
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                                className={`px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${activeTab === tab
+                                    ? 'border-primary text-primary bg-background'
+                                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/30'
                                     }`}
                             >
                                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -729,12 +792,21 @@ export function Profile() {
 
             {/* Main Content */}
             <div className="container mx-auto px-4 py-8">
+                <AnimatePresence mode="wait">
                 {/* Overview Tab */}
                 {activeTab === 'overview' && (
-                    <div className="space-y-8 animate-fade-in">
+                    <motion.div
+                        key="overview"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={transitions.default}
+                        className="space-y-8"
+                    >
                         {/* Stats Grid */}
                         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             <StatCard
+                                index={0}
                                 icon={CheckListIcon}
                                 label="Total Checklists"
                                 value={repos.length}
@@ -743,6 +815,7 @@ export function Profile() {
                                 bgColor="bg-primary/10"
                             />
                             <StatCard
+                                index={1}
                                 icon={PlayIcon}
                                 label="Active Runs"
                                 value={stats.activeRuns}
@@ -751,6 +824,7 @@ export function Profile() {
                                 bgColor="bg-sky-100"
                             />
                             <StatCard
+                                index={2}
                                 icon={CheckmarkCircle02Icon}
                                 label="Completed Runs"
                                 value={stats.completedRuns}
@@ -760,6 +834,7 @@ export function Profile() {
                                 trend={{ value: 12, positive: true }}
                             />
                             <StatCard
+                                index={3}
                                 icon={GitForkIcon}
                                 label="Total Forks"
                                 value={repos.reduce((sum, r) => sum + r.fork_count, 0)}
@@ -783,8 +858,8 @@ export function Profile() {
                                     </Badge>
                                 </div>
                                 <div className="grid sm:grid-cols-2 gap-4">
-                                    {achievements.slice(0, 6).map((achievement) => (
-                                        <AchievementBadge key={achievement.id} achievement={achievement} />
+                                    {achievements.slice(0, 6).map((achievement, index) => (
+                                        <AchievementBadge key={achievement.id} achievement={achievement} index={index} />
                                     ))}
                                 </div>
                             </div>
@@ -852,18 +927,25 @@ export function Profile() {
                                 </Card>
                             ) : (
                                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {repos.slice(0, 3).map((repo) => (
-                                        <ChecklistCard key={repo.id} repo={repo} onDelete={handleDelete} />
+                                    {repos.slice(0, 3).map((repo, index) => (
+                                        <ChecklistCard key={repo.id} repo={repo} onDelete={handleDelete} index={index} />
                                     ))}
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </motion.div>
                 )}
 
                 {/* Checklists Tab */}
                 {activeTab === 'checklists' && (
-                    <div className="space-y-6 animate-fade-in">
+                    <motion.div
+                        key="checklists"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={transitions.default}
+                        className="space-y-6"
+                    >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
                                 <h2 className="text-xl font-semibold">My Checklists</h2>
@@ -929,22 +1011,23 @@ export function Profile() {
                         ) : (
                             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {filteredRepos.map((repo, index) => (
-                                    <div
-                                        key={repo.id}
-                                        className="animate-fade-in"
-                                        style={{ animationDelay: `${index * 50}ms` }}
-                                    >
-                                        <ChecklistCard repo={repo} onDelete={handleDelete} />
-                                    </div>
+                                    <ChecklistCard key={repo.id} repo={repo} onDelete={handleDelete} index={index} />
                                 ))}
                             </div>
                         )}
-                    </div>
+                    </motion.div>
                 )}
 
                 {/* Activity Tab */}
                 {activeTab === 'activity' && (
-                    <div className="space-y-6 animate-fade-in">
+                    <motion.div
+                        key="activity"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={transitions.default}
+                        className="space-y-6"
+                    >
                         <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -987,12 +1070,19 @@ export function Profile() {
                                 ))}
                             </div>
                         )}
-                    </div>
+                    </motion.div>
                 )}
 
                 {/* Integrations Tab */}
                 {activeTab === 'integrations' && (
-                    <div className="max-w-3xl space-y-6 animate-fade-in">
+                    <motion.div
+                        key="integrations"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={transitions.default}
+                        className="max-w-3xl space-y-6"
+                    >
                         <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -1006,12 +1096,19 @@ export function Profile() {
                         </div>
 
                         <ApiKeyManager />
-                    </div>
+                    </motion.div>
                 )}
 
                 {/* Settings Tab */}
                 {activeTab === 'settings' && (
-                    <div className="max-w-2xl space-y-6 animate-fade-in">
+                    <motion.div
+                        key="settings"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={transitions.default}
+                        className="max-w-2xl space-y-6"
+                    >
                         <SettingsPanel onExport={handleExport} isExporting={isExporting} />
 
                         {/* All Achievements */}
@@ -1027,14 +1124,15 @@ export function Profile() {
                             </CardHeader>
                             <CardContent>
                                 <div className="grid sm:grid-cols-2 gap-4">
-                                    {achievements.map((achievement) => (
-                                        <AchievementBadge key={achievement.id} achievement={achievement} />
+                                    {achievements.map((achievement, index) => (
+                                        <AchievementBadge key={achievement.id} achievement={achievement} index={index} />
                                     ))}
                                 </div>
                             </CardContent>
                         </Card>
-                    </div>
+                    </motion.div>
                 )}
+                </AnimatePresence>
             </div>
         </div>
     )
