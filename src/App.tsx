@@ -1,12 +1,13 @@
 import { useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { Toaster } from 'sonner'
+import { Toaster } from "@/components/ui/sonner"
 import { Loading02Icon } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { Layout } from '@/components/Layout'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { OnboardingProvider } from '@/components/Onboarding'
 import { useAuthStore } from '@/stores/auth-store'
+import { useThemeStore } from '@/stores/theme-store'
 
 // Lazy load pages
 const Home = lazy(() => import('@/pages/Home').then(module => ({ default: module.Home })))
@@ -61,11 +62,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  const { initialize } = useAuthStore()
+  const { initialize: initializeAuth } = useAuthStore()
+  const { initialize: initializeTheme } = useThemeStore()
 
   useEffect(() => {
-    initialize()
-  }, [initialize])
+    initializeAuth()
+    initializeTheme()
+  }, [initializeAuth, initializeTheme])
 
   return (
     <BrowserRouter>

@@ -119,7 +119,7 @@ export function SSOSettings({ organizationId }: SSOSettingsProps) {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
           <Icon icon={AlertCircleIcon} className="h-4 w-4 flex-shrink-0" /> {error}
         </div>
       )}
@@ -164,7 +164,7 @@ export function SSOSettings({ organizationId }: SSOSettingsProps) {
                 <span className="text-muted-foreground">Domains</span>
                 <div className="flex flex-wrap gap-1 mt-0.5">
                   {config.domains.map(d => (
-                    <span key={d} className="inline-flex items-center bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2 py-0.5 rounded">
+                    <span key={d} className="inline-flex items-center bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs px-2 py-0.5 rounded">
                       {d}
                     </span>
                   ))}

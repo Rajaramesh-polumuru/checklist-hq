@@ -158,18 +158,18 @@ export function IPAllowlistSettings({ organizationId }: IPAllowlistSettingsProps
 
       {/* ── error banner ────────────────── */}
       {error && (
-        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
           <Icon icon={Alert02Icon} className="h-4 w-4 flex-shrink-0" /> {error}
         </div>
       )}
 
       {/* ── enforcement warning ─────────── */}
       {enforced && (
-        <div className="flex items-start gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+        <div className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2.5">
           <Icon icon={Alert02Icon} className="h-4 w-4 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold">Enforcement is ON</p>
-            <p className="text-xs text-amber-600 mt-0.5">
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
               Only IPs in the allowlist can access this organisation's data via API. Be sure your network is listed.
             </p>
           </div>
@@ -183,7 +183,7 @@ export function IPAllowlistSettings({ organizationId }: IPAllowlistSettingsProps
           <span className="text-xs text-muted-foreground">Your current IP</span>
           <span className="text-xs font-mono font-semibold">{myIP || '…'}</span>
           {myIP && myIP !== 'unknown' && entries.some(e => e.is_active && e.cidr === `${myIP}/32`) && (
-            <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50 text-[10px]">✓ Allowed</Badge>
+            <Badge variant="outline" className="text-green-700 dark:text-green-400 border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/30 text-[10px]">✓ Allowed</Badge>
           )}
         </div>
         {myIP && myIP !== 'unknown' && !entries.some(e => e.cidr === `${myIP}/32`) && (

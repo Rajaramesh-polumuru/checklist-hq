@@ -66,7 +66,7 @@ export function InviteMemberModal({ organizationId, isOpen, onClose, onMemberAdd
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div className="bg-blue-50 text-blue-800 p-3 rounded-md text-sm flex gap-2 items-start">
+          <div className="bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-200 p-3 rounded-md text-sm flex gap-2 items-start">
             <Icon icon={Mail01Icon} className="h-4 w-4 mt-0.5 shrink-0" />
             <p>
               Since this is a demo, enter the <strong>email address</strong> of an existing registered user to add them immediately.
@@ -116,7 +116,7 @@ export function InviteMemberModal({ organizationId, isOpen, onClose, onMemberAdd
           )}
 
           {success && (
-            <div className="text-sm text-green-600 bg-green-50 p-3 rounded-md">
+            <div className="text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 p-3 rounded-md">
               {success}
             </div>
           )}

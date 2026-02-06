@@ -215,7 +215,7 @@ export function AuditLogViewer({ organizationId }: AuditLogViewerProps) {
                     </div>
 
                     {log.changes && Object.keys(log.changes).length > 0 && (
-                      <div className="mt-2 p-2 bg-white/50 rounded text-[11px] font-mono">
+                      <div className="mt-2 p-2 bg-accent/50 rounded text-[11px] font-mono">
                         {Object.entries(log.changes).map(([field, change]: [string, any]) => (
                           <div key={field}>
                             <span className="text-amber-700">{field}:</span>{' '}

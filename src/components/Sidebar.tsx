@@ -1,0 +1,284 @@
+import { useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Icon } from '@/components/ui/icon'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { useIsMobile } from '@/hooks/useMobile'
+import { useAuthStore } from '@/stores/auth-store'
+import {
+    GitForkIcon,
+    DashboardSquare01Icon,
+    Search01Icon,
+    PlusSignIcon,
+    Logout02Icon,
+    ArrowLeftDoubleIcon,
+    ArrowRightDoubleIcon,
+    UserCircleIcon,
+} from '@hugeicons/core-free-icons'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+
+interface SidebarProps {
+    collapsed: boolean
+    setCollapsed: (collapsed: boolean) => void
+    openMobile: boolean
+    setOpenMobile: (open: boolean) => void
+}
+
+interface SidebarLinkProps {
+    to: string
+    icon: any
+    label: string
+    collapsed: boolean
+    active: boolean
+}
+
+function SidebarLink({ to, icon, label, collapsed, active }: SidebarLinkProps) {
+    if (collapsed) {
+        return (
+            <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Link
+                            to={to}
+                            className={cn(
+                                "flex items-center justify-center w-10 h-10 rounded-lg transition-all",
+                                active
+                                    ? "bg-primary text-primary-foreground shadow-md"
+                                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                            )}
+                        >
+                            <Icon icon={icon} className="h-5 w-5" />
+                            <span className="sr-only">{label}</span>
+                        </Link>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="z-50 ml-2">
+                        {label}
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        )
+    }
+
+    return (
+        <Link
+            to={to}
+            className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-lg transition-all group",
+                active
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+            )}
+        >
+            <Icon
+                icon={icon}
+                className={cn(
+                    "h-5 w-5 transition-colors",
+                    active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                )}
+            />
+            <span className="truncate">{label}</span>
+            {active && (
+                <motion.div
+                    layoutId="active-sidebar-indicator"
+                    className="absolute left-0 w-1 h-6 bg-primary rounded-r-full"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                />
+            )}
+        </Link>
+    )
+}
+
+export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: SidebarProps) {
+    const location = useLocation()
+    const { user, signOut } = useAuthStore()
+    const isMobile = useIsMobile()
+
+    // Close mobile menu on navigation
+    useEffect(() => {
+        if (isMobile) {
+            setOpenMobile(false)
+        }
+    }, [location.pathname, isMobile, setOpenMobile])
+
+    const links = [
+        { to: '/app', icon: DashboardSquare01Icon, label: 'Dashboard' },
+        { to: '/explore', icon: Search01Icon, label: 'Explore' },
+        { to: '/app/new', icon: PlusSignIcon, label: 'Create New' },
+    ]
+
+    const bottomLinks = [
+        { to: '/app/profile', icon: UserCircleIcon, label: 'Profile' }
+    ]
+
+    // Mobile Drawer
+    if (isMobile) {
+        return (
+            <Dialog open={openMobile} onOpenChange={setOpenMobile}>
+                {/* We reuse Dialog but style it as a sheet/drawer */}
+                <DialogContent
+                    className="fixed inset-y-0 left-0 z-50 h-full w-3/4 max-w-sm gap-4 border-r bg-background p-6 shadow-xl data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left sm:max-w-sm rounded-none border-none top-0 translate-y-0 left-[unset]"
+                    aria-describedby={undefined}
+                >
+                    <div className="flex flex-col h-full">
+                        {/* Logo */}
+                        <div className="flex items-center gap-3 mb-8 px-2">
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <Icon icon={GitForkIcon} className="h-5 w-5 text-primary" />
+                            </div>
+                            <span className="font-bold text-lg">Checklist HQ</span>
+                        </div>
+
+                        <nav className="flex-1 space-y-2">
+                            {links.map((link) => (
+                                <SidebarLink
+                                    key={link.to}
+                                    {...link}
+                                    collapsed={false}
+                                    active={location.pathname === link.to} // strict match tailored for now, improve later
+                                />
+                            ))}
+                        </nav>
+
+                        <div className="pt-6 border-t mt-auto space-y-2">
+                            {user ? (
+                                <>
+                                    {bottomLinks.map((link) => (
+                                        <SidebarLink
+                                            key={link.to}
+                                            {...link}
+                                            collapsed={false}
+                                            active={location.pathname.startsWith(link.to)}
+                                        />
+                                    ))}
+                                    <button
+                                        onClick={signOut}
+                                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                                    >
+                                        <Icon icon={Logout02Icon} className="h-5 w-5" />
+                                        <span>Sign Out</span>
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="px-2">
+                                    <Button asChild className="w-full">
+                                        <Link to="/login">Sign In</Link>
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        )
+    }
+
+    // Desktop Sidebar
+    return (
+        <motion.aside
+            initial={false}
+            animate={{ width: collapsed ? 80 : 250 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="hidden md:flex flex-col h-screen sticky top-0 border-r bg-card/50 backdrop-blur-xl z-30"
+        >
+            <div className="flex flex-col h-full p-4">
+                {/* Header */}
+                <div className={cn("flex items-center gap-3 mb-8 px-2 h-10", collapsed && "justify-center px-0")}>
+                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <Icon icon={GitForkIcon} className="h-5 w-5 text-primary" />
+                    </div>
+                    {!collapsed && (
+                        <motion.span
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="font-bold text-lg truncate"
+                        >
+                            Checklist HQ
+                        </motion.span>
+                    )}
+                </div>
+
+                {/* Navigation */}
+                <nav className="flex-1 space-y-2">
+                    {links.map((link) => (
+                        <SidebarLink
+                            key={link.to}
+                            {...link}
+                            collapsed={collapsed}
+                            active={location.pathname === link.to || (link.to !== '/app' && location.pathname.startsWith(link.to))}
+                        />
+                    ))}
+                </nav>
+
+                {/* Footer */}
+                <div className="pt-4 border-t space-y-2">
+                    {user ? (
+                        <>
+                            {bottomLinks.map((link) => (
+                                <SidebarLink
+                                    key={link.to}
+                                    {...link}
+                                    collapsed={collapsed}
+                                    active={location.pathname.startsWith(link.to)}
+                                />
+                            ))}
+
+                            {collapsed ? (
+                                <TooltipProvider delayDuration={0}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <button onClick={signOut} className="flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors mx-auto">
+                                                <Icon icon={Logout02Icon} className="h-5 w-5" />
+                                            </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="right">Sign Out</TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            ) : (
+                                <button onClick={signOut} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors group">
+                                    <Icon icon={Logout02Icon} className="h-5 w-5" />
+                                    <span>Sign Out</span>
+                                </button>
+                            )}
+                        </>
+                    ) : (
+                        <div className={cn(collapsed && "flex justify-center")}>
+                            {collapsed ? (
+                                <TooltipProvider delayDuration={0}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button size="icon" variant="ghost" asChild>
+                                                <Link to="/login"><Icon icon={UserCircleIcon} className="h-5 w-5" /></Link>
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="right">Sign In</TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            ) : (
+                                <Button asChild className="w-full">
+                                    <Link to="/login">Sign In</Link>
+                                </Button>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Collapse Toggle */}
+                    <button
+                        onClick={() => setCollapsed(!collapsed)}
+                        className={cn(
+                            "flex items-center justify-center w-full h-8 mt-4 text-muted-foreground/50 hover:text-foreground transition-colors",
+                            collapsed && "mt-2"
+                        )}
+                    >
+                        <Icon icon={collapsed ? ArrowRightDoubleIcon : ArrowLeftDoubleIcon} className="h-4 w-4" />
+                    </button>
+                </div>
+            </div>
+        </motion.aside>
+    )
+}

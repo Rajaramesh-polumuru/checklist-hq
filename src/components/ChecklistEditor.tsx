@@ -55,7 +55,9 @@ const dropAnimation = {
   }),
 }
 
-export function ChecklistEditor() {
+import { SkeletonList } from '@/components/ui/skeleton'
+
+export function ChecklistEditor({ loading = false }: { loading?: boolean }) {
   const {
     content,
     addItem,
@@ -253,6 +255,14 @@ export function ChecklistEditor() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [undo, redo, isMobile])
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <SkeletonList count={5} />
+      </div>
+    )
+  }
 
   return (
     <div id="onboarding-editor" className="space-y-4">

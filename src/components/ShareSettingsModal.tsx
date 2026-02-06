@@ -360,7 +360,7 @@ export function ShareSettingsModal({
                                         isPublic ? "bg-success" : "bg-muted"
                                     )}>
                                         <div className={cn(
-                                            "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform",
+                                            "absolute top-0.5 h-5 w-5 rounded-full bg-card shadow-sm transition-transform",
                                             isPublic ? "translate-x-5" : "translate-x-0.5"
                                         )} />
                                         {changingVisibility && (

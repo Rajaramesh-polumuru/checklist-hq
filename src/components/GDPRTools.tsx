@@ -220,7 +220,7 @@ export function GDPRTools() {
               Delete Account
             </Button>
           ) : (
-            <div className="space-y-3 border border-red-300 rounded-lg p-3 bg-white">
+            <div className="space-y-3 border border-red-300 dark:border-red-800 rounded-lg p-3 bg-card">
               <p className="text-xs text-red-700 font-medium">
                 Are you sure? Type your reason and confirm.
               </p>

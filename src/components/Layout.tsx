@@ -1,134 +1,75 @@
-import { useEffect } from 'react'
-import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
-import { useAuthStore } from '@/stores/auth-store'
+import { useState, useEffect } from 'react'
 import { useThemeStore } from '@/stores/theme-store'
+import { PageTransition } from '@/components/PageTransition'
+import { Sidebar } from '@/components/Sidebar'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
-import { GitForkIcon, Logout02Icon, PlusSignIcon } from '@hugeicons/core-free-icons'
+import { Menu01Icon } from '@hugeicons/core-free-icons'
+import { cn } from '@/lib/utils'
 
 export function Layout() {
-  const { user, signOut } = useAuthStore()
-  const location = useLocation()
   const initializeTheme = useThemeStore((state) => state.initialize)
+
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Initialize theme on mount
   useEffect(() => {
     initializeTheme()
   }, [initializeTheme])
 
-  const isEditor = location.pathname.includes('/app/repo/') || location.pathname === '/app/new'
-
-  // Don't show header in editor mode
-  if (isEditor) {
-    return <Outlet />
-  }
-
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex h-screen bg-background overflow-hidden relative">
       {/* Skip to main content link */}
       <a
         href="#main-content"
-        className="skip-link sr-only-focusable focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-lg"
+        className="skip-link sr-only-focusable focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-lg transition-all"
       >
         Skip to main content
       </a>
 
-      {/* Premium Navigation */}
-      <header
-        className="border-b bg-gradient-to-r from-background via-background to-primary/5 backdrop-blur-sm sticky top-0 z-50 shadow-sm"
-        role="banner"
-      >
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            {/* Logo */}
-            <Link
-              to="/"
-              className="flex items-center gap-2.5 font-semibold text-lg hover:opacity-80 transition-all group"
-            >
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow">
-                <Icon icon={GitForkIcon} className="h-5 w-5 text-white" />
-              </div>
-              <span className="hidden sm:inline font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-                Checklist HQ
-              </span>
-            </Link>
+      {/* Sidebar (Desktop & Mobile Drawer logic inside) */}
+      <Sidebar
+        collapsed={sidebarCollapsed}
+        setCollapsed={setSidebarCollapsed}
+        openMobile={mobileMenuOpen}
+        setOpenMobile={setMobileMenuOpen}
+      />
 
-            {/* Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1" role="navigation" aria-label="Main navigation">
-              <Link
-                to="/explore"
-                className={`px-4 py-2 text-sm font-medium rounded-full transition-all ${location.pathname === '/explore'
-                  ? 'text-primary-foreground bg-primary shadow-md'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                  }`}
-              >
-                Explore
-              </Link>
-              {user && (
-                <Link
-                  to="/app"
-                  className={`px-4 py-2 text-sm font-medium rounded-full transition-all ${location.pathname.startsWith('/app')
-                    ? 'text-primary-foreground bg-primary shadow-md'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                    }`}
-                >
-                  Dashboard
-                </Link>
-              )}
-            </nav>
-          </div>
+      {/* Main Content Area */}
+      <div className={cn(
+        "flex-1 flex flex-col min-w-0 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+      )}>
 
-          <div className="flex items-center gap-3">
-            {/* Theme Toggle - always visible */}
+        {/* Mobile Header (only visible on mobile) */}
+        <header className="md:hidden h-14 border-b flex items-center px-4 justify-between bg-card/80 backdrop-blur-sm sticky top-0 z-20 shrink-0">
+          <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(true)}>
+            <Icon icon={Menu01Icon} className="h-5 w-5" />
+          </Button>
+          <span className="font-semibold text-lg">Checklist HQ</span>
+          <ThemeToggle />
+        </header>
+
+        {/* Desktop Theme Toggle (Absolute positioned for now, or integrated into pages) 
+            Ideally should be in Sidebar or Header. 
+            Sidebar bottom is good. 
+        */}
+        <div className="hidden md:block absolute top-4 right-4 z-50 pointer-events-none">
+          <div className="pointer-events-auto">
             <ThemeToggle />
-
-            {user ? (
-              <>
-                {/* New Button */}
-                <Button asChild size="sm" className="hidden sm:inline-flex shadow-md">
-                  <Link to="/app/new">
-                    <Icon icon={PlusSignIcon} className="mr-2 h-4 w-4" />
-                    New
-                  </Link>
-                </Button>
-
-                {/* User Avatar */}
-                <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon" asChild className="rounded-full">
-                    <Link to="/app/profile" aria-label="View profile">
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
-                        {user.email?.[0]?.toUpperCase() || 'U'}
-                      </div>
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={signOut}
-                    aria-label="Sign out"
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <Icon icon={Logout02Icon} className="h-4 w-4" />
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <Button size="sm" asChild className="shadow-md">
-                <Link to="/login">Sign In</Link>
-              </Button>
-            )}
           </div>
         </div>
-      </header>
 
-      {/* Content */}
-      <div id="main-content">
-        <Outlet />
+        <main
+          id="main-content"
+          className="flex-1 overflow-y-auto overflow-x-hidden relative scroll-smooth bg-background/50"
+        >
+          <div className="w-full min-h-full">
+            <PageTransition />
+          </div>
+        </main>
       </div>
-
-      {/* Dev Color Picker - Remove before production */}
-      {/* <DevColorPicker /> */}
     </div>
   )
 }

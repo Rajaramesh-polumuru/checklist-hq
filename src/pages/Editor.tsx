@@ -347,20 +347,7 @@ export function Editor() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleManualSaveRequest])
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center animate-fade-in">
-          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <Icon icon={CheckListIcon} className="h-6 w-6 text-primary" />
-          </div>
-          <Icon icon={Loading02Icon} className="h-5 w-5 animate-spin text-muted-foreground mx-auto mb-2" />
-          <p className="text-muted-foreground text-sm">Loading checklist...</p>
-        </div>
-      </div>
-    )
-  }
+
 
   // Error state
   if (error && !repository && !isNew) {
@@ -619,7 +606,7 @@ export function Editor() {
         <div className="flex flex-col-reverse lg:flex-row gap-8">
           {/* Main Editor Column */}
           <div className="flex-1 min-w-0">
-            <ChecklistEditor />
+            <ChecklistEditor loading={loading} />
           </div>
 
           {/* Sidebar */}

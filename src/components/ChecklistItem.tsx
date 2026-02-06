@@ -1,6 +1,7 @@
 import { memo, useRef, useState, useEffect } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { motion } from 'framer-motion'
 import {
   DragDropVerticalIcon,
   Delete02Icon,
@@ -16,6 +17,7 @@ import type { ChecklistItem as ChecklistItemType } from '@/types/database'
 import { useChecklistStore } from '@/stores/checklist-store'
 import { useIsMobile } from '@/hooks/useMobile'
 import { DESIGN_TOKENS } from '@/lib/constants'
+import { useListItemInteraction } from '@/hooks/use-interaction'
 
 // Helper for item numbering
 const getNumbering = (order: number) => {
@@ -86,8 +88,6 @@ export const ChecklistItem = memo(function ChecklistItem({
 
   // Helper to find all visible items for navigation logic
   const getAllVisibleItems = (): ChecklistItemType[] => {
-    // This replicates the logic from the store/component to get a flat list
-    // Ideally we'd get this from the store but computing it locally is fine for UI nav
     const result: ChecklistItemType[] = []
     const traverse = (parentId: string | null) => {
       const children = getItemsAtLevel(parentId)
@@ -109,7 +109,6 @@ export const ChecklistItem = memo(function ChecklistItem({
     switch (e.key) {
       case 'Enter':
         e.preventDefault()
-        // Add as sibling
         addItem('', item.parent)
         break
 
@@ -125,19 +124,14 @@ export const ChecklistItem = memo(function ChecklistItem({
       case 'Backspace':
         if (item.text === '' && !hasChildren) {
           e.preventDefault()
-          // Calculate prev sibling to focus before deleting
           const prevSibling = getPreviousSibling(item.id)
           const parent = getParent(item.id)
-
           deleteItem(item.id)
-
           if (prevSibling) {
             setFocusedItem(prevSibling.id)
           } else if (parent) {
             setFocusedItem(parent.id)
           }
-        } else if (cursorAtStart && !hasChildren && item.text === '') {
-          // Empty item, but maybe covered above
         }
         break
 
@@ -180,9 +174,7 @@ export const ChecklistItem = memo(function ChecklistItem({
   }
 
   const handleBlur = () => {
-    // We don't necessarily want to clear focus on blur because line interactions might need it
-    // But keeping it in sync with store is good.
-    // implementation details...
+    // Keep sync logic
   }
 
   const handleDelete = () => {
@@ -197,20 +189,17 @@ export const ChecklistItem = memo(function ChecklistItem({
   }
 
   const isActive = isHovered || focusedItemId === item.id
-  // IsFocused state for local styling?
   const isFocused = focusedItemId === item.id
 
   const children = getItemsAtLevel(item.id)
   const hasChildren = children.length > 0
 
-  // Focus effect
   useEffect(() => {
     if (focusedItemId === item.id && inputRef.current) {
       inputRef.current.focus()
     }
   }, [focusedItemId, item.id])
 
-  // Close context menu when clicking outside
   useEffect(() => {
     if (showContextMenu) {
       const handleClickOutside = () => setShowContextMenu(false)
@@ -223,81 +212,59 @@ export const ChecklistItem = memo(function ChecklistItem({
     }
   }, [showContextMenu])
 
-  // Use (renamed) prop isDragging if passed, otherwise use sortable isDragging
   const isCurrentlyDragging = isDraggingProp || isDragging
+
+  // Motion hooks
+  const interactionProps = useListItemInteraction(isFocused && !isCurrentlyDragging)
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group relative flex items-center transition-all duration-200',
-        isCurrentlyDragging && 'opacity-40 scale-[0.98] bg-accent/20',
-        !isCurrentlyDragging && 'hover:bg-accent/40',
-        isFocused && !isCurrentlyDragging && 'bg-primary/5 ring-1 ring-primary/20',
-        isAnimatingIn && 'animate-fade-in',
-        isDropTarget && 'ring-2 ring-primary ring-offset-2'
+        'group relative flex items-center transition-all duration-200 outline-none select-none',
+        isCurrentlyDragging && 'opacity-40 z-50',
+        isAnimatingIn && 'animate-fade-in'
       )}
       onMouseEnter={() => !isMobile && setIsHovered(true)}
       onMouseLeave={() => !isMobile && setIsHovered(false)}
+      {...attributes}
     >
-      {/* Drop zone indicator line */}
-      {isDropTarget && (
-        <div className="absolute -top-0.5 left-0 right-0 h-1 bg-primary rounded-full animate-pulse z-50" />
-      )}
-      {/* Tree connector lines */}
-      {depth > 0 && (
-        <div className="absolute left-0 top-0 bottom-0 flex" aria-hidden="true">
-          {Array.from({ length: depth }).map((_, idx) => (
-            <div
-              key={idx}
-              className="relative"
-              style={{ width: `${DESIGN_TOKENS.spacing.itemIndentPx}px` }}
-            >
-              {idx < depth - 1 && parentHasMoreSiblings[idx] && (
-                <div className="absolute left-4 top-0 bottom-0 w-px bg-border/60" />
-              )}
-              {idx === depth - 1 && (
-                <>
-                  <div
-                    className={cn(
-                      "absolute left-4 w-px bg-border/60",
-                      isLast ? "top-0 h-1/2" : "top-0 bottom-0"
-                    )}
-                  />
-                  <div className="absolute left-4 top-1/2 w-3 h-px bg-border/60" />
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Content wrapper - larger padding on mobile */}
-      <div
+      {/* Interaction/Visual Wrapper */}
+      <motion.div
         className={cn(
-          "flex items-center gap-2 flex-1 min-w-0 transition-all",
-          isMobile ? "px-3 py-4" : "px-3 py-2.5" // Larger touch target on mobile
+          "flex-1 flex items-center gap-2 rounded-lg transition-colors relative",
+          isMobile ? "px-3 py-4" : "px-3 py-2.5",
+          // Focused state — subtle brand tint
+          isFocused && !isCurrentlyDragging && "bg-primary/10",
+          // Hover state — accent background (only if not focused)
+          isHovered && !isFocused && !isCurrentlyDragging && "bg-accent",
+          // Dragging/drop states
+          isDropTarget && 'ring-2 ring-primary ring-offset-2 bg-accent/30',
+          isCurrentlyDragging && 'bg-accent/20 border border-primary/20'
         )}
-        style={{ paddingLeft: `${(depth * DESIGN_TOKENS.spacing.itemIndentPx) + 12}px` }}
+        initial={false}
+        {...interactionProps}
+        style={{
+          marginLeft: `${depth * DESIGN_TOKENS.spacing.itemIndentPx}px`,
+        }}
       >
-        {/* Drag Handle - always visible on mobile */}
+        {/* Drag Handle */}
         <button
           className={cn(
             'cursor-grab touch-none text-muted-foreground/40 hover:text-muted-foreground transition-all duration-150',
             'flex items-center justify-center rounded shrink-0',
-            isMobile ? 'w-10 h-10 opacity-100' : 'w-6 h-6', // 44px touch target on mobile
+            isMobile ? 'w-10 h-10 opacity-100' : 'w-6 h-6',
             !isMobile && !isActive && 'opacity-0',
             !isMobile && isActive && 'opacity-100'
           )}
           aria-label="Drag to reorder item"
-          {...attributes}
           {...listeners}
         >
           <Icon icon={DragDropVerticalIcon} className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
         </button>
 
-        {/* Item number */}
+        {/* Numbering */}
         <span className={cn(
           'font-medium shrink-0 w-6 text-right tabular-nums',
           isMobile ? 'text-sm' : 'text-xs',
@@ -306,14 +273,14 @@ export const ChecklistItem = memo(function ChecklistItem({
           {getNumbering(item.order)}
         </span>
 
-        {/* Expand indicator */}
+        {/* Expand Toggle */}
         <div className={cn("shrink-0 flex items-center justify-center", isMobile ? "w-5 h-5" : "w-4 h-4")}>
           {hasChildren && (
             <Icon icon={ArrowRight01Icon} className={cn(isMobile ? "h-4 w-4" : "h-3.5 w-3.5", "text-muted-foreground/60")} />
           )}
         </div>
 
-        {/* Input - larger font on mobile */}
+        {/* Text Input */}
         <input
           ref={inputRef}
           type="text"
@@ -331,12 +298,11 @@ export const ChecklistItem = memo(function ChecklistItem({
           )}
         />
 
-        {/* Action buttons - larger on mobile, visible on hover/focus desktop */}
+        {/* Actions */}
         <div className={cn(
           'flex items-center gap-1 transition-opacity duration-150',
           isMobile ? 'opacity-100' : isActive ? 'opacity-100' : 'opacity-0'
         )}>
-          {/* Mobile: single menu button */}
           {isMobile ? (
             <button
               onClick={(e) => {
@@ -345,48 +311,67 @@ export const ChecklistItem = memo(function ChecklistItem({
                 setContextMenuPosition({ x: rect.left, y: rect.bottom + 4 })
                 setShowContextMenu(true)
               }}
-              className={cn(
-                'text-muted-foreground/60 hover:text-muted-foreground transition-colors',
-                'w-11 h-11 flex items-center justify-center rounded-lg hover:bg-accent' // 44px touch target
-              )}
-              aria-label="Item options"
+              className="text-muted-foreground/60 w-11 h-11 flex items-center justify-center rounded-lg hover:bg-accent"
             >
               <Icon icon={MoreVerticalIcon} className="h-5 w-5" />
             </button>
           ) : (
-            /* Desktop: inline action buttons */
             <>
               <button
                 onClick={() => setShowContextMenu(!showContextMenu)}
-                className={cn(
-                  'text-muted-foreground/50 hover:text-muted-foreground transition-colors',
-                  'w-7 h-7 flex items-center justify-center rounded hover:bg-accent'
-                )}
-                aria-label="More options"
+                className="text-muted-foreground/50 w-7 h-7 flex items-center justify-center rounded hover:bg-accent hover:text-foreground"
               >
                 <Icon icon={MoreVerticalIcon} className="h-4 w-4" />
               </button>
               <button
                 onClick={handleDelete}
-                className={cn(
-                  'text-muted-foreground/50 hover:text-destructive transition-colors',
-                  'w-7 h-7 flex items-center justify-center rounded hover:bg-destructive/10'
-                )}
-                aria-label="Delete item"
+                className="text-muted-foreground/50 w-7 h-7 flex items-center justify-center rounded hover:bg-destructive/10 hover:text-destructive"
               >
                 <Icon icon={Delete02Icon} className="h-4 w-4" />
               </button>
             </>
           )}
         </div>
-      </div>
+      </motion.div>
 
-      {/* Context menu - positioned differently on mobile */}
+      {/* Tree Connection Lines */}
+      {depth > 0 && (
+        <div className="absolute left-0 top-0 bottom-0 flex z-[-1] pointer-events-none" aria-hidden="true">
+          {Array.from({ length: depth }).map((_, idx) => (
+            <div
+              key={idx}
+              className="relative"
+              style={{ width: `${DESIGN_TOKENS.spacing.itemIndentPx}px` }}
+            >
+              {idx < depth - 1 && parentHasMoreSiblings[idx] && (
+                <div className="absolute left-4 top-0 bottom-0 w-px bg-border/40" />
+              )}
+              {idx === depth - 1 && (
+                <>
+                  <div
+                    className={cn(
+                      "absolute left-4 w-px bg-border/40",
+                      isLast ? "top-0 h-1/2" : "top-0 bottom-0"
+                    )}
+                  />
+                  <div className="absolute left-4 top-1/2 w-3 h-px bg-border/40" />
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Drop Target Indicator */}
+      {isDropTarget && (
+        <div className="absolute -top-0.5 left-0 right-0 h-0.5 bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)] z-50 rounded-full" />
+      )}
+
+      {/* Context Menu */}
       {showContextMenu && (
         <div
           className={cn(
-            "fixed z-50 bg-popover border rounded-xl shadow-lg py-2 animate-fade-in",
-            isMobile ? "min-w-[200px]" : "min-w-[160px]"
+            "fixed z-[100] bg-popover border rounded-xl shadow-lg py-1 animate-in fade-in zoom-in-95 duration-200 elevation-2 min-w-[180px]",
           )}
           style={{
             left: isMobile ? '50%' : contextMenuPosition.x,
@@ -395,50 +380,21 @@ export const ChecklistItem = memo(function ChecklistItem({
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <button
-            onClick={() => { duplicateItem(item.id); setShowContextMenu(false) }}
-            className={cn(
-              "w-full px-4 text-left hover:bg-accent flex items-center gap-3",
-              isMobile ? "py-3 text-base" : "py-2 text-sm"
-            )}
-          >
-            <Icon icon={Copy01Icon} className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
-            Duplicate
-            {!isMobile && <kbd className="ml-auto text-[10px] text-muted-foreground">⌘D</kbd>}
+          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+            Actions
+          </div>
+          <button onClick={() => { duplicateItem(item.id); setShowContextMenu(false) }} className="w-full px-3 py-2 text-left hover:bg-accent text-sm flex items-center gap-2">
+            <Icon icon={Copy01Icon} size="sm" /> Duplicate
           </button>
-          <button
-            onClick={() => { moveItemUp(item.id); setShowContextMenu(false) }}
-            className={cn(
-              "w-full px-4 text-left hover:bg-accent flex items-center gap-3",
-              isMobile ? "py-3 text-base" : "py-2 text-sm"
-            )}
-          >
-            <Icon icon={ArrowUp01Icon} className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
-            Move up
-            {!isMobile && <kbd className="ml-auto text-[10px] text-muted-foreground">⌘↑</kbd>}
+          <button onClick={() => { moveItemUp(item.id); setShowContextMenu(false) }} className="w-full px-3 py-2 text-left hover:bg-accent text-sm flex items-center gap-2">
+            <Icon icon={ArrowUp01Icon} size="sm" /> Move Up
           </button>
-          <button
-            onClick={() => { moveItemDown(item.id); setShowContextMenu(false) }}
-            className={cn(
-              "w-full px-4 text-left hover:bg-accent flex items-center gap-3",
-              isMobile ? "py-3 text-base" : "py-2 text-sm"
-            )}
-          >
-            <Icon icon={ArrowDown01Icon} className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
-            Move down
-            {!isMobile && <kbd className="ml-auto text-[10px] text-muted-foreground">⌘↓</kbd>}
+          <button onClick={() => { moveItemDown(item.id); setShowContextMenu(false) }} className="w-full px-3 py-2 text-left hover:bg-accent text-sm flex items-center gap-2">
+            <Icon icon={ArrowDown01Icon} size="sm" /> Move Down
           </button>
-          <div className="border-t my-1" />
-          <button
-            onClick={() => { handleDelete(); setShowContextMenu(false) }}
-            className={cn(
-              "w-full px-4 text-left hover:bg-destructive/10 text-destructive flex items-center gap-3",
-              isMobile ? "py-3 text-base" : "py-2 text-sm"
-            )}
-          >
-            <Icon icon={Delete02Icon} className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
-            Delete
-            {!isMobile && <kbd className="ml-auto text-[10px] text-destructive/60">⌫</kbd>}
+          <div className="h-px bg-border my-1" />
+          <button onClick={() => { handleDelete(); setShowContextMenu(false) }} className="w-full px-3 py-2 text-left hover:bg-destructive/10 text-destructive text-sm flex items-center gap-2">
+            <Icon icon={Delete02Icon} size="sm" /> Delete
           </button>
         </div>
       )}
@@ -458,10 +414,9 @@ export const ChecklistItem = memo(function ChecklistItem({
   )
 })
 
-// Drag overlay item - floating preview during drag
 export function DragOverlayItem({ item }: { item: ChecklistItemType }) {
   return (
-    <div className="flex items-center gap-3 px-4 py-3 bg-card border-2 border-primary/30 rounded-xl shadow-2xl shadow-primary/20">
+    <div className="flex items-center gap-3 px-4 py-3 bg-card border-2 border-primary/30 rounded-xl shadow-2xl shadow-primary/20 elevation-3 opacity-90 backdrop-blur-sm">
       <Icon icon={DragDropVerticalIcon} className="h-4 w-4 text-primary" />
       <span className="text-base font-medium text-foreground">
         {item.text || <span className="text-muted-foreground italic">Empty item</span>}

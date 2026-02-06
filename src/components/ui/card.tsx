@@ -3,17 +3,23 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Enable hover lift effect */
-  hoverable?: boolean
+  elevation?: 0 | 1 | 2 | 3
+  interactive?: boolean
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, hoverable = false, ...props }, ref) => (
+  ({ className, elevation = 1, interactive = false, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        "rounded-xl border bg-card text-card-foreground shadow-sm",
-        hoverable && "transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md cursor-pointer",
+        "rounded-xl border bg-card text-card-foreground transition-all duration-200",
+        // Elevation mapping
+        elevation === 0 && "elevation-0 border-transparent",
+        elevation === 1 && "elevation-1",
+        elevation === 2 && "elevation-2",
+        elevation === 3 && "elevation-3",
+        // Interactive state
+        interactive && "hover-lift cursor-pointer",
         className
       )}
       {...props}
@@ -78,4 +84,14 @@ const CardFooter = React.forwardRef<
 ))
 CardFooter.displayName = "CardFooter"
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+// Composite export for "Card.Root" syntax if desired, but keeping named exports as primary
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  // Alias for roadmap alignment
+  Card as Root
+}

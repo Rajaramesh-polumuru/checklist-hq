@@ -130,14 +130,14 @@ export function ApiKeyManager() {
 
       {/* New Key Success Modal/Banner */}
       {newKeySecret && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 animate-in fade-in slide-in-from-top-2">
+        <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-4 animate-in fade-in slide-in-from-top-2">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-green-100 rounded-full">
-              <Icon icon={Tick01Icon} className="h-5 w-5 text-green-600" />
+            <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-full">
+              <Icon icon={Tick01Icon} className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-green-900">API Key Generated</h3>
-              <p className="text-sm text-green-700 mt-1 mb-3">
+              <h3 className="font-semibold text-green-900 dark:text-green-100">API Key Generated</h3>
+              <p className="text-sm text-green-700 dark:text-green-300 mt-1 mb-3">
                 Copy this key now. You won't be able to see it again!
               </p>
 
@@ -145,9 +145,9 @@ export function ApiKeyManager() {
                 <Input
                   value={newKeySecret}
                   readOnly
-                  className="font-mono text-sm bg-white border-green-200"
+                  className="font-mono text-sm bg-card border-green-200 dark:border-green-700"
                 />
-                <Button variant="outline" onClick={copyToClipboard} className="shrink-0 bg-white">
+                <Button variant="outline" onClick={copyToClipboard} className="shrink-0">
                   {copied ? <Icon icon={Tick01Icon} className="h-4 w-4 text-green-600" /> : <Icon icon={Copy01Icon} className="h-4 w-4" />}
                 </Button>
               </div>

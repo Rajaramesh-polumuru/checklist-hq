@@ -74,47 +74,47 @@ Execute these phases strictly sequentially. Do not jump ahead.
 ### Phase 0: Foundation
 *Goal: Establish the constraints and tokens that will govern the UI.*
 
-1.  **[ ] Design Tokens Setup**
+1.  **[x] Design Tokens Setup**
     *   Create `/src/design-system/tokens.ts`.
     *   Define colors, spacing, motion, and typography constants.
-2.  **[ ] Global CSS Configuration**
+2.  **[x] Global CSS Configuration**
     *   Update `globals.css` to map CSS Custom Properties to the Design Tokens.
     *   Configure Tailwind 4 theme to use these variables.
-3.  **[ ] Component Inventory & Audit**
+3.  **[x] Component Inventory & Audit**
     *   Audit existing `/components`.
     *   Flag duplicates, hardcoded values, and non-accessible elements.
 
 ### Phase 1: Primitives
 *Goal: Build the "LEGO bricks" of the application using polymorphic, accessible designs.*
 
-4.  **[ ] Button Component**
+4.  **[x] Button Component**
     *   **Tech:** CVA + Framer Motion (`whileTap`, `whileHover`).
     *   **Variants:** `primary`, `secondary`, `ghost`, `danger`.
     *   **Sizes:** `sm`, `md`, `lg`.
     *   **Features:** Loading spinner state, icon support, `asChild` (Slot).
-5.  **[ ] Input Field System**
+5.  **[x] Input Field System**
     *   **Tech:** Composition pattern (`Root`, `Label`, `Input`, `Error`, `Help`).
     *   **Features:** Focus rings, validation styling, disabled states.
-6.  **[ ] Card Primitive**
+6.  **[x] Card Primitive**
     *   **Structure:** `Card.Root`, `Card.Header`, `Card.Content`, `Card.Footer`.
     *   **Props:** `elevation` (0-3), `interactive` (hover effects).
-7.  **[ ] Icon Wrapper**
+7.  **[x] Icon Wrapper**
     *   **Tech:** Wrapper around `@hugeicons/react`.
     *   **Tokens:** Map size props (`sm`, `md`...) to standard px values.
 
 ### Phase 2: Motion System
 *Goal: Make the app feel "alive" and responsive.*
 
-8.  **[ ] Motion Utilities**
+8.  **[x] Motion Utilities**
     *   Create `/lib/motion.ts`.
     *   Export standard `variants` (fade, slideUp, scaleIn) and `transitions`.
-9.  **[ ] Page Transition Wrapper**
+9.  **[x] Page Transition Wrapper**
     *   Implement `AnimatePresence` layout for route changes.
     *   Standard `slideUp` + `fade` entrance.
-10. **[ ] Micro-interaction Hooks**
+10. **[x] Micro-interaction Hooks**
     *   `useButtonInteraction`: Standardize press/hover scales.
     *   `useListItemInteraction`: Standardize list item hover/focus physics.
-11. **[ ] DnD Enhancement**
+11. **[x] DnD Enhancement**
     *   Create `SortableItem` wrapper.
     *   **Physics:** Scale up on drag start, shadow elevation change.
     *   **Layout:** Smooth reordering animations.
@@ -122,57 +122,57 @@ Execute these phases strictly sequentially. Do not jump ahead.
 ### Phase 3: Composites
 *Goal: Assemble primitives into complex, interactive UI features.*
 
-12. **[ ] Dialog (Modal) System**
+12. **[x] Dialog (Modal) System**
     *   **Base:** Radix UI Dialog.
     *   **UX:** Overlay blur, scale+fade entrance, strictly managed focus trap.
-13. **[ ] Dropdown Menus**
+13. **[x] Dropdown Menus**
     *   **Base:** Radix UI DropdownMenu.
     *   **Motion:** Staggered entrance for children items, origin-aware expansion.
-14. **[ ] Toast System**
+14. **[x] Toast System**
     *   **Base:** Sonner.
     *   **Theming:** Custom styling to match design tokens (Success, Error, Info, Action).
-15. **[ ] Checklist Item (The Core)**
+15. **[x] Checklist Item (The Core)**
     *   **States:** Default, Hover, Editing, Completed, Dragging.
     *   **Visuals:** Animated SVG checkbox check, strikethrough transition.
-16. **[ ] Checklist Container**
+16. **[x] Checklist Container**
     *   **Features:** Empty state illustration, skeleton loading, independent scroll areas.
 
 ### Phase 4: Shell & Layout
 *Goal: Create the frame that holds the application together.*
 
-17. **[ ] App Shell**
+17. **[x] App Shell**
     *   **Sidebar:** Collapsible (240px -> 64px) with smooth width transition.
     *   **Mobile:** Drawer variant for small screens.
     *   **Header:** Sticky context bar.
-18. **[ ] Navigation**
+18. **[x] Navigation**
     *   **Active State:** "Pill" highlight background + border accent.
     *   **Hover:** Subtle background fade.
-19. **[ ] Breadcrumb Navigation**
+19. **[x] Breadcrumb Navigation**
     *   **Pattern:** Home > Parent > [Current].
     *   **Style:** Current item is text (non-clickable), ancestors are muted links.
 
 ### Phase 5: Feedback & Onboarding
 *Goal: Guide the user and handle edge cases gracefully.*
 
-20. **[ ] Skeleton Loading System**
+20. **[x] Skeleton Loading System**
     *   **Variants:** `Text`, `Card`, `Circle`, `List`.
     *   **Animation:** Standardized shimmer effect (sync speed with design tokens).
-21. **[ ] Empty States**
+21. **[x] Empty States**
     *   **Pattern:** Illustration -> Headline -> Description -> Call to Action (CTA).
-22. **[ ] User Onboarding**
+22. **[x] User Onboarding**
     *   **Tech:** NextStep.js.
     *   **Features:** Contextual tour steps, persistence via Supabase/Zustand.
 
 ### Phase 6: Polish & Refinement
 *Goal: The final 10% that differentiates "good" from "premium".*
 
-23. **[ ] Reduced Motion Support**
+23. **[x] Reduced Motion Support**
     *   Hook: `useReducedMotion`.
     *   Logic: Disable layout animations and transform transitions if system pref is set.
-24. **[ ] Dark Mode Perfection**
+24. **[x] Dark Mode Perfection**
     *   Verify all color tokens in Dark context.
     *   Persist preference to local storage/user profile.
-25. **[ ] Accessibility & Focus Review**
+25. **[x] Accessibility & Focus Review**
     *   **Focus:** Ensure highly visible focus rings (blue/brand color) on all standard inputs.
     *   **Management:** Test focus restoration when closing all modals/drawers.
 

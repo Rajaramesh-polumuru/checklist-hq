@@ -297,7 +297,7 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
         {/* Error State */}
         {runState === 'error' && (
           <div className="py-6 text-center">
-            <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3">
+            <div className="h-12 w-12 rounded-full bg-red-100 dark:bg-red-950/30 flex items-center justify-center mx-auto mb-3">
               <Icon icon={AlertCircleIcon} className="h-6 w-6 text-red-600" />
             </div>
             <p className="font-medium text-lg mb-1">Unable to Start Run</p>
