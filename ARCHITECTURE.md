@@ -1,88 +1,96 @@
-# Architecture: The "GitHub for Process" Model
+# Architecture: Distributed Process Control
 
-This document details the technical architecture required to support the "Forking" mechanic, providing specific database schemas and JSON structures optimized for a React/Supabase stack.
+> **Conceptual Model:** "Git for Process".
+> This application is NOT a standard CRUD app. It is a Version Control System (VCS) optimized for checklists.
 
-## 1. The Database Paradigm: Relational vs. Document
-We utilize **PostgreSQL (via Supabase)**.
-- **Referential Integrity**: Strict foreign keys are required to track lineage (`origin_id`, `upstream_id`).
-- **JSONB**: We use Postgres's best-in-class JSON support to store checklist content as immutable snapshots while keeping metadata relational.
+## 1. Core Data Models
 
-### Core Entities
+### 1.1 Repositories (`repositories`)
+The container for a process history.
+- **Identity:** `id` (UUID).
+- **Lineage:**
+  - `upstream_repo_id`: The parent repo if this is a fork.
+  - `origin_repo_id`: The root ancestor (for graphing the full network).
+- **Visibility:** `is_public` (Boolean).
 
-#### Repositories (The Container)
-Represents the abstract concept of the "Checklist."
-- **`upstream_repo_id`**: Points to the parent repository (if forked).
-- **`origin_repo_id`**: Points to the original root repository.
+### 1.2 Commits (`commits`)
+**Immutable Snapshots** of the checklist content.
+- **Rule:** NEVER update a commit's content. Create a NEW commit linked to the parent.
+- **Structure:**
+  - `repo_id`: Link to container.
+  - `parent_commit_id`: The previous version (for traversing history).
+  - `content`: `JSONB` blob (The entire checklist state).
 
-#### Commits (The Version)
-Represents a specific state of the checklist at a specific point in time.
-- **`content`**: A `JSONB` column containing the entire tree of items.
-- **Immutable**: Once written, a commit is never changed. Edits create new commits.
+### 1.3 Runs (`runs`)
+An execution instance of a specific Commit.
+- **Rule:** A run is tied to a specific `commit_id`. If the repo updates, old runs stay on the old commit.
+- **State:** `progress` (JSONB) tracks completion status separately from content.
 
-#### Runs (The Instance)
-Represents an execution of a specific Commit.
-- **`progress`**: Validates the completion state of items without modifying the definition.
+## 2. The JSON Content Schema
 
-## 2. Schema Design (SQL)
+We use a **normalized map** to store items. This prevents array-index fragility during diffs.
 
-```sql
--- 1. REPOSITORIES
-CREATE TABLE repositories (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  owner_id UUID REFERENCES auth.users(id) NOT NULL,
-  title TEXT NOT NULL,
-  upstream_repo_id UUID REFERENCES repositories(id),
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+```typescript
+type ChecklistContent = {
+  version: "1.0";
+  items: Record<string, ChecklistItem>; // Keyed by UUID
+};
 
--- 2. COMMITS
-CREATE TABLE commits (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  repo_id UUID REFERENCES repositories(id) NOT NULL,
-  content JSONB NOT NULL, -- The Snapshot
-  parent_commit_id UUID REFERENCES commits(id),
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 3. RUNS
-CREATE TABLE runs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  repo_id UUID REFERENCES repositories(id) NOT NULL,
-  commit_id UUID REFERENCES commits(id) NOT NULL,
-  progress JSONB DEFAULT '{}', -- { "item_uuid": { "completed": true } }
-  status TEXT DEFAULT 'active'
-);
+type ChecklistItem = {
+  id: string;        // UUID
+  text: string;      // "Check engine oil"
+  parent: string | null; // UUID of parent item (null if root)
+  order: number;     // Sorting index (0, 100, 200...)
+  collapsed?: boolean;
+};
 ```
 
-## 3. The JSON Data Structure
-To support consistent diffing and merging, we use a **normalized** map structure rather than a nested array. This prevents "array index shift" issues during diffs.
+**Why Normalized?**
+- **O(1) Lookups:** finding an item by ID is instant.
+- **Clean Diffs:** Moving an item only changes its `parent` or `order` field, not its position in an array.
 
-```json
-{
-  "items": {
-    "uuid-1": { 
-      "id": "uuid-1", 
-      "text": "Step 1", 
-      "parent": null, 
-      "order": 0 
-    },
-    "uuid-2": { 
-      "id": "uuid-2", 
-      "text": "Step 1.1", 
-      "parent": "uuid-1", 
-      "order": 0 
-    }
-  }
-}
+## 3. Critical Algorithms
+
+### 3.1 The Forking Mechanic
+When a user forks Repository A (Commit 101):
+1.  **Create Repository B**: New entry in `repositories` table.
+    - Set `upstream_repo_id` = Repository A.
+2.  **Clone State**:
+    - Read `content` from Commit 101.
+    - Insert NEW Commit (201) into `commits` table linked to Repository B.
+    - Set `content` = Commit 101's content (Deep Copy).
+    - `parent_commit_id` = NULL (It is the initial commit of *this* repo).
+
+### 3.2 The Auto-Save Loop
+The Editor uses a specialized "Debounced Commit" strategy:
+1.  User edits checkist (Local State / Zustand updates immediately).
+2.  `useDebounce` waits for 2 seconds of inactivity.
+3.  **Action:** create a new row in `commits` with the new JSON.
+4.  **Optimization:** If the content is identical to the HEAD commit (after diff), do nothing.
+
+## 4. Security & Permissions (RLS)
+
+**PostgreSQL Row Level Security** is the primary defense.
+
+- **Public Repos:** `SELECT` allowed for `authenticated` and `anon`.
+- **Private Repos:** `SELECT` allowed only for `owner_id`.
+- **Mutations:** `INSERT/UPDATE` allowed ONLY for `owner_id`.
+- **Runs:** Viewable only by the runner/owner.
+
+## 5. System Diagram
+
+```mermaid
+graph TD
+    User -->|Auth| Supabase
+    User -->|Edit| Zustand[Client Store]
+    
+    subgraph Data Flow
+    Zustand -->|Debounce 2s| API[Supabase API]
+    API -->|Insert| Commits[(Commits Table)]
+    end
+    
+    subgraph Execution
+    User -->|Start Run| Runs[(Runs Table)]
+    Runs -->|Refers to| Commits
+    end
 ```
-
-## 4. The Forking Mechanic
-When a user "Forks":
-1.  **Create Repository**: A new row in `repositories` linked to the `upstream_repo_id`.
-2.  **Deep Copy**: The latest `JSONB` content from the upstream repo is copied and inserted as the *first* commit of the new repo.
-    *   *Why Deep Copy?* Users must be able to edit their fork independently.
-    *   *Why Link?* To enable future "Upstream Merge" features.
-
-## 5. Strategic Decisions
-- **Zustand over Context**: For the Editor, we use Zustand to avoid re-rendering the entire list on every keystroke.
-- **UUIDs everywhere**: Every item gets a UUID. Array indices are never used as identifiers.

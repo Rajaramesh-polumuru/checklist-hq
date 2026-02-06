@@ -13,14 +13,21 @@ Checklist HQ leverages the mental model of software development—version contro
 - **Forks**: Don't start from a blank page. Fork an existing process and adapt it.
 - **Runs**: Execute specific versions of a process with full auditability.
 
-## Tech Stack (The "Ruthless MVP")
+## 📚 Documentation Hub
 
-- **Frontend**: React (Vite) + Tailwind CSS + shadcn/ui
-- **State**: Zustand (for high-performance, transient editor state)
+*   **[Agent Guide (AI)](./CLAUDE.md)**: The strict ruleset for AI assistance.
+*   **[Design Philosophy](./DESIGN_PHILOSOPHY.md)**: Frontend architecture, design tokens, and UI principles.
+*   **[Architecture](./ARCHITECTURE.md)**: Database schema, JSON models, and "Git-like" algorithms.
+*   **[Product Roadmap](./ROADMAP.md)**: Vision and phased execution plan.
+
+## 🛠 Tech Stack (The "Ruthless MVP")
+
+- **Frontend**: React 19 (Vite) + Tailwind CSS 4 + shadcn/ui
+- **State**: Zustand (Local) + React Query (Server)
 - **Backend**: Supabase (PostgreSQL + Auth + Real-time)
 - **Drag & Drop**: @dnd-kit/core (Vertical list optimization)
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js 18+
@@ -41,28 +48,10 @@ Checklist HQ leverages the mental model of software development—version contro
     VITE_SUPABASE_ANON_KEY=your_anon_key
     ```
 
-3.  **Database Migration**
-    Run the SQL scripts in `supabase/migrations` against your Supabase SQL Editor.
-
-4.  **Run Development Server**
+3.  **Run Development Server**
     ```bash
     npm run dev
     ```
-
-## Roadmap
-
-- **Phase 1: The Foundation** (Current)
-    - Editor with nested indentation (Tab/Shift+Tab)
-    - "Git-like" Schema Implementation
-    - Forking Mechanism (Deep Copy)
-
-- **Phase 2: The Network**
-    - Public ecosystem
-    - "Forks per User" metrics
-
-- **Phase 3: The Enterprise**
-    - Upstream Merging
-    - Role-Based Access Control (RBAC)
 
 ## License
 MIT
