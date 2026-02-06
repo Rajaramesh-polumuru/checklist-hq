@@ -26,7 +26,7 @@ An execution instance of a specific Commit.
 - **Rule:** A run is tied to a specific `commit_id`. If the repo updates, old runs stay on the old commit.
 - **State:** `progress` (JSONB) tracks completion status separately from content.
 
-## 2. The JSON Content Schema
+## 2. The JSON Content Schema (Agent-Ready)
 
 We use a **normalized map** to store items. This prevents array-index fragility during diffs.
 
@@ -42,6 +42,13 @@ type ChecklistItem = {
   parent: string | null; // UUID of parent item (null if root)
   order: number;     // Sorting index (0, 100, 200...)
   collapsed?: boolean;
+  
+  // Future-proofing for AI Agents
+  agent_config?: {
+      action_type: "manual" | "browse" | "api";
+      parameters?: Record<string, any>; // JSON Schema inputs
+      expected_output?: Record<string, any>; // JSON Schema outputs
+  };
 };
 ```
 
@@ -81,8 +88,8 @@ The Editor uses a specialized "Debounced Commit" strategy:
 
 ```mermaid
 graph TD
-    User -->|Auth| Supabase
-    User -->|Edit| Zustand[Client Store]
+    User[Human or Agent] -->|Auth| Supabase
+    User -->|Edit/Run| Zustand[Client Store]
     
     subgraph Data Flow
     Zustand -->|Debounce 2s| API[Supabase API]

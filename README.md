@@ -2,23 +2,18 @@
 
 > **"Don’t write checklists. Fork them."**
 
-Checklist HQ is the strategic blueprint for the "GitHub for Process" ecosystem. It moves beyond simple to-do lists to a platform for the **standardization of excellence**. By treating Standard Operating Procedures (SOPs) not as static documents but as dynamic, versioned code repositories, we unlock a mechanism for distributed process improvement.
-
-## The Core Concept
-The market has fundamentally misunderstood operational work. The challenge isn't remembering to do a task; it's knowing the *optimal* way to perform it.
-Checklist HQ leverages the mental model of software development—version control, forking, and merging—to revolutionize business operations.
-
-- **Repositories**: Processes are code-like repositories, not docs.
-- **Commits**: Every change is an immutable snapshot.
-- **Forks**: Don't start from a blank page. Fork an existing process and adapt it.
-- **Runs**: Execute specific versions of a process with full auditability.
+Checklist HQ is the operating system for **Hybrid Intelligence**. It is the standard operating protocol for both human operators and AI agents. By treating SOPs as version-controlled code, we enable reliable execution across the carbon/silicon divide.
 
 ## 📚 Documentation Hub
 
+### Core Philosophy
+*   **[Manifesto](./MANIFESTO.md)**: The vision of **"Git for Process"** in an AI-first world. **Start here.**
+
+### Implementation Guides
 *   **[Agent Guide (AI)](./CLAUDE.md)**: The strict ruleset for AI assistance.
 *   **[Design Philosophy](./DESIGN_PHILOSOPHY.md)**: Frontend architecture, design tokens, and UI principles.
-*   **[Architecture](./ARCHITECTURE.md)**: Database schema, JSON models, and "Git-like" algorithms.
-*   **[Product Roadmap](./ROADMAP.md)**: Vision and phased execution plan.
+*   **[Architecture](./ARCHITECTURE.md)**: Database schema, JSON models, and algorithms.
+*   **[Product Roadmap](./ROADMAP.md)**: The path to Hybrid Teams (Humans + Agents).
 
 ## 🛠 Tech Stack (The "Ruthless MVP")
 
