@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/ui/skeleton'
@@ -17,6 +18,7 @@ import {
   PlusSignIcon,
   Tag01Icon,
   Cancel01Icon,
+  SparklesIcon,
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
@@ -28,6 +30,7 @@ import {
 import { formatRelativeTime } from '@/lib/date-utils'
 import { useDebounce } from '@/hooks/useDebounce'
 import { SEARCH, KEYBOARD_SHORTCUTS } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 import type { Tag, RepositoryWithTags, Repository } from '@/types/database'
 
 type SortOption = 'fork_count' | 'created_at' | 'updated_at'
@@ -126,13 +129,6 @@ export function Explore() {
     }
   }
 
-  // Get unique categories from tags
-  const tagCategories = tags.reduce((acc, tag) => {
-    const category = tag.category || 'other'
-    if (!acc.includes(category)) acc.push(category)
-    return acc
-  }, [] as string[])
-
   // Debounced search effect
   useEffect(() => {
     if (debouncedSearchQuery !== searchQuery) return // Still typing
@@ -183,25 +179,92 @@ export function Explore() {
     { value: 'updated_at', label: 'Recently Updated', icon: Clock01Icon },
   ]
 
+  // Color palette for cards
+  const getAccentColor = (title: string) => {
+    const colors = [
+      { bg: 'bg-primary/10', text: 'text-primary', gradient: 'from-primary to-orange-400' },
+      { bg: 'bg-emerald-500/10', text: 'text-emerald-500', gradient: 'from-emerald-500 to-teal-400' },
+      { bg: 'bg-sky-500/10', text: 'text-sky-500', gradient: 'from-sky-500 to-cyan-400' },
+      { bg: 'bg-violet-500/10', text: 'text-violet-500', gradient: 'from-violet-500 to-purple-400' },
+      { bg: 'bg-amber-500/10', text: 'text-amber-500', gradient: 'from-amber-500 to-yellow-400' },
+      { bg: 'bg-pink-500/10', text: 'text-pink-500', gradient: 'from-pink-500 to-rose-400' },
+    ]
+    return colors[title.length % colors.length]
+  }
+
   return (
     <div className="min-h-screen">
-      {/* Premium Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 border-b">
-        {/* Decorative elements */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-60" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+      {/* Premium Hero Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-orange-500/5 border-b">
+        {/* Mesh gradient background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-60" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-400/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+        </div>
 
-        <div className="container mx-auto px-4 py-12 relative">
+        {/* Floating template previews - decorative */}
+        <motion.div
+          initial={{ opacity: 0, x: -50, rotate: -15 }}
+          animate={{ opacity: 0.25, x: 0, rotate: -12 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
+          className="absolute top-20 left-[5%] w-48 h-32 bg-card/50 backdrop-blur-sm rounded-lg border shadow-lg hidden xl:block pointer-events-none"
+        >
+          <div className="p-3">
+            <div className="h-3 w-24 bg-muted rounded mb-2" />
+            <div className="h-2 w-full bg-muted/50 rounded mb-1" />
+            <div className="h-2 w-3/4 bg-muted/50 rounded" />
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, x: 50, rotate: 15 }}
+          animate={{ opacity: 0.25, x: 0, rotate: 8 }}
+          transition={{ delay: 0.7, duration: 0.8 }}
+          className="absolute bottom-20 right-[5%] w-48 h-32 bg-card/50 backdrop-blur-sm rounded-lg border shadow-lg hidden xl:block pointer-events-none"
+        >
+          <div className="p-3">
+            <div className="h-3 w-20 bg-muted rounded mb-2" />
+            <div className="h-2 w-full bg-muted/50 rounded mb-1" />
+            <div className="h-2 w-2/3 bg-muted/50 rounded" />
+          </div>
+        </motion.div>
+
+        <div className="container mx-auto px-4 py-16 relative">
           <div className="max-w-2xl mx-auto text-center">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-              Explore Templates
-            </h1>
-            <p className="text-lg text-muted-foreground mb-8">
-              Discover proven checklists from the community. Fork, customize, and make them yours.
-            </p>
+            {/* Animated badge */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6"
+            >
+              <Icon icon={SparklesIcon} className="h-4 w-4" />
+              Community Templates
+            </motion.div>
 
-            {/* Search */}
-            <div className="max-w-md mx-auto">
+            <motion.h1
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
+            >
+              Explore <span className="text-gradient-primary">Templates</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="text-xl text-muted-foreground mb-10 leading-relaxed"
+            >
+              Discover battle-tested checklists from the community. Fork, customize, and make them yours.
+            </motion.p>
+
+            {/* Premium search input */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="max-w-lg mx-auto"
+            >
               <SearchInput
                 ref={searchInputRef}
                 value={searchQuery}
@@ -211,69 +274,98 @@ export function Explore() {
                 resultCount={searchQuery.trim() ? repositories.length : undefined}
                 size="large"
                 ariaLabel="Search templates"
+                className="shadow-lg shadow-black/5"
               />
-              <div className="text-center mt-4 text-xs text-muted-foreground">
-                Press <kbd className="px-2 py-0.5 bg-muted rounded border text-foreground font-mono">{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}+K</kbd> to focus search
-              </div>
-            </div>
+            </motion.div>
           </div>
 
-          {/* Stats */}
-          <div className="flex justify-center gap-8 mt-8">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-primary">{loading ? '—' : repositories.length}</p>
-              <p className="text-xs text-muted-foreground">Templates</p>
-            </div>
-            <div className="text-center border-l border-r border-border px-8">
-              <p className="text-2xl font-bold text-primary">{loading ? '—' : repositories.reduce((sum, r) => sum + r.fork_count, 0)}</p>
-              <p className="text-xs text-muted-foreground">Total Forks</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-emerald-400">Free</p>
-              <p className="text-xs text-muted-foreground">Forever</p>
-            </div>
+          {/* Enhanced stats row */}
+          <div className="flex justify-center gap-8 mt-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="text-center"
+            >
+              <p className="text-3xl font-bold text-gradient-primary">
+                {loading ? '—' : repositories.length}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">Templates</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-center border-l border-r border-border px-8"
+            >
+              <p className="text-3xl font-bold text-gradient-primary">
+                {loading ? '—' : repositories.reduce((sum, r) => sum + r.fork_count, 0)}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">Total Forks</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="text-center"
+            >
+              <p className="text-3xl font-bold text-emerald-500">Free</p>
+              <p className="text-sm text-muted-foreground mt-1">Forever</p>
+            </motion.div>
           </div>
         </div>
       </div>
 
-      {/* Tag Filters */}
+      {/* Sticky Tag Filter Bar with Glassmorphism */}
       {tags.length > 0 && (
-        <div className="border-b bg-muted/30">
+        <div className="border-b sticky top-0 z-20 bg-background/80 backdrop-blur-md">
           <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center gap-3 mb-3">
-              <Icon icon={Tag01Icon} className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-muted-foreground">Filter by category:</span>
-              {selectedTag && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleTagSelect(null)}
-                  className="h-6 px-2 text-xs"
-                >
-                  <Icon icon={Cancel01Icon} className="h-3 w-3 mr-1" />
-                  Clear filter
-                </Button>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {tagCategories.map((category) => (
-                <div key={category} className="flex flex-wrap gap-1.5">
-                  {tags
-                    .filter((t) => (t.category || 'other') === category)
-                    .slice(0, 6) // Show first 6 tags per category
-                    .map((tag) => (
-                      <Button
-                        key={tag.id}
-                        variant={selectedTag === tag.slug ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => handleTagSelect(selectedTag === tag.slug ? null : tag.slug)}
-                        className="h-7 text-xs"
-                      >
-                        {tag.name}
-                      </Button>
-                    ))}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 shrink-0">
+                <Icon icon={Tag01Icon} className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground hidden sm:inline">Filter:</span>
+              </div>
+
+              {/* Scrollable tag container */}
+              <div className="flex-1 overflow-x-auto scrollbar-hide">
+                <div className="flex gap-2 pb-1">
+                  {tags.map((tag) => (
+                    <Button
+                      key={tag.id}
+                      variant={selectedTag === tag.slug ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleTagSelect(selectedTag === tag.slug ? null : tag.slug)}
+                      className={cn(
+                        "h-8 text-xs shrink-0 transition-all",
+                        selectedTag === tag.slug && "shadow-md shadow-primary/25"
+                      )}
+                    >
+                      {tag.name}
+                    </Button>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              {/* Clear filter button - animated appearance */}
+              <AnimatePresence>
+                {selectedTag && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleTagSelect(null)}
+                      className="h-8 px-3 text-xs shrink-0"
+                    >
+                      <Icon icon={Cancel01Icon} className="h-3 w-3 mr-1" />
+                      Clear
+                    </Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -281,24 +373,6 @@ export function Explore() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-
-        {/* Active filter indicator */}
-        {selectedTag && (
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <Badge variant="secondary" className="px-3 py-1">
-              <Icon icon={Tag01Icon} className="h-3 w-3 mr-1.5" />
-              {tags.find(t => t.slug === selectedTag)?.name || selectedTag}
-              <button
-                onClick={() => handleTagSelect(null)}
-                className="ml-2 hover:text-destructive"
-                aria-label="Clear tag filter"
-              >
-                <Icon icon={Cancel01Icon} className="h-3 w-3" />
-              </button>
-            </Badge>
-          </div>
-        )}
-
         {/* Sort Tabs */}
         <div className="flex justify-center gap-2 mb-8">
           {sortOptions.map((option) => (
@@ -307,7 +381,10 @@ export function Explore() {
               variant={activeSort === option.value ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveSort(option.value)}
-              className="gap-2"
+              className={cn(
+                "gap-2 transition-all",
+                activeSort === option.value && "shadow-md shadow-primary/25"
+              )}
             >
               <Icon icon={option.icon} className="h-4 w-4" />
               {option.label}
@@ -317,7 +394,11 @@ export function Explore() {
 
         {/* Error */}
         {error && (
-          <div className="text-center py-4 text-destructive mb-6 bg-destructive/10 border border-destructive/20 rounded-lg px-4">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-4 text-destructive mb-6 bg-destructive/10 border border-destructive/20 rounded-lg px-4"
+          >
             <p className="font-medium">{error}</p>
             <button
               onClick={() => setError(null)}
@@ -326,7 +407,7 @@ export function Explore() {
             >
               Dismiss
             </button>
-          </div>
+          </motion.div>
         )}
 
         {/* Loading */}
@@ -337,31 +418,27 @@ export function Explore() {
             ))}
           </div>
         ) : repositories.length === 0 ? (
-          <div className="text-center py-16">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-16"
+          >
             {searchQuery.trim() ? (
               <div className="max-w-md mx-auto">
-                <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                <div className="mx-auto w-16 h-16 bg-muted/50 rounded-2xl flex items-center justify-center mb-4">
                   <Icon icon={CheckListIcon} className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">No templates found</h3>
+                <h3 className="text-xl font-semibold mb-2">No templates found</h3>
                 <p className="text-muted-foreground mb-6">
-                  We couldn't find any templates matching <strong>"{searchQuery}"</strong>
+                  We couldn't find any templates matching "<span className="font-medium text-foreground">{searchQuery}</span>"
                 </p>
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground">Try:</p>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Using different keywords</li>
-                    <li>• Checking for typos</li>
-                    <li>• Using more general terms</li>
-                  </ul>
-                  <Button variant="outline" onClick={() => setSearchQuery('')} className="mt-4">
-                    Clear search and browse all
-                  </Button>
-                </div>
+                <Button variant="outline" onClick={() => setSearchQuery('')}>
+                  Clear search and browse all
+                </Button>
               </div>
             ) : (
               <>
-                <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                <div className="mx-auto w-16 h-16 bg-muted/50 rounded-2xl flex items-center justify-center mb-4">
                   <Icon icon={CheckListIcon} className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <p className="text-muted-foreground mb-4">
@@ -377,110 +454,135 @@ export function Explore() {
                 )}
               </>
             )}
-          </div>
+          </motion.div>
         ) : (
-          /* Template Grid */
+          /* Premium Template Grid */
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {repositories.map((repo, index) => {
-              // Generate consistent color based on title - using pastel colors
-              const colors = ['bg-primary/80', 'bg-emerald-300', 'bg-sky-300', 'bg-violet-300', 'bg-amber-300', 'bg-pink-300']
-              const colorIndex = repo.title.length % colors.length
-              const accentColor = colors[colorIndex]
+              const accent = getAccentColor(repo.title)
 
               return (
-                <Link key={repo.id} to={`/repo/${repo.id}`}>
-                  <Card
-                    hoverable
-                    className="h-full animate-fade-in relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    {/* Colored accent bar */}
-                    <div className={`absolute top-0 left-0 right-0 h-0.5 ${accentColor}`} />
+                <motion.div
+                  key={repo.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.03 }}
+                >
+                  <Link to={`/repo/${repo.id}`}>
+                    <Card
+                      className={cn(
+                        "group h-full relative overflow-hidden",
+                        "transition-all duration-300",
+                        "hover:-translate-y-1 hover:shadow-xl hover:shadow-black/10"
+                      )}
+                    >
+                      {/* Gradient accent bar - animated on hover */}
+                      <div className={cn(
+                        "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r transition-all duration-300",
+                        accent.gradient,
+                        "group-hover:h-1.5"
+                      )} />
 
-                    <CardHeader className="pb-3 pt-5">
-                      <div className="flex items-start gap-3">
-                        {/* Icon */}
-                        <div className={`h-10 w-10 rounded-lg ${accentColor}/10 flex items-center justify-center shrink-0`}>
-                          <Icon icon={CheckListIcon} className={`h-5 w-5 ${accentColor.replace('bg-', 'text-')}`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <CardTitle className="text-lg truncate">{repo.title}</CardTitle>
-                          <div className="flex items-center gap-2 mt-1.5">
-                            {repo.fork_count > 0 && (
-                              <Badge variant="default" className="text-xs">
-                                <Icon icon={GitForkIcon} className="h-3 w-3 mr-1" />
-                                {repo.fork_count} forks
-                              </Badge>
-                            )}
-                            <Badge variant="outline" className="text-xs">
-                              Template
-                            </Badge>
+                      {/* Background glow on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                      <CardHeader className="relative pb-3 pt-6">
+                        <div className="flex items-start gap-4">
+                          {/* Icon container with scale animation */}
+                          <div className={cn(
+                            "h-12 w-12 rounded-xl flex items-center justify-center transition-all duration-300",
+                            accent.bg,
+                            "group-hover:scale-110 group-hover:shadow-lg"
+                          )}>
+                            <Icon icon={CheckListIcon} className={cn("h-6 w-6", accent.text)} />
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-lg truncate group-hover:text-primary transition-colors">
+                              {repo.title}
+                            </CardTitle>
+
+                            {/* Stats row */}
+                            <div className="flex items-center gap-3 mt-2">
+                              {repo.fork_count > 0 && (
+                                <div className="flex items-center gap-1 text-xs">
+                                  <Icon icon={GitForkIcon} className="h-3.5 w-3.5 text-primary" />
+                                  <span className="font-medium text-primary">{repo.fork_count}</span>
+                                  <span className="text-muted-foreground">forks</span>
+                                </div>
+                              )}
+                              <Badge variant="secondary" className="text-[10px]">Template</Badge>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      {repo.description && (
-                        <CardDescription className="line-clamp-2 mt-3">
-                          {repo.description}
-                        </CardDescription>
-                      )}
-                      {/* Tags */}
-                      {repo.tags && repo.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-3">
-                          {repo.tags.slice(0, 3).map((tag) => (
-                            <Badge
-                              key={tag.id}
-                              variant="outline"
-                              className="text-xs cursor-pointer hover:bg-primary/10"
+
+                        {repo.description && (
+                          <CardDescription className="mt-4 line-clamp-2 leading-relaxed">
+                            {repo.description}
+                          </CardDescription>
+                        )}
+
+                        {/* Tags */}
+                        {repo.tags && repo.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mt-4">
+                            {repo.tags.slice(0, 3).map((tag) => (
+                              <Badge
+                                key={tag.id}
+                                variant="outline"
+                                className="text-[10px] h-5 bg-background/50 hover:bg-primary/10 transition-colors cursor-pointer"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  handleTagSelect(tag.slug)
+                                }}
+                              >
+                                {tag.name}
+                              </Badge>
+                            ))}
+                            {repo.tags.length > 3 && (
+                              <Badge variant="outline" className="text-[10px] h-5">
+                                +{repo.tags.length - 3}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </CardHeader>
+
+                      <CardContent className="pt-0">
+                        <div className="flex items-center justify-between pt-4 border-t">
+                          <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                            <Icon icon={Clock01Icon} className="h-3.5 w-3.5" />
+                            {formatRelativeTime(repo.updated_at)}
+                          </span>
+
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 px-3"
                               onClick={(e) => {
                                 e.preventDefault()
                                 e.stopPropagation()
-                                handleTagSelect(tag.slug)
+                                navigate(`/repo/${repo.id}`)
                               }}
                             >
-                              {tag.name}
-                            </Badge>
-                          ))}
-                          {repo.tags.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{repo.tags.length - 3}
-                            </Badge>
-                          )}
+                              <Icon icon={EyeIcon} className="mr-1.5 h-3.5 w-3.5" />
+                              View
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="h-8 shadow-sm hover:shadow-md transition-shadow"
+                              onClick={(e) => handleForkClick(repo, e)}
+                            >
+                              <Icon icon={GitForkIcon} className="mr-1.5 h-3.5 w-3.5" />
+                              Fork
+                            </Button>
+                          </div>
                         </div>
-                      )}
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                          <Icon icon={Clock01Icon} className="h-3.5 w-3.5" />
-                          {formatRelativeTime(repo.updated_at)}
-                        </span>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              navigate(`/repo/${repo.id}`)
-                            }}
-                          >
-                            <Icon icon={EyeIcon} className="mr-1 h-3.5 w-3.5" />
-                            View
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="h-8 shadow-sm"
-                            onClick={(e) => handleForkClick(repo, e)}
-                          >
-                            <Icon icon={GitForkIcon} className="mr-1 h-3.5 w-3.5" />
-                            Fork
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
               )
             })}
           </div>

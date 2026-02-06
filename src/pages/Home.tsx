@@ -1,4 +1,5 @@
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -21,6 +22,7 @@ import {
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
+import { cn } from '@/lib/utils'
 
 // Demo mode configuration
 const DEMO_MODE_KEY = 'checklist_hq_demo_mode'
@@ -71,33 +73,33 @@ const features = [
     icon: GitForkIcon,
     title: "Fork & Customize",
     description: "Start with battle-tested templates from the community. Fork, customize, and make them yours in seconds.",
-    color: "from-primary/80 to-orange-300",
-    bgColor: "from-primary/15 to-primary/5",
+    color: "from-primary to-orange-400",
+    bgColor: "bg-primary/10",
     textColor: "text-primary",
   },
   {
     icon: Clock01Icon,
     title: "Version Control",
     description: "Every change is tracked automatically. View history, compare versions, and roll back with confidence.",
-    color: "from-sky-300 to-cyan-200",
-    bgColor: "from-sky-300/30 to-sky-200/15",
-    textColor: "text-sky-400",
+    color: "from-sky-500 to-cyan-400",
+    bgColor: "bg-sky-500/10",
+    textColor: "text-sky-500",
   },
   {
     icon: PlayIcon,
     title: "Run Mode",
     description: "Execute checklists in real-time with progress tracking. Never miss a critical step again.",
-    color: "from-emerald-300 to-green-200",
-    bgColor: "from-emerald-300/30 to-emerald-200/15",
-    textColor: "text-emerald-400",
+    color: "from-emerald-500 to-teal-400",
+    bgColor: "bg-emerald-500/10",
+    textColor: "text-emerald-500",
   },
   {
     icon: UserGroupIcon,
     title: "Community Driven",
     description: "The best processes rise to the top. Learn from thousands of teams and share your expertise.",
-    color: "from-violet-300 to-purple-200",
-    bgColor: "from-violet-300/30 to-violet-200/15",
-    textColor: "text-violet-400",
+    color: "from-violet-500 to-purple-400",
+    bgColor: "bg-violet-500/10",
+    textColor: "text-violet-500",
   },
 ]
 
@@ -164,11 +166,11 @@ export function Home() {
       {/* Hero Section */}
       <section className="relative overflow-hidden min-h-[90vh] flex items-center">
         {/* Premium gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-orange-500/5" />
 
         {/* Animated orbs */}
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-400/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
 
         {/* Subtle dot pattern */}
@@ -180,30 +182,109 @@ export function Home() {
           }}
         />
 
+        {/* Floating checklist preview - left */}
+        <motion.div
+          initial={{ opacity: 0, x: -50, rotate: -15 }}
+          animate={{ opacity: 0.3, x: 0, rotate: -12 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
+          className="absolute top-1/4 left-[5%] w-64 hidden xl:block pointer-events-none"
+        >
+          <Card className="bg-card/60 backdrop-blur-sm border shadow-xl">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Icon icon={CheckListIcon} className="h-4 w-4 text-primary" />
+                </div>
+                <div className="h-3 w-24 bg-muted rounded" />
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {[true, true, false, false].map((checked, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <div className={cn(
+                    "h-4 w-4 rounded border-2 flex items-center justify-center",
+                    checked ? "bg-success border-success" : "border-muted-foreground/30"
+                  )}>
+                    {checked && <Icon icon={CheckmarkCircle02Icon} className="h-3 w-3 text-white" />}
+                  </div>
+                  <div className={cn("h-2 rounded bg-muted", i % 2 === 0 ? "w-full" : "w-3/4")} />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Floating checklist preview - right */}
+        <motion.div
+          initial={{ opacity: 0, x: 50, rotate: 15 }}
+          animate={{ opacity: 0.3, x: 0, rotate: 8 }}
+          transition={{ delay: 0.7, duration: 0.8 }}
+          className="absolute bottom-1/4 right-[5%] w-56 hidden xl:block pointer-events-none"
+        >
+          <Card className="bg-card/60 backdrop-blur-sm border shadow-xl">
+            <CardHeader className="pb-2">
+              <div className="h-3 w-32 bg-muted rounded" />
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {[65, 40, 90].map((progress, i) => (
+                <div key={i}>
+                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ delay: 1 + i * 0.2, duration: 0.8 }}
+                      className="h-full bg-primary/60 rounded-full"
+                    />
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </motion.div>
+
         <div className="container mx-auto px-4 py-20 md:py-28 relative">
           <div className="text-center max-w-4xl mx-auto">
             {/* Animated badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8 animate-fade-in shadow-lg shadow-primary/5">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8 shadow-lg shadow-primary/5"
+            >
               <Icon icon={SparklesIcon} className="h-4 w-4" />
               <span>The GitHub for Standard Operating Procedures</span>
-            </div>
+            </motion.div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 animate-slide-up">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
+            >
               Don't write checklists.
               <br />
-              <span className="bg-gradient-to-r from-primary via-primary to-orange-400 bg-clip-text text-transparent">
+              <span className="text-gradient-primary">
                 Fork them.
               </span>
-            </h1>
+            </motion.h1>
 
-            <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-slide-up leading-relaxed" style={{ animationDelay: '50ms' }}>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed"
+            >
               Checklist HQ is where teams version control their SOPs, fork proven templates,
               and evolve their operations with the community.
-            </p>
+            </motion.p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
-              <Button size="lg" asChild className="text-lg px-8 py-6 shadow-xl shadow-primary/25">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
+            >
+              <Button size="lg" asChild className="text-lg px-8 py-6 shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 transition-shadow">
                 <Link to="/signup">
                   Get Started Free
                   <Icon icon={ArrowRight01Icon} className="ml-2 h-5 w-5" />
@@ -213,33 +294,43 @@ export function Home() {
                 variant="outline"
                 size="lg"
                 onClick={handleTryDemo}
-                className="text-lg px-8 py-6"
+                className="text-lg px-8 py-6 group"
               >
-                <Icon icon={PlayIcon} className="mr-2 h-5 w-5" />
+                <Icon icon={PlayIcon} className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
                 Try Demo
               </Button>
-            </div>
+            </motion.div>
 
             {/* Demo mode hint */}
-            <p className="text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '150ms' }}>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.25 }}
+              className="text-sm text-muted-foreground"
+            >
               No signup required to explore templates
-            </p>
+            </motion.p>
 
             {/* Stats Row */}
-            <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto mt-12 animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="grid grid-cols-3 gap-6 max-w-2xl mx-auto mt-12"
+            >
               <div className="text-center p-4">
-                <p className="text-3xl md:text-4xl font-bold text-primary">500+</p>
+                <p className="text-3xl md:text-4xl font-bold text-gradient-primary">500+</p>
                 <p className="text-sm text-muted-foreground mt-1">Templates</p>
               </div>
               <div className="text-center p-4 border-x border-border">
-                <p className="text-3xl md:text-4xl font-bold text-primary">2K+</p>
+                <p className="text-3xl md:text-4xl font-bold text-gradient-primary">2K+</p>
                 <p className="text-sm text-muted-foreground mt-1">Teams</p>
               </div>
               <div className="text-center p-4">
-                <p className="text-3xl md:text-4xl font-bold text-primary">99.9%</p>
+                <p className="text-3xl md:text-4xl font-bold text-gradient-primary">99.9%</p>
                 <p className="text-sm text-muted-foreground mt-1">Uptime</p>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -258,23 +349,54 @@ export function Home() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => (
-            <Card
+            <motion.div
               key={feature.title}
-              hoverable
-              className="group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 animate-fade-in"
-              style={{ animationDelay: `${index * 50}ms` }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
             >
-              <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${feature.color}`} />
-              <CardHeader className="pt-6">
-                <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${feature.bgColor} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <Icon icon={feature.icon} className={`h-6 w-6 ${feature.textColor}`} />
+              <Card
+                className={cn(
+                  "group relative overflow-hidden h-full",
+                  "transition-all duration-500",
+                  "hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/10"
+                )}
+              >
+                {/* Animated gradient border on hover */}
+                <div className={cn(
+                  "absolute inset-0 rounded-xl p-px bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500",
+                  feature.color
+                )}>
+                  <div className="h-full w-full bg-card rounded-[11px]" />
                 </div>
-                <CardTitle className="text-lg">{feature.title}</CardTitle>
-                <CardDescription className="text-sm leading-relaxed">
-                  {feature.description}
-                </CardDescription>
-              </CardHeader>
-            </Card>
+
+                {/* Gradient accent line */}
+                <div className={cn("absolute top-0 left-0 right-0 h-1 bg-gradient-to-r", feature.color)} />
+
+                <CardHeader className="relative pt-8">
+                  {/* Icon with animation */}
+                  <div className={cn(
+                    "h-14 w-14 rounded-2xl flex items-center justify-center mb-4",
+                    "shadow-lg transition-all duration-300",
+                    feature.bgColor,
+                    "group-hover:scale-110 group-hover:rotate-3"
+                  )}>
+                    <Icon icon={feature.icon} className={cn("h-7 w-7", feature.textColor)} />
+                  </div>
+
+                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                  <CardDescription className="text-base leading-relaxed mt-2">
+                    {feature.description}
+                  </CardDescription>
+                </CardHeader>
+
+                {/* Hover indicator */}
+                <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Icon icon={ArrowRight01Icon} className="h-5 w-5 text-primary" />
+                </div>
+              </Card>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -294,24 +416,27 @@ export function Home() {
 
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {howItWorks.map((step, index) => (
-              <div
+              <motion.div
                 key={step.step}
-                className="relative text-center animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 }}
+                className="relative text-center"
               >
                 {/* Connector line */}
                 {index < howItWorks.length - 1 && (
-                  <div className="hidden md:block absolute top-12 left-1/2 w-full h-0.5 bg-border" />
+                  <div className="hidden md:block absolute top-12 left-1/2 w-full h-0.5 bg-gradient-to-r from-border via-primary/20 to-border" />
                 )}
 
-                {/* Step number */}
-                <div className="relative z-10 mx-auto w-24 h-24 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20 flex items-center justify-center mb-6">
+                {/* Step circle */}
+                <div className="relative z-10 mx-auto w-24 h-24 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20 flex items-center justify-center mb-6 group hover:scale-105 transition-transform">
                   <Icon icon={step.icon} className="h-10 w-10 text-primary" />
                 </div>
 
                 <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
                 <p className="text-muted-foreground">{step.description}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -331,15 +456,21 @@ export function Home() {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {useCases.map((useCase, index) => (
-            <Card
+            <motion.div
               key={useCase.title}
-              className="text-center p-6 hover:shadow-md transition-shadow animate-fade-in"
-              style={{ animationDelay: `${index * 50}ms` }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.05 }}
             >
-              <Icon icon={useCase.icon} className="h-8 w-8 mx-auto mb-3 text-primary" />
-              <h3 className="font-semibold text-sm mb-1">{useCase.title}</h3>
-              <p className="text-xs text-muted-foreground">{useCase.description}</p>
-            </Card>
+              <Card className="text-center p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-300 group">
+                <div className="h-10 w-10 mx-auto mb-3 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Icon icon={useCase.icon} className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-semibold text-sm mb-1">{useCase.title}</h3>
+                <p className="text-xs text-muted-foreground">{useCase.description}</p>
+              </Card>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -359,41 +490,58 @@ export function Home() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card
+              <motion.div
                 key={testimonial.author}
-                className="relative animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 }}
               >
-                <CardContent className="pt-8 pb-6">
-                  {/* Quote icon */}
-                  <Icon icon={QuoteUpIcon} className="h-10 w-10 text-primary/20 absolute top-4 right-4" />
+                <Card className="group relative overflow-hidden h-full hover:shadow-xl transition-all duration-300">
+                  {/* Decorative gradient corner */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full" />
 
-                  {/* Stars */}
-                  <div className="flex gap-1 mb-4">
-                    {Array.from({ length: testimonial.rating }).map((_, i) => (
-                      <Icon key={i} icon={StarIcon} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-
-                  {/* Quote */}
-                  <p className="text-foreground mb-6 leading-relaxed">
-                    "{testimonial.quote}"
-                  </p>
-
-                  {/* Author */}
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center text-white font-medium text-sm">
-                      {testimonial.avatar}
+                  <CardContent className="pt-8 pb-6 relative">
+                    {/* Quote icon with glow */}
+                    <div className="absolute top-4 right-4">
+                      <Icon icon={QuoteUpIcon} className="h-12 w-12 text-primary/10" />
                     </div>
-                    <div>
-                      <p className="font-semibold text-sm">{testimonial.author}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {testimonial.role}, {testimonial.company}
-                      </p>
+
+                    {/* Star rating with animation */}
+                    <div className="flex gap-1 mb-6">
+                      {Array.from({ length: testimonial.rating }).map((_, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, scale: 0 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: 0.3 + i * 0.1 }}
+                        >
+                          <Icon icon={StarIcon} className="h-5 w-5 fill-amber-400 text-amber-400" />
+                        </motion.div>
+                      ))}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+
+                    {/* Quote text */}
+                    <blockquote className="text-lg leading-relaxed text-foreground mb-8 relative z-10">
+                      "{testimonial.quote}"
+                    </blockquote>
+
+                    {/* Author section */}
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center text-white font-semibold shadow-lg shadow-primary/25">
+                        {testimonial.avatar}
+                      </div>
+                      <div>
+                        <p className="font-semibold">{testimonial.author}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {testimonial.role} at {testimonial.company}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -401,7 +549,7 @@ export function Home() {
 
       {/* Demo Section */}
       <section className="container mx-auto px-4 py-20 md:py-28">
-        <Card className="bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20">
+        <Card className="bg-gradient-to-br from-primary/5 via-background to-orange-500/5 border-primary/20 overflow-hidden">
           <CardContent className="p-8 md:p-12">
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div>
@@ -414,7 +562,7 @@ export function Home() {
                   without creating an account. When you're ready, sign up to create your own.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button size="lg" onClick={handleTryDemo} className="shadow-lg">
+                  <Button size="lg" onClick={handleTryDemo} className="shadow-lg shadow-primary/25 hover:shadow-xl transition-shadow">
                     <Icon icon={PlayIcon} className="mr-2 h-5 w-5" />
                     Launch Demo Mode
                   </Button>
@@ -426,8 +574,13 @@ export function Home() {
                 </div>
               </div>
               <div className="relative">
-                {/* Demo preview placeholder */}
-                <div className="bg-card rounded-xl border shadow-xl p-6 space-y-4">
+                {/* Demo preview */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="bg-card rounded-xl border shadow-2xl p-6 space-y-4"
+                >
                   <div className="flex items-center gap-3 border-b pb-4">
                     <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Icon icon={CheckListIcon} className="h-5 w-5 text-primary" />
@@ -439,11 +592,11 @@ export function Home() {
                   </div>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <Icon icon={CheckmarkCircle02Icon} className="h-5 w-5 text-emerald-500" />
+                      <Icon icon={CheckmarkCircle02Icon} className="h-5 w-5 text-success" />
                       <span className="text-sm">Complete paperwork</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Icon icon={CheckmarkCircle02Icon} className="h-5 w-5 text-emerald-500" />
+                      <Icon icon={CheckmarkCircle02Icon} className="h-5 w-5 text-success" />
                       <span className="text-sm">Set up workstation</span>
                     </div>
                     <div className="flex items-center gap-3">
@@ -461,10 +614,10 @@ export function Home() {
                       <span className="font-medium">2 of 15</span>
                     </div>
                     <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary rounded-full" style={{ width: '13%' }} />
+                      <div className="h-full bg-primary rounded-full transition-all" style={{ width: '13%' }} />
                     </div>
                   </div>
-                </div>
+                </motion.div>
               </div>
             </div>
           </CardContent>
@@ -473,36 +626,46 @@ export function Home() {
 
       {/* Final CTA Section */}
       <section className="container mx-auto px-4 py-16 md:py-24">
-        <Card className="bg-primary text-primary-foreground border-0">
-          <CardContent className="p-8 md:p-12 text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              Ready to standardize excellence?
-            </h2>
-            <p className="text-lg opacity-90 mb-8 max-w-xl mx-auto">
-              Join thousands of teams building their operational knowledge base with Checklist HQ.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                size="lg"
-                variant="secondary"
-                asChild
-                className="bg-white text-primary hover:bg-white/90"
-              >
-                <Link to="/signup">
-                  Start for Free
-                  <Icon icon={ArrowRight01Icon} className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={handleTryDemo}
-                className="border-white/30 text-white hover:bg-white/10"
-              >
-                <Icon icon={PlayIcon} className="mr-2 h-4 w-4" />
-                Try Demo First
-              </Button>
-            </div>
+        <Card className="bg-gradient-to-r from-primary to-orange-500 text-primary-foreground border-0 overflow-hidden relative">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+
+          <CardContent className="p-8 md:p-12 text-center relative">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                Ready to standardize excellence?
+              </h2>
+              <p className="text-lg opacity-90 mb-8 max-w-xl mx-auto">
+                Join thousands of teams building their operational knowledge base with Checklist HQ.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  asChild
+                  className="bg-white text-primary hover:bg-white/90 shadow-lg"
+                >
+                  <Link to="/signup">
+                    Start for Free
+                    <Icon icon={ArrowRight01Icon} className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={handleTryDemo}
+                  className="border-white/30 text-white hover:bg-white/10"
+                >
+                  <Icon icon={PlayIcon} className="mr-2 h-4 w-4" />
+                  Try Demo First
+                </Button>
+              </div>
+            </motion.div>
           </CardContent>
         </Card>
       </section>

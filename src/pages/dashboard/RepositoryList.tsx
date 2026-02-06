@@ -31,10 +31,11 @@ export function RepositoryList({
 
     return (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {repositories.map((repo) => (
+            {repositories.map((repo, index) => (
                 <RepositoryCard
                     key={repo.id}
                     repo={repo}
+                    index={index}
                     onRun={onRun}
                     onShare={onShare}
                     onDuplicate={onDuplicate}

@@ -250,6 +250,78 @@
     background-size: 200% 100%;
     animation: shimmer var(--duration-shimmer) ease-in-out infinite;
   }
+
+  /* ============================================
+   * PREMIUM UTILITIES
+   * Premium visual effects for enhanced UI
+   * ============================================ */
+
+  /* Gradient text effect */
+  .text-gradient-primary {
+    background: linear-gradient(to right, var(--color-primary), hsl(32 95% 52%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Animated gradient border */
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-x 3s ease infinite;
+  }
+
+  /* Glassmorphism effect */
+  .glass {
+    background: color-mix(in srgb, var(--color-background) 80%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+  }
+
+  /* Premium multi-layer shadow */
+  .shadow-premium {
+    box-shadow:
+      0 0 0 1px rgb(0 0 0 / 0.03),
+      0 2px 4px rgb(0 0 0 / 0.02),
+      0 12px 24px rgb(0 0 0 / 0.06);
+  }
+
+  /* Premium shadow with glow */
+  .shadow-glow-primary {
+    box-shadow:
+      0 4px 14px 0 color-mix(in srgb, var(--color-primary) 25%, transparent),
+      0 0 0 1px rgb(0 0 0 / 0.03);
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Premium card hover effect */
+  .hover-premium {
+    transition: transform 300ms var(--ease-default), box-shadow 300ms var(--ease-default);
+  }
+  .hover-premium:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 20px 25px -5px rgb(0 0 0 / 0.1),
+      0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+
+  /* Pulse indicator for active items */
+  .pulse-indicator {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Tracking tight for premium headlines */
+  .tracking-premium {
+    letter-spacing: -0.02em;
+  }
 }
 
 @keyframes shimmer {
@@ -259,6 +331,24 @@
 
   100% {
     background-position: -200% 0;
+  }
+}
+
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
 

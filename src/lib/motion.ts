@@ -75,6 +75,78 @@ export const variants = {
             },
         },
     },
+
+    // Premium Card Hover
+    cardHover: {
+        initial: { scale: 1, y: 0 },
+        hover: {
+            scale: 1.02,
+            y: -4,
+            transition: { duration: 0.3, ease: tokens.motion.easing.default }
+        },
+        tap: {
+            scale: 0.98,
+            transition: { duration: 0.1 }
+        },
+    },
+
+    // Float In (for decorative elements)
+    floatIn: {
+        initial: { opacity: 0, y: 40, scale: 0.9 },
+        animate: {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            transition: {
+                type: "spring",
+                stiffness: 100,
+                damping: 15
+            }
+        },
+    },
+
+    // Glow Pulse (for active indicators)
+    glowPulse: {
+        initial: { opacity: 0.5 },
+        animate: {
+            opacity: [0.5, 1, 0.5],
+            transition: {
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+            }
+        },
+    },
+
+    // Slide In from Left
+    slideInLeft: {
+        initial: { opacity: 0, x: -20 },
+        animate: {
+            opacity: 1,
+            x: 0,
+            transition: transitions.default
+        },
+        exit: {
+            opacity: 0,
+            x: -20,
+            transition: transitions.fast
+        },
+    },
+
+    // Slide In from Right
+    slideInRight: {
+        initial: { opacity: 0, x: 20 },
+        animate: {
+            opacity: 1,
+            x: 0,
+            transition: transitions.default
+        },
+        exit: {
+            opacity: 0,
+            x: 20,
+            transition: transitions.fast
+        },
+    },
 } satisfies Record<string, Variants>
 
 /**
@@ -99,6 +171,29 @@ export const staticVariants = {
     },
     staggerContainer: {
         animate: { transition: { staggerChildren: 0 } },
+    },
+    cardHover: {
+        initial: { opacity: 1 },
+        hover: { opacity: 1 },
+        tap: { opacity: 1 },
+    },
+    floatIn: {
+        initial: { opacity: 0 },
+        animate: { opacity: 1, transition: transitions.fast },
+    },
+    glowPulse: {
+        initial: { opacity: 1 },
+        animate: { opacity: 1 },
+    },
+    slideInLeft: {
+        initial: { opacity: 0 },
+        animate: { opacity: 1, transition: transitions.fast },
+        exit: { opacity: 0, transition: transitions.fast },
+    },
+    slideInRight: {
+        initial: { opacity: 0 },
+        animate: { opacity: 1, transition: transitions.fast },
+        exit: { opacity: 0, transition: transitions.fast },
     },
 } satisfies Record<string, Variants>
 
