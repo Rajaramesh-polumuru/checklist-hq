@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { FilterBar } from '@/components/FilterBar'
 import {
     Popover,
@@ -5,7 +6,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Icon } from '@/components/ui/icon'
-import { InformationCircleIcon } from '@hugeicons/core-free-icons'
+import { InformationCircleIcon, ArrowDown01Icon } from '@hugeicons/core-free-icons'
 import { COLOR_LEGEND, type ColorStatus, type FilterState, type SortOption, getDefaultFilters } from '@/lib/dashboard-utils'
 import { cn } from '@/lib/utils'
 
@@ -40,6 +41,7 @@ function ColorRow({ status }: { status: ColorStatus }) {
 }
 
 function ColorLegend() {
+    const [expanded, setExpanded] = useState(false)
     const visibleStatuses: ColorStatus[] = ['dormant', 'public', 'forked', 'popular', 'new', 'recently-used']
 
     return (
@@ -83,6 +85,41 @@ function ColorLegend() {
                     {visibleStatuses.map((status) => (
                         <ColorRow key={status} status={status} />
                     ))}
+                </div>
+
+                {/* Expandable help section */}
+                <div className="mt-3 pt-3 border-t border-border">
+                    <button
+                        type="button"
+                        onClick={() => setExpanded(!expanded)}
+                        className={cn(
+                            "flex items-center gap-1 text-[10px] text-muted-foreground",
+                            "transition-colors duration-200 hover:text-foreground"
+                        )}
+                    >
+                        <Icon
+                            icon={ArrowDown01Icon}
+                            className={cn(
+                                "size-3 transition-transform duration-200",
+                                expanded && "rotate-180"
+                            )}
+                        />
+                        <span>{expanded ? 'Less' : 'How it works'}</span>
+                    </button>
+                    <div
+                        className={cn(
+                            "grid transition-all duration-200 ease-in-out",
+                            expanded ? "grid-rows-[1fr] opacity-100 mt-2" : "grid-rows-[0fr] opacity-0"
+                        )}
+                    >
+                        <div className="overflow-hidden">
+                            <p className="text-[10px] text-muted-foreground leading-relaxed max-w-[220px]">
+                                Ring colors are assigned based on checklist activity and visibility.
+                                The most relevant status is shown — e.g., dormant items surface first
+                                to help you stay on top of neglected processes.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </PopoverContent>
         </Popover>

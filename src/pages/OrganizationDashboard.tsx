@@ -304,8 +304,11 @@ export function OrganizationDashboard() {
                           size="sm" 
                           className="h-8 active:scale-95 transition-transform"
                           aria-label={`View ${team.name} team`}
+                          asChild
                         >
-                          View
+                          <Link to={`/app/orgs/${orgId}/teams/${team.id}`}>
+                            View
+                          </Link>
                         </Button>
                       </div>
                     </CardContent>
