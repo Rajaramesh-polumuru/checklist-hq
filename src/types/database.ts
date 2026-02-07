@@ -69,6 +69,16 @@ export interface ChecklistItem {
   order: number
   type?: 'task' | 'header' | 'note'
   details?: string
+
+  // Agent execution configuration (Phase 6: AI Agent Integration)
+  agent_config?: {
+    action_type: 'manual' | 'browse' | 'api' | 'approve'
+    assignee?: string // Agent ID or 'human' or 'any'
+    parameters?: Record<string, unknown>
+    expected_output?: Record<string, unknown>
+    timeout_ms?: number
+    fallback_assignee?: string // If agent fails
+  }
 }
 
 export interface ChecklistContent {
@@ -82,6 +92,11 @@ export interface ItemProgress {
   timestamp?: string
   user_id?: string
   note?: string  // Optional note added when completing the item
+
+  // Agent execution tracking (Phase 6: AI Agent Integration)
+  completed_by?: string // User ID or Agent ID
+  completed_by_type?: 'human' | 'agent'
+  agent_output?: Record<string, unknown> // Structured output from agent
 }
 
 export type RunProgress = Record<string, ItemProgress>
@@ -184,6 +199,45 @@ export interface TeamUpdate {
   visibility?: 'visible' | 'secret'
   default_permission?: 'read' | 'write' | 'admin'
   settings?: Record<string, unknown>
+}
+
+// ==================== AI Agent Types ====================
+
+export type AgentType = 'claude' | 'custom' | 'webhook'
+
+export interface Agent {
+  id: string
+  organization_id: string
+  name: string
+  description: string | null
+  agent_type: AgentType
+  capabilities: string[] | null // What actions this agent can perform
+  api_key_hash: string | null // For authentication
+  created_by: string
+  created_at: string
+  last_active_at: string | null
+}
+
+export interface AgentTeamMembership {
+  agent_id: string
+  team_id: string
+  permissions: Record<string, unknown> | null // Specific allowed actions
+  created_at: string
+}
+
+export interface AgentInsert {
+  organization_id: string
+  name: string
+  description?: string | null
+  agent_type: AgentType
+  capabilities?: string[] | null
+  api_key_hash?: string | null
+}
+
+export interface AgentUpdate {
+  name?: string
+  description?: string | null
+  capabilities?: string[] | null
 }
 
 // Repository with tags (for display purposes)

@@ -44,7 +44,7 @@ function DaySelect({ value, onChange }: { value: number; onChange: (v: number) =
 
 /** One row: icon, label, description, select, preview count */
 function PolicyRow({
-  icon: Icon,
+  icon: IconComponent,
   label,
   desc,
   value,
@@ -66,7 +66,7 @@ function PolicyRow({
     <div className="flex items-center justify-between gap-4 py-3 border-b last:border-0">
       <div className="flex items-start gap-3 flex-1 min-w-0">
         <div className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 ${bg}`}>
-          <Icon icon={Icon} className={`h-4 w-4 ${color}`} />
+          <Icon icon={IconComponent} className={`h-4 w-4 ${color}`} />
         </div>
         <div className="min-w-0">
           <p className="text-sm font-medium">{label}</p>

@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getTeam, getTeamMembers, type TeamMemberWithUser } from '@/services/team'
 import type { Team } from '@/types/database'
+import { useAuthStore } from '@/stores/auth-store'
+import { usePermissionStore } from '@/stores/permission-store'
+import { useTeamPermission } from '@/hooks/usePermissions'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  Loading02Icon,
   UserGroupIcon,
   GitForkIcon,
   Settings02Icon,
@@ -23,6 +25,9 @@ import { MemberListSkeleton } from '@/components/organization/OrganizationSkelet
 export function TeamDashboard() {
   const { orgId, teamId } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuthStore()
+  const setTeamPermission = usePermissionStore((state) => state.setTeamPermission)
+  useTeamPermission(teamId)
   const [team, setTeam] = useState<Team | null>(null)
   const [members, setMembers] = useState<TeamMemberWithUser[]>([])
   const [loading, setLoading] = useState(true)
@@ -31,7 +36,7 @@ export function TeamDashboard() {
 
   useEffect(() => {
     async function loadData() {
-      if (!teamId) return
+      if (!teamId || !user) return
       try {
         setLoading(true)
         const [teamData, membersData] = await Promise.all([
@@ -46,6 +51,12 @@ export function TeamDashboard() {
 
         setTeam(teamData)
         setMembers(membersData)
+
+        // Set user's team permission
+        const userMember = membersData.find(m => m.user_id === user.id)
+        if (userMember) {
+          setTeamPermission(teamId, userMember.role)
+        }
       } catch (error) {
         console.error('Failed to load team data:', error)
       } finally {
@@ -53,7 +64,7 @@ export function TeamDashboard() {
       }
     }
     loadData()
-  }, [teamId, orgId, navigate])
+  }, [teamId, orgId, user, navigate, setTeamPermission])
 
   const refreshMembers = async () => {
     if (!teamId) return

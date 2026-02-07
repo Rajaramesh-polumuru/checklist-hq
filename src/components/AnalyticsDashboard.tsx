@@ -10,7 +10,7 @@ import { getOrgAnalytics, type OrgAnalytics, type DayBucket, type ActionStat, ty
 
 /** Metric card with icon, value, label, optional delta */
 function MetricCard({
-  icon: Icon,
+  icon: IconComponent,
   label,
   value,
   sub,
@@ -28,7 +28,7 @@ function MetricCard({
     <Card>
       <CardContent className="pt-5 flex items-start gap-4">
         <div className={`h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 ${bg}`}>
-          <Icon icon={Icon} className={`h-5 w-5 ${color}`} />
+          <Icon icon={IconComponent} className={`h-5 w-5 ${color}`} />
         </div>
         <div>
           <p className="text-2xl font-bold leading-none">{value}</p>

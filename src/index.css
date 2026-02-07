@@ -60,6 +60,21 @@
   --color-input: var(--color-surface-2);
   --color-ring: var(--color-primary);
 
+  /* Role Colors */
+  --color-role-owner: hsl(32 95% 44%);
+  --color-role-owner-foreground: hsl(0 0% 100%);
+  --color-role-admin: hsl(217 91% 60%);
+  --color-role-admin-foreground: hsl(0 0% 100%);
+  --color-role-member: hsl(142 76% 36%);
+  --color-role-member-foreground: hsl(0 0% 100%);
+  --color-role-viewer: hsl(220 10% 46%);
+  --color-role-viewer-foreground: hsl(0 0% 100%);
+
+  /* Visibility Colors */
+  --color-visibility-public: hsl(142 76% 36%);
+  --color-visibility-private: hsl(220 10% 46%);
+  --color-visibility-secret: hsl(0 84% 60%);
+
   /* Typography */
   --font-sans: "Inter Display", "Inter", "ui-sans-serif", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans", "sans-serif", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
@@ -102,6 +117,17 @@
   --color-warning: hsl(32 90% 55%);
   --color-danger: hsl(0 84% 65%);
   --color-info: hsl(217 90% 65%);
+
+  /* Role colors for dark mode */
+  --color-role-owner: hsl(32 90% 55%);
+  --color-role-admin: hsl(217 90% 65%);
+  --color-role-member: hsl(142 60% 45%);
+  --color-role-viewer: hsl(220 10% 60%);
+
+  /* Visibility colors for dark mode */
+  --color-visibility-public: hsl(142 60% 45%);
+  --color-visibility-private: hsl(220 10% 60%);
+  --color-visibility-secret: hsl(0 84% 65%);
 
   /* Elevation — increase opacity so shadows read against dark surfaces */
   --shadow-1: 0 1px 2px 0 rgb(0 0 0 / 0.2);

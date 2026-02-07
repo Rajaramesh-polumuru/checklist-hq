@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Icon } from "@/components/ui/icon"
 import {
   UserGroupIcon,
-  GitForkIcon,
   CheckListIcon,
   ChartBarLineIcon,
   PlusSignIcon,

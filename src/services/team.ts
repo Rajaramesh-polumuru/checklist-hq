@@ -166,7 +166,7 @@ export async function getTeamMembers(teamId: string): Promise<TeamMemberWithUser
   if (error) throw error
 
   // Type-safe mapping
-  return (data || []).map(item => ({
+  return (data || []).map((item: any) => ({
     id: item.id,
     team_id: item.team_id,
     user_id: item.user_id,
@@ -220,7 +220,7 @@ export async function addTeamMember(
       action: 'team.member_added',
       resourceType: 'team_member',
       resourceId: teamId,
-      metadata: { userId, role },
+      newValues: { userId, role },
     }).catch(err => console.error('Audit log failed:', err))
   }
 }
@@ -264,7 +264,7 @@ export async function removeTeamMember(
       action: 'team.member_removed',
       resourceType: 'team_member',
       resourceId: teamId,
-      metadata: { userId },
+      oldValues: { userId },
     }).catch(err => console.error('Audit log failed:', err))
   }
 }
@@ -313,7 +313,7 @@ export async function updateTeamMemberRole(
       action: 'team.member_role_updated',
       resourceType: 'team_member',
       resourceId: teamId,
-      metadata: { userId, newRole: role },
+      changes: { userId, newRole: role },
     }).catch(err => console.error('Audit log failed:', err))
   }
 }

@@ -2,16 +2,16 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { Icon } from "@/components/ui/icon"
-import { Globe02Icon, LockKeyIcon, EyeOffIcon } from "@hugeicons/core-free-icons"
+import { Globe02Icon, LockKeyIcon, ViewOffSlashIcon } from "@hugeicons/core-free-icons"
 
 const visibilityBadgeVariants = cva(
   "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium transition-colors",
   {
     variants: {
       visibility: {
-        public: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20",
-        private: "bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-500/20",
-        secret: "bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20",
+        public: "bg-[color-mix(in_srgb,var(--color-visibility-public)_10%,transparent)] text-[var(--color-visibility-public)] border border-[color-mix(in_srgb,var(--color-visibility-public)_20%,transparent)]",
+        private: "bg-[color-mix(in_srgb,var(--color-visibility-private)_10%,transparent)] text-[var(--color-visibility-private)] border border-[color-mix(in_srgb,var(--color-visibility-private)_20%,transparent)]",
+        secret: "bg-[color-mix(in_srgb,var(--color-visibility-secret)_10%,transparent)] text-[var(--color-visibility-secret)] border border-[color-mix(in_srgb,var(--color-visibility-secret)_20%,transparent)]",
       },
     },
     defaultVariants: {
@@ -30,7 +30,7 @@ export interface VisibilityBadgeProps
 const visibilityIcons = {
   public: Globe02Icon,
   private: LockKeyIcon,
-  secret: EyeOffIcon,
+  secret: ViewOffSlashIcon,
 }
 
 const visibilityLabels = {

@@ -1,18 +1,18 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
+import type { OrgRole, TeamRole } from "@/stores/permission-store"
 
 const roleBadgeVariants = cva(
   "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium transition-colors",
   {
     variants: {
       role: {
-        owner: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20",
-        admin: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/20",
-        member: "bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20",
-        viewer: "bg-muted text-muted-foreground border border-border",
-        maintainer: "bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/20",
+        owner: "bg-[color-mix(in_srgb,var(--color-role-owner)_10%,transparent)] text-[var(--color-role-owner)] border border-[color-mix(in_srgb,var(--color-role-owner)_20%,transparent)]",
+        admin: "bg-[color-mix(in_srgb,var(--color-role-admin)_10%,transparent)] text-[var(--color-role-admin)] border border-[color-mix(in_srgb,var(--color-role-admin)_20%,transparent)]",
+        member: "bg-[color-mix(in_srgb,var(--color-role-member)_10%,transparent)] text-[var(--color-role-member)] border border-[color-mix(in_srgb,var(--color-role-member)_20%,transparent)]",
+        viewer: "bg-[color-mix(in_srgb,var(--color-role-viewer)_10%,transparent)] text-[var(--color-role-viewer)] border border-[color-mix(in_srgb,var(--color-role-viewer)_20%,transparent)]",
+        maintainer: "bg-[color-mix(in_srgb,var(--color-role-admin)_10%,transparent)] text-[var(--color-role-admin)] border border-[color-mix(in_srgb,var(--color-role-admin)_20%,transparent)]",
       },
     },
     defaultVariants: {
@@ -24,7 +24,7 @@ const roleBadgeVariants = cva(
 export interface RoleBadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof roleBadgeVariants> {
-  role: "owner" | "admin" | "member" | "viewer" | "maintainer"
+  role: OrgRole | TeamRole
   showIcon?: boolean
 }
 

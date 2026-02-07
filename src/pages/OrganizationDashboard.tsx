@@ -3,18 +3,18 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getOrganization, getOrganizationMembers, getOrganizationTeams } from '@/services/organization'
 import { getOrganizationRepositories } from '@/services/repository'
 import type { Organization, OrganizationMember, Team, Repository } from '@/types/database'
-// import { useAuthStore } from '@/stores/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
+import { usePermissionStore } from '@/stores/permission-store'
+import { useOrgPermission } from '@/hooks/usePermissions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  Loading02Icon,
   Building02Icon,
   UserGroupIcon,
   GitForkIcon,
   Settings02Icon,
   PlusSignIcon,
-  Shield01Icon,
   Search01Icon,
   LayoutGridIcon,
   Analytics01Icon
@@ -28,13 +28,15 @@ import { OrganizationSettings } from '@/components/OrganizationSettings'
 import { AnalyticsDashboard } from '@/components/AnalyticsDashboard'
 import { RoleBadge } from '@/components/ui/role-badge'
 import { VisibilityBadge } from '@/components/ui/visibility-badge'
-import { EmptyState, QuickStartChecklist } from '@/components/organization/EmptyStates'
+import { EmptyState } from '@/components/organization/EmptyStates'
 import { TeamListSkeleton, MemberListSkeleton, RepositoryGridSkeleton, TabsSkeleton } from '@/components/organization/OrganizationSkeletons'
 
 export function OrganizationDashboard() {
   const { orgId } = useParams()
   const navigate = useNavigate()
-  // const { user } = useAuthStore() // Potentially used for permission checks later
+  const { user } = useAuthStore()
+  const setOrgPermission = usePermissionStore((state) => state.setOrgPermission)
+  const { canInvite, canCreateTeams, canAccessSettings } = useOrgPermission(orgId)
   const [org, setOrg] = useState<Organization | null>(null)
   const [members, setMembers] = useState<OrganizationMember[]>([])
   const [teams, setTeams] = useState<Team[]>([])
@@ -51,7 +53,7 @@ export function OrganizationDashboard() {
 
   useEffect(() => {
     async function loadData() {
-      if (!orgId) return
+      if (!orgId || !user) return
       try {
         setLoading(true)
         const [orgData, membersData, teamsData, reposData] = await Promise.all([
@@ -65,6 +67,12 @@ export function OrganizationDashboard() {
         setMembers(membersData)
         setTeams(teamsData)
         setRepos(reposData)
+
+        // Set user's organization permission
+        const userMember = membersData.find(m => m.user_id === user.id)
+        if (userMember) {
+          setOrgPermission(orgId, userMember.role as 'owner' | 'admin' | 'member' | 'viewer')
+        }
       } catch (error) {
         console.error('Failed to load organization data:', error)
       } finally {
@@ -72,7 +80,7 @@ export function OrganizationDashboard() {
       }
     }
     loadData()
-  }, [orgId])
+  }, [orgId, user, setOrgPermission])
 
   const refreshTeams = async () => {
     if (!orgId) return
@@ -164,15 +172,17 @@ export function OrganizationDashboard() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setActiveTab('settings')}
-                className="active:scale-95 transition-transform"
-                aria-label="Organization settings"
-              >
-                <Icon icon={Settings02Icon} className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
+              {canAccessSettings && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => setActiveTab('settings')}
+                  className="active:scale-95 transition-transform"
+                  aria-label="Organization settings"
+                >
+                  <Icon icon={Settings02Icon} className="h-4 w-4 mr-2" />
+                  Settings
+                </Button>
+              )}
               <Button 
                 className="active:scale-95 transition-transform"
                 aria-label="Create new project"
@@ -205,10 +215,12 @@ export function OrganizationDashboard() {
                   <Icon icon={Analytics01Icon} className="h-4 w-4" />
                   Analytics
                 </TabsTrigger>
-                <TabsTrigger value="settings" className="gap-2">
-                  <Icon icon={Settings02Icon} className="h-4 w-4" />
-                  Settings
-                </TabsTrigger>
+                {canAccessSettings && (
+                  <TabsTrigger value="settings" className="gap-2">
+                    <Icon icon={Settings02Icon} className="h-4 w-4" />
+                    Settings
+                  </TabsTrigger>
+                )}
               </TabsList>
             </Tabs>
           </div>
@@ -266,15 +278,17 @@ export function OrganizationDashboard() {
           <TabsContent value="teams" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Teams</h2>
-              <Button 
-                size="sm" 
-                onClick={() => setCreateTeamOpen(true)}
-                className="active:scale-95 transition-transform"
-                aria-label="Create new team"
-              >
-                <Icon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
-                New Team
-              </Button>
+              {canCreateTeams && (
+                <Button 
+                  size="sm" 
+                  onClick={() => setCreateTeamOpen(true)}
+                  className="active:scale-95 transition-transform"
+                  aria-label="Create new team"
+                >
+                  <Icon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+                  New Team
+                </Button>
+              )}
             </div>
 
             {loading ? (
@@ -322,15 +336,17 @@ export function OrganizationDashboard() {
           <TabsContent value="members" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">People</h2>
-              <Button 
-                size="sm" 
-                onClick={() => setInviteMemberOpen(true)}
-                className="active:scale-95 transition-transform"
-                aria-label="Invite new member"
-              >
-                <Icon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
-                Invite Member
-              </Button>
+              {canInvite && (
+                <Button 
+                  size="sm" 
+                  onClick={() => setInviteMemberOpen(true)}
+                  className="active:scale-95 transition-transform"
+                  aria-label="Invite new member"
+                >
+                  <Icon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+                  Invite Member
+                </Button>
+              )}
             </div>
 
             {loading ? (

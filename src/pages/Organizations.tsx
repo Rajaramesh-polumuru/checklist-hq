@@ -4,6 +4,7 @@ import { getMyOrganizations } from '@/services/organization'
 import type { Organization } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { RoleBadge } from '@/components/ui/role-badge'
 import { Icon } from '@/components/ui/icon'
 import {
     Loading02Icon,
@@ -11,9 +12,8 @@ import {
     PlusSignIcon,
     UserGroupIcon,
     ArrowRight01Icon,
-    Shield01Icon,
 } from '@hugeicons/core-free-icons'
-import { cn } from '@/lib/utils'
+import type { OrgRole } from '@/stores/permission-store'
 
 export function Organizations() {
     const [orgs, setOrgs] = useState<(Organization & { role: string })[]>([])
@@ -51,7 +51,7 @@ export function Organizations() {
                         Create and manage your organizations and teams
                     </p>
                 </div>
-                <Button asChild>
+                <Button asChild className="active:scale-95 transition-transform">
                     <Link to="/app/orgs/new">
                         <Icon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                         New Organization
@@ -70,7 +70,7 @@ export function Organizations() {
                         <p className="text-muted-foreground text-center max-w-md mb-6">
                             Organizations help you collaborate with your team. Create your first organization to start working together on checklists and processes.
                         </p>
-                        <Button asChild size="lg">
+                        <Button asChild size="lg" className="active:scale-95 transition-transform">
                             <Link to="/app/orgs/new">
                                 <Icon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                                 Create Your First Organization
@@ -82,20 +82,25 @@ export function Organizations() {
                 /* Organization Grid */
                 <div className="grid gap-4 md:grid-cols-2">
                     {orgs.map((org) => (
-                        <Link key={org.id} to={`/app/orgs/${org.id}`} className="group">
-                            <Card className="h-full transition-all hover:shadow-md hover:border-primary/50">
+                        <Link
+                            key={org.id}
+                            to={`/app/orgs/${org.id}`}
+                            className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+                            aria-label={`Open ${org.name} organization dashboard`}
+                        >
+                            <Card className="h-full transition-all duration-200 ease-in-out hover:shadow-md hover:border-primary/50 active:scale-[0.98]">
                                 <CardHeader className="pb-3">
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-3">
                                             {org.avatar_url ? (
                                                 <img
                                                     src={org.avatar_url}
-                                                    alt={org.name}
+                                                    alt={`${org.name} logo`}
                                                     className="h-10 w-10 rounded-lg object-cover"
                                                 />
                                             ) : (
                                                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                                    <Icon icon={Building02Icon} className="h-5 w-5 text-primary" />
+                                                    <Icon icon={Building02Icon} className="h-5 w-5 text-primary" aria-hidden="true" />
                                                 </div>
                                             )}
                                             <div>
@@ -107,7 +112,7 @@ export function Organizations() {
                                                 </CardDescription>
                                             </div>
                                         </div>
-                                        <RoleBadge role={org.role} />
+                                        <RoleBadge role={org.role as OrgRole} />
                                     </div>
                                 </CardHeader>
                                 <CardContent>
@@ -119,13 +124,15 @@ export function Organizations() {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                                             <span className="flex items-center gap-1">
-                                                <Icon icon={UserGroupIcon} className="h-4 w-4" />
+                                                <Icon icon={UserGroupIcon} className="h-4 w-4" aria-hidden="true" />
+                                                <span className="sr-only">Teams in organization</span>
                                                 Team
                                             </span>
                                         </div>
                                         <Icon
                                             icon={ArrowRight01Icon}
                                             className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all"
+                                            aria-hidden="true"
                                         />
                                     </div>
                                 </CardContent>
@@ -134,11 +141,15 @@ export function Organizations() {
                     ))}
 
                     {/* Create New Card */}
-                    <Link to="/app/orgs/new" className="group">
-                        <Card className="h-full border-dashed hover:border-primary/50 transition-all">
+                    <Link
+                        to="/app/orgs/new"
+                        className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+                        aria-label="Create new organization"
+                    >
+                        <Card className="h-full border-dashed hover:border-primary/50 transition-all duration-200 ease-in-out active:scale-[0.98]">
                             <CardContent className="flex flex-col items-center justify-center h-full min-h-[180px] text-center">
                                 <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/10 transition-colors">
-                                    <Icon icon={PlusSignIcon} className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    <Icon icon={PlusSignIcon} className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" aria-hidden="true" />
                                 </div>
                                 <p className="font-medium group-hover:text-primary transition-colors">
                                     Create New Organization
@@ -152,24 +163,5 @@ export function Organizations() {
                 </div>
             )}
         </div>
-    )
-}
-
-function RoleBadge({ role }: { role: string }) {
-    const config = {
-        owner: { label: 'Owner', className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
-        admin: { label: 'Admin', className: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
-        member: { label: 'Member', className: 'bg-green-500/10 text-green-600 dark:text-green-400' },
-        viewer: { label: 'Viewer', className: 'bg-gray-500/10 text-gray-600 dark:text-gray-400' },
-    }[role] || { label: role, className: 'bg-gray-500/10 text-gray-600' }
-
-    return (
-        <span className={cn(
-            "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
-            config.className
-        )}>
-            {role === 'owner' && <Icon icon={Shield01Icon} className="h-3 w-3" />}
-            {config.label}
-        </span>
     )
 }
