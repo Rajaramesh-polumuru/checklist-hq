@@ -152,21 +152,21 @@ export async function deleteTeam(id: string): Promise<void> {
 
 /**
  * Get team members with user details
+ * Note: auth.users is not directly accessible via PostgREST.
+ * To get user profiles, create a profiles table with a trigger on auth.users.
  */
 export async function getTeamMembers(teamId: string): Promise<TeamMemberWithUser[]> {
   const { data, error } = await supabase
     .from('team_members')
-    .select(`
-      *,
-      user:auth.users!inner(id, email, user_metadata)
-    `)
+    .select('*')
     .eq('team_id', teamId)
     .order('added_at', { ascending: false })
 
   if (error) throw error
 
-  // Type-safe mapping
-  return (data || []).map((item: any) => ({
+  // Return members with placeholder user data
+  // TODO: Join with a profiles table when available
+  return (data || []).map((item) => ({
     id: item.id,
     team_id: item.team_id,
     user_id: item.user_id,
@@ -174,9 +174,9 @@ export async function getTeamMembers(teamId: string): Promise<TeamMemberWithUser
     added_at: item.added_at,
     added_by: item.added_by,
     user: {
-      id: item.user.id,
-      email: item.user.email,
-      user_metadata: item.user.user_metadata || {},
+      id: item.user_id,
+      email: '', // Not available without profiles table
+      user_metadata: {},
     },
   }))
 }
@@ -320,24 +320,201 @@ export async function updateTeamMemberRole(
 
 /**
  * Invite a user to a team by email
- * If the user is not in the organization, this will fail.
- * You should add them to the organization first.
+ * Note: This requires an RPC function to look up users by email
+ * since auth.users is not directly accessible via PostgREST.
  */
 export async function inviteToTeam(
   teamId: string,
   email: string,
   role: 'maintainer' | 'member' = 'member'
 ): Promise<void> {
-  // First, find the user by email
-  const { data: users, error: userError } = await supabase
-    .from('auth.users')
-    .select('id')
-    .eq('email', email)
-    .single()
+  // Try to use an RPC function to find user by email
+  const { data, error } = await supabase.rpc('get_user_id_by_email', {
+    p_email: email,
+  })
 
-  if (userError || !users) {
-    throw new Error('User not found. Please invite them to the organization first.')
+  if (error || !data) {
+    throw new Error('User not found. Please ensure they have an account and try again.')
   }
 
-  await addTeamMember(teamId, users.id, role)
+  await addTeamMember(teamId, data as string, role)
+}
+
+// ==================== Team Repository Access ====================
+
+import type { Repository, RepositoryTeamAccess } from '@/types/database'
+
+/**
+ * Repository with team access permission
+ */
+export interface TeamRepositoryWithAccess extends Repository {
+  permission: 'read' | 'write' | 'admin'
+  granted_at: string
+}
+
+/**
+ * Get repositories accessible by a team
+ */
+export async function getTeamRepositories(teamId: string): Promise<TeamRepositoryWithAccess[]> {
+  const { data, error } = await supabase
+    .from('repository_team_access')
+    .select(`
+      permission,
+      granted_at,
+      repository:repositories(*)
+    `)
+    .eq('team_id', teamId)
+    .order('granted_at', { ascending: false })
+
+  if (error) throw error
+
+  // Transform the data to include permission with repository
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data || []).map((item: any) => ({
+    ...item.repository,
+    permission: item.permission,
+    granted_at: item.granted_at,
+  }))
+}
+
+/**
+ * Add repository access to a team
+ */
+export async function addRepositoryToTeam(
+  teamId: string,
+  repositoryId: string,
+  permission: 'read' | 'write' | 'admin' = 'read'
+): Promise<void> {
+  const { session } = useAuthStore.getState()
+  if (!session) {
+    throw new Error('Not authenticated')
+  }
+
+  const { error } = await supabase
+    .from('repository_team_access')
+    .insert({
+      team_id: teamId,
+      repository_id: repositoryId,
+      permission,
+      granted_by: session.user.id,
+    })
+
+  if (error) {
+    if (error.code === '23505') {
+      throw new Error('This repository is already shared with this team')
+    }
+    throw error
+  }
+
+  // Get team for audit log
+  const team = await getTeam(teamId)
+
+  // Log audit event
+  if (team) {
+    logAuditEvent({
+      organizationId: team.organization_id,
+      action: 'team.repository_added',
+      resourceType: 'repository_team_access',
+      resourceId: `${teamId}:${repositoryId}`,
+      newValues: { repositoryId, permission },
+    }).catch(err => console.error('Audit log failed:', err))
+  }
+}
+
+/**
+ * Remove repository access from a team
+ */
+export async function removeRepositoryFromTeam(
+  teamId: string,
+  repositoryId: string
+): Promise<void> {
+  const { session } = useAuthStore.getState()
+  if (!session) {
+    throw new Error('Not authenticated')
+  }
+
+  const { error } = await supabase
+    .from('repository_team_access')
+    .delete()
+    .eq('team_id', teamId)
+    .eq('repository_id', repositoryId)
+
+  if (error) throw error
+
+  // Get team for audit log
+  const team = await getTeam(teamId)
+
+  // Log audit event
+  if (team) {
+    logAuditEvent({
+      organizationId: team.organization_id,
+      action: 'team.repository_removed',
+      resourceType: 'repository_team_access',
+      resourceId: `${teamId}:${repositoryId}`,
+      oldValues: { repositoryId },
+    }).catch(err => console.error('Audit log failed:', err))
+  }
+}
+
+/**
+ * Update repository permission for a team
+ */
+export async function updateTeamRepositoryPermission(
+  teamId: string,
+  repositoryId: string,
+  permission: 'read' | 'write' | 'admin'
+): Promise<void> {
+  const { session } = useAuthStore.getState()
+  if (!session) {
+    throw new Error('Not authenticated')
+  }
+
+  const { error } = await supabase
+    .from('repository_team_access')
+    .update({ permission })
+    .eq('team_id', teamId)
+    .eq('repository_id', repositoryId)
+
+  if (error) throw error
+
+  // Get team for audit log
+  const team = await getTeam(teamId)
+
+  // Log audit event
+  if (team) {
+    logAuditEvent({
+      organizationId: team.organization_id,
+      action: 'team.repository_permission_updated',
+      resourceType: 'repository_team_access',
+      resourceId: `${teamId}:${repositoryId}`,
+      changes: { newPermission: permission },
+    }).catch(err => console.error('Audit log failed:', err))
+  }
+}
+
+/**
+ * Get all team access entries for a repository
+ */
+export async function getRepositoryTeamAccess(repositoryId: string): Promise<(RepositoryTeamAccess & { team: Team })[]> {
+  const { data, error } = await supabase
+    .from('repository_team_access')
+    .select(`
+      *,
+      team:teams(*)
+    `)
+    .eq('repository_id', repositoryId)
+    .order('granted_at', { ascending: false })
+
+  if (error) throw error
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data || []).map((item: any) => ({
+    id: item.id,
+    repository_id: item.repository_id,
+    team_id: item.team_id,
+    permission: item.permission,
+    granted_at: item.granted_at,
+    granted_by: item.granted_by,
+    team: item.team,
+  }))
 }

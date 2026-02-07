@@ -5,6 +5,21 @@ import type { Organization, OrganizationMember, Team } from '@/types/database'
 import { useAuthStore } from '@/stores/auth-store'
 
 /**
+ * OrganizationMember with user details joined
+ */
+export interface OrganizationMemberWithUser extends OrganizationMember {
+  user: {
+    id: string
+    email: string
+    user_metadata?: {
+      full_name?: string
+      avatar_url?: string
+      name?: string
+    }
+  }
+}
+
+/**
  * Create a new organization using the RPC function.
  * This automatically adds the current user as the owner.
  */
@@ -108,18 +123,36 @@ export async function getMyOrganizations(): Promise<(Organization & { role: stri
 
 /**
  * Get organization members
+ * Note: auth.users is not directly accessible via PostgREST.
+ * To get user profiles, create a profiles table with a trigger on auth.users.
  */
 export async function getOrganizationMembers(
   organizationId: string
-): Promise<OrganizationMember[]> {
+): Promise<OrganizationMemberWithUser[]> {
   const { data, error } = await supabase
     .from('organization_members')
-    .select()
+    .select('*')
     .eq('organization_id', organizationId)
     .order('joined_at', { ascending: true })
 
   if (error) throw error
-  return (data || []) as OrganizationMember[]
+
+  // Return members with placeholder user data
+  // TODO: Join with a profiles table when available
+  return (data || []).map((item) => ({
+    id: item.id,
+    organization_id: item.organization_id,
+    user_id: item.user_id,
+    role: item.role as 'owner' | 'admin' | 'member' | 'viewer',
+    invited_by: item.invited_by,
+    invited_at: item.invited_at,
+    joined_at: item.joined_at,
+    user: {
+      id: item.user_id,
+      email: '', // Not available without profiles table
+      user_metadata: {},
+    },
+  }))
 }
 
 /**

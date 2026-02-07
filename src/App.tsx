@@ -25,11 +25,12 @@ const OrganizationDashboard = lazy(() => import('@/pages/OrganizationDashboard')
 const NewOrganization = lazy(() => import('@/pages/NewOrganization').then(module => ({ default: module.NewOrganization })))
 const Organizations = lazy(() => import('@/pages/Organizations').then(module => ({ default: module.Organizations })))
 const TeamDashboard = lazy(() => import('@/pages/TeamDashboard').then(module => ({ default: module.TeamDashboard })))
-// const OrganizationSettings = lazy(() => import('@/components/OrganizationSettings').then(module => ({ default: module.OrganizationSettings }))) // OrganizationSettings path?
+const AgentsDashboard = lazy(() => import('@/pages/AgentsDashboard').then(module => ({ default: module.AgentsDashboard })))
 const RunHistory = lazy(() => import('@/pages/RunHistory').then(module => ({ default: module.RunHistory })))
 const RunAnalytics = lazy(() => import('@/pages/RunAnalytics')) // Default export
 const ActiveRuns = lazy(() => import('@/pages/ActiveRuns').then(module => ({ default: module.ActiveRuns })))
 const AuthCallback = lazy(() => import('@/pages/AuthCallback').then(module => ({ default: module.AuthCallback })))
+const SlackCallback = lazy(() => import('@/pages/SlackCallback').then(module => ({ default: module.SlackCallback })))
 
 // Loading fallback component
 function PageLoader() {
@@ -247,10 +248,32 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="app/orgs/:orgId/agents"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<PageLoader />}>
+                      <AgentsDashboard />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Public repo view (for forking) */}
               <Route path="repo/:repoId" element={<Suspense fallback={<PageLoader />}><ViewRepository /></Suspense>} />
             </Route>
+            
+            {/* Slack OAuth Callback */}
+            <Route
+              path="/integrations/slack/callback"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <SlackCallback />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </OnboardingProvider>
       </ErrorBoundary>

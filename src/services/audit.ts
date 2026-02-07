@@ -252,3 +252,41 @@ export async function getUserActivitySummary(userId: string): Promise<{
     actionCounts: (data.action_counts as Record<string, number>) || {},
   }
 }
+
+/**
+ * Get team-related activity logs
+ * This includes team member changes, repository sharing, and team settings updates
+ */
+export async function getTeamActivityLogs(params: {
+  teamId: string
+  limit?: number
+  offset?: number
+}): Promise<{ logs: AuditLog[]; total: number }> {
+  const { teamId, limit = 20, offset = 0 } = params
+
+  // Get logs where the resource_id contains the team ID
+  // Team actions use resource_id format like "teamId" or "teamId:repoId"
+  const { data, error, count } = await supabase
+    .from('audit_logs')
+    .select('*', { count: 'exact' })
+    .or(`resource_id.eq.${teamId},resource_id.like.${teamId}:%`)
+    .in('action', [
+      'team.created',
+      'team.updated',
+      'team.deleted',
+      'team.member_added',
+      'team.member_removed',
+      'team.member_role_updated',
+      'team.repository_added',
+      'team.repository_removed',
+      'team.repository_permission_updated',
+    ])
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) throw error
+  return {
+    logs: (data || []) as AuditLog[],
+    total: count || 0,
+  }
+}

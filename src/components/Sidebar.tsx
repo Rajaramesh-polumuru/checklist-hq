@@ -22,11 +22,12 @@ import {
     Building02Icon,
     ArrowDown01Icon,
     ArrowUp01Icon,
+    UserGroupIcon,
 } from '@hugeicons/core-free-icons'
 import { useThemeStore } from '@/stores/theme-store'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { getMyOrganizations } from '@/services/organization'
-import type { Organization } from '@/types/database'
+import { getMyOrganizations, getOrganizationTeams } from '@/services/organization'
+import type { Organization, Team } from '@/types/database'
 
 interface SidebarProps {
     collapsed: boolean
@@ -109,6 +110,9 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
     const [orgs, setOrgs] = useState<(Organization & { role: string })[]>([])
     const [orgsExpanded, setOrgsExpanded] = useState(true)
     const [orgsLoading, setOrgsLoading] = useState(false)
+    const [expandedOrgIds, setExpandedOrgIds] = useState<Set<string>>(new Set())
+    const [orgTeams, setOrgTeams] = useState<Record<string, Team[]>>({})
+    const [teamsLoading, setTeamsLoading] = useState<Set<string>>(new Set())
 
     // Fetch user's organizations
     useEffect(() => {
@@ -122,6 +126,44 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
             setOrgs([])
         }
     }, [user])
+
+    // Toggle organization expansion and fetch teams
+    const toggleOrgExpansion = async (orgId: string) => {
+        const newExpanded = new Set(expandedOrgIds)
+        if (newExpanded.has(orgId)) {
+            newExpanded.delete(orgId)
+        } else {
+            newExpanded.add(orgId)
+            // Fetch teams if not already loaded
+            if (!orgTeams[orgId]) {
+                setTeamsLoading(prev => new Set(prev).add(orgId))
+                try {
+                    const teams = await getOrganizationTeams(orgId)
+                    setOrgTeams(prev => ({ ...prev, [orgId]: teams }))
+                } catch (error) {
+                    console.error('Failed to load teams:', error)
+                } finally {
+                    setTeamsLoading(prev => {
+                        const next = new Set(prev)
+                        next.delete(orgId)
+                        return next
+                    })
+                }
+            }
+        }
+        setExpandedOrgIds(newExpanded)
+    }
+
+    // Auto-expand organization if on a team page
+    useEffect(() => {
+        const match = location.pathname.match(/\/app\/orgs\/([^/]+)\/teams/)
+        if (match) {
+            const orgId = match[1]
+            if (!expandedOrgIds.has(orgId)) {
+                toggleOrgExpansion(orgId)
+            }
+        }
+    }, [location.pathname])
 
     const cycleTheme = () => {
         if (theme === 'light') setTheme('dark')
@@ -215,18 +257,66 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
                                                         <div className="px-3 py-2 text-sm text-muted-foreground">No organizations yet</div>
                                                     ) : (
                                                         orgs.map((org) => (
-                                                            <Link
-                                                                key={org.id}
-                                                                to={`/app/orgs/${org.id}`}
-                                                                className={cn(
-                                                                    "flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors",
-                                                                    location.pathname === `/app/orgs/${org.id}`
-                                                                        ? "bg-primary/10 text-primary"
-                                                                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                                                                )}
-                                                            >
-                                                                <span className="truncate">{org.name}</span>
-                                                            </Link>
+                                                            <div key={org.id} className="space-y-0.5">
+                                                                <div className="flex items-center">
+                                                                    <button
+                                                                        onClick={() => toggleOrgExpansion(org.id)}
+                                                                        className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                                                                        aria-label={expandedOrgIds.has(org.id) ? 'Collapse teams' : 'Expand teams'}
+                                                                    >
+                                                                        <Icon
+                                                                            icon={expandedOrgIds.has(org.id) ? ArrowDown01Icon : ArrowUp01Icon}
+                                                                            className="h-3 w-3 rotate-180"
+                                                                            style={{ transform: expandedOrgIds.has(org.id) ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+                                                                        />
+                                                                    </button>
+                                                                    <Link
+                                                                        to={`/app/orgs/${org.id}`}
+                                                                        className={cn(
+                                                                            "flex-1 flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors",
+                                                                            location.pathname === `/app/orgs/${org.id}`
+                                                                                ? "bg-primary/10 text-primary"
+                                                                                : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                                                                        )}
+                                                                    >
+                                                                        <span className="truncate">{org.name}</span>
+                                                                    </Link>
+                                                                </div>
+                                                                <AnimatePresence>
+                                                                    {expandedOrgIds.has(org.id) && (
+                                                                        <motion.div
+                                                                            initial={{ height: 0, opacity: 0 }}
+                                                                            animate={{ height: 'auto', opacity: 1 }}
+                                                                            exit={{ height: 0, opacity: 0 }}
+                                                                            className="overflow-hidden"
+                                                                        >
+                                                                            <div className="pl-6 space-y-0.5">
+                                                                                {teamsLoading.has(org.id) ? (
+                                                                                    <div className="px-2 py-1.5 text-xs text-muted-foreground">Loading teams...</div>
+                                                                                ) : (orgTeams[org.id]?.length ?? 0) === 0 ? (
+                                                                                    <div className="px-2 py-1.5 text-xs text-muted-foreground">No teams</div>
+                                                                                ) : (
+                                                                                    orgTeams[org.id]?.map((team) => (
+                                                                                        <Link
+                                                                                            key={team.id}
+                                                                                            to={`/app/orgs/${org.id}/teams/${team.id}`}
+                                                                                            className={cn(
+                                                                                                "flex items-center gap-2 px-2 py-1.5 text-xs rounded-md transition-colors",
+                                                                                                location.pathname === `/app/orgs/${org.id}/teams/${team.id}`
+                                                                                                    ? "bg-primary/10 text-primary"
+                                                                                                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                                                                                            )}
+                                                                                        >
+                                                                                            <Icon icon={UserGroupIcon} className="h-3 w-3 shrink-0" />
+                                                                                            <span className="truncate">{team.name}</span>
+                                                                                        </Link>
+                                                                                    ))
+                                                                                )}
+                                                                            </div>
+                                                                        </motion.div>
+                                                                    )}
+                                                                </AnimatePresence>
+                                                            </div>
                                                         ))
                                                     )}
                                                     <Link
@@ -373,18 +463,66 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
                                                         <div className="px-3 py-2 text-sm text-muted-foreground">No organizations yet</div>
                                                     ) : (
                                                         orgs.map((org) => (
-                                                            <Link
-                                                                key={org.id}
-                                                                to={`/app/orgs/${org.id}`}
-                                                                className={cn(
-                                                                    "flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors",
-                                                                    location.pathname === `/app/orgs/${org.id}`
-                                                                        ? "bg-primary/10 text-primary"
-                                                                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                                                                )}
-                                                            >
-                                                                <span className="truncate">{org.name}</span>
-                                                            </Link>
+                                                            <div key={org.id} className="space-y-0.5">
+                                                                <div className="flex items-center">
+                                                                    <button
+                                                                        onClick={() => toggleOrgExpansion(org.id)}
+                                                                        className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                                                                        aria-label={expandedOrgIds.has(org.id) ? 'Collapse teams' : 'Expand teams'}
+                                                                    >
+                                                                        <Icon
+                                                                            icon={ArrowDown01Icon}
+                                                                            className="h-3 w-3 transition-transform"
+                                                                            style={{ transform: expandedOrgIds.has(org.id) ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+                                                                        />
+                                                                    </button>
+                                                                    <Link
+                                                                        to={`/app/orgs/${org.id}`}
+                                                                        className={cn(
+                                                                            "flex-1 flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors",
+                                                                            location.pathname === `/app/orgs/${org.id}`
+                                                                                ? "bg-primary/10 text-primary"
+                                                                                : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                                                                        )}
+                                                                    >
+                                                                        <span className="truncate">{org.name}</span>
+                                                                    </Link>
+                                                                </div>
+                                                                <AnimatePresence>
+                                                                    {expandedOrgIds.has(org.id) && (
+                                                                        <motion.div
+                                                                            initial={{ height: 0, opacity: 0 }}
+                                                                            animate={{ height: 'auto', opacity: 1 }}
+                                                                            exit={{ height: 0, opacity: 0 }}
+                                                                            className="overflow-hidden"
+                                                                        >
+                                                                            <div className="pl-6 space-y-0.5">
+                                                                                {teamsLoading.has(org.id) ? (
+                                                                                    <div className="px-2 py-1.5 text-xs text-muted-foreground">Loading teams...</div>
+                                                                                ) : (orgTeams[org.id]?.length ?? 0) === 0 ? (
+                                                                                    <div className="px-2 py-1.5 text-xs text-muted-foreground">No teams</div>
+                                                                                ) : (
+                                                                                    orgTeams[org.id]?.map((team) => (
+                                                                                        <Link
+                                                                                            key={team.id}
+                                                                                            to={`/app/orgs/${org.id}/teams/${team.id}`}
+                                                                                            className={cn(
+                                                                                                "flex items-center gap-2 px-2 py-1.5 text-xs rounded-md transition-colors",
+                                                                                                location.pathname === `/app/orgs/${org.id}/teams/${team.id}`
+                                                                                                    ? "bg-primary/10 text-primary"
+                                                                                                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                                                                                            )}
+                                                                                        >
+                                                                                            <Icon icon={UserGroupIcon} className="h-3 w-3 shrink-0" />
+                                                                                            <span className="truncate">{team.name}</span>
+                                                                                        </Link>
+                                                                                    ))
+                                                                                )}
+                                                                            </div>
+                                                                        </motion.div>
+                                                                    )}
+                                                                </AnimatePresence>
+                                                            </div>
                                                         ))
                                                     )}
                                                     <Link

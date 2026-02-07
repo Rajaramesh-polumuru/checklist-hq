@@ -10,8 +10,9 @@ import {
     Clock01Icon,
     PlayIcon,
     GitBranchIcon,
+    CheckListIcon
 } from '@hugeicons/core-free-icons'
-import { Card } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,7 +22,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { getRepoColorStatus, COLOR_LEGEND } from '@/lib/dashboard-utils'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 import type { Repository } from '@/types/database'
@@ -43,52 +43,50 @@ export function RepositoryCard({
     onDuplicate,
     onDelete
 }: RepositoryCardProps) {
-    const colorStatus = getRepoColorStatus(repo)
-    const colorConfig = COLOR_LEGEND[colorStatus]
-    const StatusIcon = colorConfig.icon
-
-    const isPopular = colorStatus === 'popular'
-    const isDormant = colorStatus === 'dormant'
+    const isPublic = repo.is_public
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.03, duration: 0.3 }}
+            transition={{ delay: index * 0.05, duration: 0.3 }}
+            className="h-full"
         >
-            <Card
-                className={cn(
-                    "group relative overflow-hidden h-full flex flex-col",
-                    "transition-all duration-300",
-                    "hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5",
-                    isDormant && "opacity-70 hover:opacity-100"
-                )}
-            >
-                {/* Gradient accent bar at top */}
-                <div className={cn(
-                    "absolute top-0 left-0 right-0 h-1 transition-all duration-300",
-                    colorStatus !== 'dormant' && `bg-gradient-to-r ${colorConfig.gradient}`,
-                    "group-hover:h-1.5"
-                )} />
+            <Card className="group relative h-full flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border-border/60 bg-card/50 backdrop-blur-sm">
 
-                {/* Animated gradient border for popular items */}
-                {isPopular && (
-                    <div className="absolute inset-0 rounded-xl p-px bg-gradient-to-r from-amber-400/50 via-orange-400/50 to-amber-400/50 animate-gradient-x opacity-50 pointer-events-none" />
-                )}
-
-                {/* Gradient overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-
-                <div className="relative flex-1 flex flex-col p-4 pt-5">
-                    {/* Header */}
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                        {/* Status icon with scale animation */}
-                        <div className={cn(
-                            "h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-300",
-                            "bg-muted/60",
-                            "group-hover:scale-110 group-hover:shadow-md"
-                        )}>
-                            <StatusIcon className={cn("h-5 w-5", colorConfig.text)} />
+                <CardHeader className="pb-3 space-y-3">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-4">
+                            <div className={cn(
+                                "h-10 w-10 rounded-lg flex items-center justify-center shrink-0 transition-colors",
+                                "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground"
+                            )}>
+                                <Icon icon={CheckListIcon} className="h-5 w-5" />
+                            </div>
+                            <div className="space-y-1">
+                                <Link to={`/app/repo/${repo.id}`} className="block focus:outline-none">
+                                    <CardTitle className="text-base font-semibold leading-none group-hover:text-primary transition-colors">
+                                        {repo.title}
+                                    </CardTitle>
+                                </Link>
+                                <div className="flex items-center gap-2">
+                                    <Badge
+                                        variant="outline"
+                                        className="h-5 px-1.5 text-[10px] font-normal border-border/50 bg-background/50 text-muted-foreground"
+                                    >
+                                        {isPublic ? 'Public' : 'Private'}
+                                    </Badge>
+                                    {repo.fork_count > 0 && (
+                                        <Badge
+                                            variant="secondary"
+                                            className="h-5 px-1.5 text-[10px] font-normal bg-muted/50 text-muted-foreground gap-1"
+                                        >
+                                            <Icon icon={GitBranchIcon} className="h-3 w-3" />
+                                            {repo.fork_count}
+                                        </Badge>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         <DropdownMenu>
@@ -96,15 +94,15 @@ export function RepositoryCard({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 -mr-2 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
+                                    className="h-8 w-8 -mt-1 -mr-2 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 data-[state=open]:opacity-100"
                                 >
                                     <Icon icon={MoreVerticalCircle01Icon} className="h-4 w-4" />
                                     <span className="sr-only">Actions</span>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuContent align="end" className="w-48">
                                 <DropdownMenuItem onClick={() => onRun(repo)}>
-                                    <Icon icon={PlayIcon} className="mr-2 h-4 w-4" /> Run
+                                    <Icon icon={PlayIcon} className="mr-2 h-4 w-4" /> Run Checklist
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                     <Link to={`/app/repo/${repo.id}`}>
@@ -118,86 +116,39 @@ export function RepositoryCard({
                                     <Icon icon={Copy01Icon} className="mr-2 h-4 w-4" /> Duplicate
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem destructive onClick={() => onDelete(repo.id, repo.title)}>
+                                <DropdownMenuItem
+                                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                                    onClick={() => onDelete(repo.id, repo.title)}
+                                >
                                     <Icon icon={Delete02Icon} className="mr-2 h-4 w-4" /> Delete
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
+                </CardHeader>
 
-                    {/* Title with gradient on hover */}
-                    <Link to={`/app/repo/${repo.id}`} className="block mb-1">
-                        <h3
-                            className={cn(
-                                "font-semibold text-base truncate transition-all duration-300",
-                                "group-hover:text-gradient-primary"
-                            )}
-                            title={repo.title}
-                        >
-                            {repo.title}
-                        </h3>
-                    </Link>
+                <CardContent className="flex-1 pb-4">
+                    <CardDescription className="line-clamp-2 min-h-[2.5rem] text-sm leading-relaxed">
+                        {repo.description || "No description provided for this checklist."}
+                    </CardDescription>
+                </CardContent>
 
-                    {/* Description */}
-                    {repo.description ? (
-                        <p className="text-sm text-muted-foreground/80 line-clamp-2 mb-4 leading-relaxed min-h-[2.5rem]">
-                            {repo.description}
-                        </p>
-                    ) : (
-                        <p className="text-sm text-muted-foreground/50 italic mb-4 min-h-[2.5rem]">
-                            No description
-                        </p>
-                    )}
-
-                    {/* Metadata badges */}
-                    <div className="flex items-center gap-2 mt-auto flex-wrap">
-                        <Badge
-                            variant="outline"
-                            className="font-normal text-[10px] h-5 px-2 bg-background/50 backdrop-blur-sm"
-                        >
-                            {repo.is_public ? 'Public' : 'Private'}
-                        </Badge>
-
-                        {repo.fork_count > 0 && (
-                            <Badge
-                                variant="secondary"
-                                className="font-normal text-[10px] h-5 px-2 gap-1"
-                            >
-                                <Icon icon={GitBranchIcon} className="h-2.5 w-2.5" />
-                                {repo.fork_count}
-                            </Badge>
-                        )}
-
-                        {colorStatus !== 'default' && colorStatus !== 'dormant' && (
-                            <Badge
-                                variant="secondary"
-                                className={cn(
-                                    "font-normal text-[10px] h-5 px-2",
-                                    colorConfig.text
-                                )}
-                            >
-                                {colorConfig.label}
-                            </Badge>
-                        )}
+                <CardFooter className="pt-0 pb-4 flex items-center justify-between border-t border-border/40 bg-muted/5 mt-auto">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-3">
+                        <Icon icon={Clock01Icon} className="h-3.5 w-3.5" />
+                        <span>Updated {formatRelativeTime(repo.updated_at)}</span>
                     </div>
-                </div>
-
-                {/* Premium footer with glassmorphism */}
-                <div className="relative px-4 py-3 border-t bg-gradient-to-r from-muted/30 via-muted/50 to-muted/30 backdrop-blur-sm flex items-center justify-between gap-3">
-                    <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                        <Icon icon={Clock01Icon} className="h-3 w-3" />
-                        {formatRelativeTime(repo.updated_at)}
-                    </span>
 
                     <Button
                         size="sm"
-                        className="h-7 text-xs shadow-sm hover:shadow-md transition-shadow"
+                        className="h-8 text-xs font-medium opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 mt-3"
                         onClick={() => onRun(repo)}
                     >
-                        <Icon icon={PlayIcon} className="mr-1 h-3 w-3" />
+                        <Icon icon={PlayIcon} className="mr-1.5 h-3.5 w-3.5" />
                         Run
                     </Button>
-                </div>
+                </CardFooter>
+
             </Card>
         </motion.div>
     )

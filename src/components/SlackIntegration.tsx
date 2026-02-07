@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -61,12 +62,27 @@ export function SlackIntegration({ orgId, userId }: SlackIntegrationProps) {
   const handleConnect = () => {
     // In a real app, this would redirect to Slack OAuth
     // For MVP, we'll show a placeholder
-    const clientId = (import.meta as any).env.VITE_SLACK_CLIENT_ID || 'YOUR_CLIENT_ID'
-    const redirectUri = `${window.location.origin}/integrations/slack/callback`
-    const scope = 'chat:write,channels:read,users:read'
+    const clientId = (import.meta as any).env.VITE_SLACK_CLIENT_ID
 
-    const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}`
-    window.open(slackAuthUrl, '_blank')
+    if (!clientId || clientId === 'YOUR_CLIENT_ID') {
+      toast.error('Slack integration is not configured correctly', {
+        description: 'Please set VITE_SLACK_CLIENT_ID in your .env file'
+      })
+      return
+    }
+
+    const redirectUri = `${window.location.origin}/integrations/slack/callback`
+    const scope = 'chat:write,channels:read,users:read,groups:read,im:read,mpim:read'
+    
+    // Encode state to pass orgId and generic return path
+    const state = btoa(JSON.stringify({ 
+      orgId, 
+      userId,
+      returnPath: window.location.pathname 
+    }))
+
+    const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}&state=${state}`
+    window.open(slackAuthUrl, '_self') // Open in self to avoid popup blockers and handle callback easier
   }
 
   if (loading) {

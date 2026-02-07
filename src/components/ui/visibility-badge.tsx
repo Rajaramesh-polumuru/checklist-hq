@@ -10,6 +10,7 @@ const visibilityBadgeVariants = cva(
     variants: {
       visibility: {
         public: "bg-[color-mix(in_srgb,var(--color-visibility-public)_10%,transparent)] text-[var(--color-visibility-public)] border border-[color-mix(in_srgb,var(--color-visibility-public)_20%,transparent)]",
+        visible: "bg-[color-mix(in_srgb,var(--color-visibility-public)_10%,transparent)] text-[var(--color-visibility-public)] border border-[color-mix(in_srgb,var(--color-visibility-public)_20%,transparent)]",
         private: "bg-[color-mix(in_srgb,var(--color-visibility-private)_10%,transparent)] text-[var(--color-visibility-private)] border border-[color-mix(in_srgb,var(--color-visibility-private)_20%,transparent)]",
         secret: "bg-[color-mix(in_srgb,var(--color-visibility-secret)_10%,transparent)] text-[var(--color-visibility-secret)] border border-[color-mix(in_srgb,var(--color-visibility-secret)_20%,transparent)]",
       },
@@ -23,18 +24,20 @@ const visibilityBadgeVariants = cva(
 export interface VisibilityBadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof visibilityBadgeVariants> {
-  visibility: "public" | "private" | "secret"
+  visibility: "public" | "private" | "secret" | "visible"
   showIcon?: boolean
 }
 
 const visibilityIcons = {
   public: Globe02Icon,
+  visible: Globe02Icon,
   private: LockKeyIcon,
   secret: ViewOffSlashIcon,
 }
 
 const visibilityLabels = {
   public: "Public",
+  visible: "Visible",
   private: "Private",
   secret: "Secret",
 }

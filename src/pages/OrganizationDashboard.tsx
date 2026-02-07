@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { getOrganization, getOrganizationMembers, getOrganizationTeams } from '@/services/organization'
+import { getOrganization, getOrganizationMembers, getOrganizationTeams, type OrganizationMemberWithUser } from '@/services/organization'
 import { getOrganizationRepositories } from '@/services/repository'
-import type { Organization, OrganizationMember, Team, Repository } from '@/types/database'
+import type { Organization, Team, Repository } from '@/types/database'
 import { useAuthStore } from '@/stores/auth-store'
 import { usePermissionStore } from '@/stores/permission-store'
 import { useOrgPermission } from '@/hooks/usePermissions'
@@ -17,19 +17,23 @@ import {
   PlusSignIcon,
   Search01Icon,
   LayoutGridIcon,
-  Analytics01Icon
+  Analytics01Icon,
+  MoreHorizontalIcon,
+  AiCloud02Icon
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { RepositoryCard } from '@/pages/dashboard/RepositoryCard'
 import { Input } from '@/components/ui/input'
 import { CreateTeamModal } from '@/components/CreateTeamModal'
 import { InviteMemberModal } from '@/components/InviteMemberModal'
+import { CreateRepositoryModal } from '@/components/CreateRepositoryModal'
 import { OrganizationSettings } from '@/components/OrganizationSettings'
 import { AnalyticsDashboard } from '@/components/AnalyticsDashboard'
 import { RoleBadge } from '@/components/ui/role-badge'
 import { VisibilityBadge } from '@/components/ui/visibility-badge'
 import { EmptyState } from '@/components/organization/EmptyStates'
-import { TeamListSkeleton, MemberListSkeleton, RepositoryGridSkeleton, TabsSkeleton } from '@/components/organization/OrganizationSkeletons'
+import { TabsSkeleton } from '@/components/organization/OrganizationSkeletons'
+import { cn } from '@/lib/utils'
 
 export function OrganizationDashboard() {
   const { orgId } = useParams()
@@ -37,8 +41,9 @@ export function OrganizationDashboard() {
   const { user } = useAuthStore()
   const setOrgPermission = usePermissionStore((state) => state.setOrgPermission)
   const { canInvite, canCreateTeams, canAccessSettings } = useOrgPermission(orgId)
+
   const [org, setOrg] = useState<Organization | null>(null)
-  const [members, setMembers] = useState<OrganizationMember[]>([])
+  const [members, setMembers] = useState<OrganizationMemberWithUser[]>([])
   const [teams, setTeams] = useState<Team[]>([])
   const [repos, setRepos] = useState<Repository[]>([])
   const [loading, setLoading] = useState(true)
@@ -47,6 +52,7 @@ export function OrganizationDashboard() {
   // Modals
   const [createTeamOpen, setCreateTeamOpen] = useState(false)
   const [inviteMemberOpen, setInviteMemberOpen] = useState(false)
+  const [createRepoOpen, setCreateRepoOpen] = useState(false)
 
   // Search filter for repos
   const [repoSearch, setRepoSearch] = useState('')
@@ -82,6 +88,12 @@ export function OrganizationDashboard() {
     loadData()
   }, [orgId, user, setOrgPermission])
 
+  const refreshRepos = async () => {
+    if (!orgId) return
+    const reposData = await getOrganizationRepositories(orgId)
+    setRepos(reposData)
+  }
+
   const refreshTeams = async () => {
     if (!orgId) return
     const teamsData = await getOrganizationTeams(orgId)
@@ -115,17 +127,19 @@ export function OrganizationDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="border-b bg-card">
-          <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center gap-4 mb-8">
+        <div className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-xl bg-muted animate-pulse" />
               <div className="space-y-2">
-                <div className="h-8 w-64 bg-muted animate-pulse rounded" />
-                <div className="h-4 w-48 bg-muted animate-pulse rounded" />
+                <div className="h-6 w-48 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-32 bg-muted animate-pulse rounded" />
               </div>
             </div>
-            <TabsSkeleton />
           </div>
+        </div>
+        <div className="container mx-auto px-4 py-8">
+          <TabsSkeleton />
         </div>
       </div>
     )
@@ -133,8 +147,8 @@ export function OrganizationDashboard() {
 
   if (!org) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="text-2xl font-bold">Organization not found</h1>
+      <div className="container mx-auto px-4 py-8 text-center pt-24">
+        <h1 className="text-2xl font-bold tracking-tight">Organization not found</h1>
         <Button variant="outline" className="mt-4" asChild>
           <Link to="/app">Back to Dashboard</Link>
         </Button>
@@ -142,128 +156,123 @@ export function OrganizationDashboard() {
     )
   }
 
-  // Filter repos
   const filteredRepos = repos.filter(repo =>
     repo.title.toLowerCase().includes(repoSearch.toLowerCase())
   )
 
   return (
-    <div className="min-h-screen bg-background pb-12">
-      {/* Header */}
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-primary/20 to-violet-500/20 flex items-center justify-center border">
-                {org.avatar_url ? (
-                  <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover rounded-xl" />
-                ) : (
-                  <Icon icon={Building02Icon} className="h-8 w-8 text-primary" />
-                )}
+    <div className="min-h-screen bg-background">
+      {/* Header Section */}
+      <div className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-20">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+
+            {/* Org Profile */}
+            <div className="flex items-center gap-5">
+              <div className="relative group shrink-0">
+                <div className="size-16 rounded-xl bg-gradient-to-br from-primary/5 to-muted border border-border/50 flex items-center justify-center overflow-hidden shadow-sm transition-all group-hover:shadow-md ring-1 ring-transparent group-hover:ring-primary/10">
+                  {org.avatar_url ? (
+                    <img src={org.avatar_url} alt={org.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <Icon icon={Building02Icon} size="xl" className="text-primary/70" />
+                  )}
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold">{org.name}</h1>
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mt-1">
-                  <span className="bg-muted px-2 py-0.5 rounded text-xs font-mono">@{org.slug}</span>
-                  <span>•</span>
-                  <span>{members.length} members</span>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold tracking-tight text-foreground">{org.name}</h1>
+                  <span className="inline-flex items-center justify-center rounded-md bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-gray-500/10">
+                    Free Plan
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <span className="font-mono text-xs">@{org.slug}</span>
+                  <span className="text-border mx-1">•</span>
+                  <span className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-pointer">
+                    <Icon icon={UserGroupIcon} size="xs" />
+                    {members.length} members
+                  </span>
+                  <span className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-pointer">
+                    <Icon icon={LayoutGridIcon} size="xs" />
+                    {teams.length} teams
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* Actions */}
+            <div className="flex items-center gap-3">
+              {/* Search - Desktop */}
+              <div className="hidden md:block relative w-64">
+                <Icon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" size="sm" />
+                <Input
+                  placeholder="Find repository..."
+                  className="h-9 w-full bg-muted/30 pl-9 border-transparent focus-visible:ring-1 focus-visible:bg-background transition-all hover:bg-muted/50 font-sans"
+                  value={repoSearch}
+                  onChange={(e) => setRepoSearch(e.target.value)}
+                />
+              </div>
+
               {canAccessSettings && (
-                <Button 
-                  variant="outline" 
-                  onClick={() => setActiveTab('settings')}
-                  className="active:scale-95 transition-transform"
-                  aria-label="Organization settings"
-                >
-                  <Icon icon={Settings02Icon} className="h-4 w-4 mr-2" />
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('settings')} className="hidden sm:flex h-9">
+                  <Icon icon={Settings02Icon} size="sm" className="mr-2" />
                   Settings
                 </Button>
               )}
-              <Button 
-                className="active:scale-95 transition-transform"
-                aria-label="Create new project"
-              >
-                <Icon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+
+              <Button size="sm" onClick={() => setCreateRepoOpen(true)} className="h-9 px-4 shadow-sm active:scale-95 transition-all">
+                <Icon icon={PlusSignIcon} size="sm" className="mr-2" />
                 New Project
               </Button>
             </div>
           </div>
+        </div>
 
-          <div className="mt-8">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList>
-                <TabsTrigger value="repositories" className="gap-2">
-                  <Icon icon={GitForkIcon} className="h-4 w-4" />
-                  Repositories
-                  <span className="ml-1 bg-muted px-1.5 py-0.5 rounded-full text-xs">{repos.length}</span>
-                </TabsTrigger>
-                <TabsTrigger value="teams" className="gap-2">
-                  <Icon icon={LayoutGridIcon} className="h-4 w-4" />
-                  Teams
-                  <span className="ml-1 bg-muted px-1.5 py-0.5 rounded-full text-xs">{teams.length}</span>
-                </TabsTrigger>
-                <TabsTrigger value="members" className="gap-2">
-                  <Icon icon={UserGroupIcon} className="h-4 w-4" />
-                  People
-                  <span className="ml-1 bg-muted px-1.5 py-0.5 rounded-full text-xs">{members.length}</span>
-                </TabsTrigger>
-                <TabsTrigger value="analytics" className="gap-2">
-                  <Icon icon={Analytics01Icon} className="h-4 w-4" />
-                  Analytics
-                </TabsTrigger>
-                {canAccessSettings && (
-                  <TabsTrigger value="settings" className="gap-2">
-                    <Icon icon={Settings02Icon} className="h-4 w-4" />
-                    Settings
-                  </TabsTrigger>
-                )}
-              </TabsList>
-            </Tabs>
-          </div>
+        {/* Navigation Tabs */}
+        <div className="container mx-auto px-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="h-auto w-full justify-start gap-2 bg-transparent p-0 border-b border-border/40">
+              <TabTrigger value="repositories" icon={GitForkIcon} label="Repositories" count={repos.length} />
+              <TabTrigger value="teams" icon={LayoutGridIcon} label="Teams" count={teams.length} />
+              <TabTrigger value="members" icon={UserGroupIcon} label="People" />
+              <TabTrigger value="analytics" icon={Analytics01Icon} label="Analytics" />
+              <TabTrigger value="agents" icon={AiCloud02Icon} label="Agents" />
+              {canAccessSettings && <TabTrigger value="settings" icon={Settings02Icon} label="Settings" />}
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {/* Repositories Tab */}
-          <TabsContent value="repositories" className="space-y-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="relative flex-1 max-w-sm">
-                <Icon icon={Search01Icon} className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Find a repository..."
-                  className="pl-9 focus-visible:ring-2 focus-visible:ring-ring"
-                  value={repoSearch}
-                  onChange={(e) => setRepoSearch(e.target.value)}
-                  aria-label="Search repositories"
-                />
-              </div>
-            </div>
-
-            {loading ? (
-              <RepositoryGridSkeleton />
-            ) : filteredRepos.length === 0 ? (
+          <TabsContent value="repositories" className="mt-0 focus-visible:outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
+            {filteredRepos.length === 0 ? (
               repoSearch ? (
-                <div className="text-center py-12 border rounded-lg bg-muted/10 border-dashed">
-                  <Icon icon={Search01Icon} className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium">No repositories found</h3>
-                  <p className="text-muted-foreground mt-1 max-w-sm mx-auto">
-                    Try a different search term.
+                <div className="flex flex-col items-center justify-center py-20 border border-dashed rounded-xl bg-muted/5 text-center">
+                  <div className="h-12 w-12 rounded-full bg-muted/20 flex items-center justify-center mb-4">
+                    <Icon icon={Search01Icon} className="h-6 w-6 text-muted-foreground opacity-50" />
+                  </div>
+                  <h3 className="text-lg font-medium tracking-tight">No repositories found</h3>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    We couldn't find any repositories matching "{repoSearch}".
                   </p>
+                  <Button variant="ghost" onClick={() => setRepoSearch('')} className="mt-4">
+                    Clear Search
+                  </Button>
                 </div>
               ) : (
-                <EmptyState variant="repositories" onAction={() => console.log('Create repository')} />
+                <EmptyState variant="repositories" onAction={() => setCreateRepoOpen(true)} />
               )
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredRepos.map(repo => (
+                {filteredRepos.map((repo, index) => (
                   <RepositoryCard
                     key={repo.id}
                     repo={repo}
+                    index={index}
                     onRun={handleRun}
                     onShare={handleShare}
                     onDuplicate={handleDuplicate}
@@ -275,53 +284,43 @@ export function OrganizationDashboard() {
           </TabsContent>
 
           {/* Teams Tab */}
-          <TabsContent value="teams" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Teams</h2>
+          <TabsContent value="teams" className="mt-0 focus-visible:outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-semibold tracking-tight">Teams</h2>
+                <p className="text-sm text-muted-foreground">Manage team access and visibility.</p>
+              </div>
               {canCreateTeams && (
-                <Button 
-                  size="sm" 
-                  onClick={() => setCreateTeamOpen(true)}
-                  className="active:scale-95 transition-transform"
-                  aria-label="Create new team"
-                >
-                  <Icon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
-                  New Team
+                <Button size="sm" onClick={() => setCreateTeamOpen(true)}>
+                  <Icon icon={PlusSignIcon} size="sm" className="mr-2" />
+                  Create Team
                 </Button>
               )}
             </div>
 
-            {loading ? (
-              <TeamListSkeleton />
-            ) : teams.length === 0 ? (
+            {teams.length === 0 ? (
               <EmptyState variant="teams" onAction={() => setCreateTeamOpen(true)} />
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {teams.map(team => (
-                  <Card key={team.id} className="hover:shadow-md transition-shadow">
+                  <Card key={team.id} className="group hover:shadow-md transition-all duration-300 border-border/60">
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-base font-medium flex items-center gap-2">
+                        <CardTitle className="text-base font-medium flex items-center gap-2 group-hover:text-primary transition-colors">
                           {team.name}
                         </CardTitle>
                         <VisibilityBadge visibility={team.visibility as "public" | "private" | "secret"} />
                       </div>
-                      <CardDescription className="line-clamp-1">
+                      <CardDescription className="line-clamp-1 text-xs">
                         {team.description || 'No description'}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <span className="font-mono text-xs">@{team.slug}</span>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-8 active:scale-95 transition-transform"
-                          aria-label={`View ${team.name} team`}
-                          asChild
-                        >
+                      <div className="flex items-center justify-between pt-2 border-t border-border/40">
+                        <span className="font-mono text-xs text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">@{team.slug}</span>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs opacity-0 group-hover:opacity-100 transition-opacity" asChild>
                           <Link to={`/app/orgs/${orgId}/teams/${team.id}`}>
-                            View
+                            Manage <Icon icon={MoreHorizontalIcon} size="xs" className="ml-1" />
                           </Link>
                         </Button>
                       </div>
@@ -333,77 +332,111 @@ export function OrganizationDashboard() {
           </TabsContent>
 
           {/* Members Tab */}
-          <TabsContent value="members" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">People</h2>
+          <TabsContent value="members" className="mt-0 focus-visible:outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-semibold tracking-tight">People</h2>
+                <p className="text-sm text-muted-foreground">Manage members and roles.</p>
+              </div>
               {canInvite && (
-                <Button 
-                  size="sm" 
-                  onClick={() => setInviteMemberOpen(true)}
-                  className="active:scale-95 transition-transform"
-                  aria-label="Invite new member"
-                >
-                  <Icon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+                <Button size="sm" onClick={() => setInviteMemberOpen(true)}>
+                  <Icon icon={PlusSignIcon} size="sm" className="mr-2" />
                   Invite Member
                 </Button>
               )}
             </div>
 
-            {loading ? (
-              <MemberListSkeleton />
-            ) : members.length === 0 ? (
+            {members.length === 0 ? (
               <EmptyState variant="members" onAction={() => setInviteMemberOpen(true)} />
             ) : (
-              <Card>
-                <div className="divide-y">
-                  {members.map(member => (
-                    <div 
-                      key={member.id} 
-                      className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors focus-within:bg-muted/50"
-                      role="listitem"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium"
-                          aria-hidden="true"
-                        >
-                          <Icon icon={UserGroupIcon} className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <div className="font-medium flex items-center gap-2">
-                            <span>User ID: {member.user_id.slice(0, 8)}...</span>
-                            <RoleBadge role={member.role as "owner" | "admin" | "member" | "viewer"} />
+              <Card className="overflow-hidden border-border/60 shadow-sm">
+                <div className="divide-y divide-border/40">
+                  {members.map(member => {
+                    // Use user metadata if available, otherwise use user_id
+                    const displayName = member.user?.user_metadata?.full_name
+                      || member.user?.user_metadata?.name
+                      || (member.user?.email ? member.user.email.split('@')[0] : null)
+                      || `Member ${member.user_id.slice(0, 8)}`
+                    const initials = member.user_id.slice(0, 2).toUpperCase()
+                    const avatarUrl = member.user?.user_metadata?.avatar_url
+                    const email = member.user?.email || null
+
+                    return (
+                      <div key={member.id} className="flex items-center justify-between p-4 hover:bg-muted/20 transition-colors group">
+                        <div className="flex items-center gap-4">
+                          {avatarUrl ? (
+                            <img
+                              src={avatarUrl}
+                              alt={displayName}
+                              className="h-9 w-9 rounded-full object-cover ring-1 ring-border/20"
+                            />
+                          ) : (
+                            <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm ring-1 ring-border/20">
+                              {initials}
+                            </div>
+                          )}
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-sm">{displayName}</span>
+                              <RoleBadge role={member.role} />
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {email ? `${email} · ` : ''}Joined {new Date(member.joined_at).toLocaleDateString()}
+                            </div>
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            Joined {new Date(member.joined_at).toLocaleDateString()}
-                          </div>
                         </div>
+                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          Manage
+                        </Button>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="active:scale-95 transition-transform focus-visible:ring-2 focus-visible:ring-ring"
-                        aria-label={`Manage member ${member.user_id.slice(0, 8)}`}
-                      >
-                        Manage
-                      </Button>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </Card>
             )}
           </TabsContent>
+
           {/* Analytics Tab */}
-          <TabsContent value="analytics">
+          <TabsContent value="analytics" className="mt-0 focus-visible:outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
             {orgId && <AnalyticsDashboard organizationId={orgId} />}
           </TabsContent>
 
+          {/* Agents Tab */}
+          <TabsContent value="agents" className="mt-0 focus-visible:outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="flex flex-col items-center justify-center py-16 border border-dashed rounded-xl bg-muted/5 text-center">
+              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Icon icon={AiCloud02Icon} className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold tracking-tight">AI Agents</h3>
+              <p className="text-muted-foreground mt-2 text-sm max-w-md">
+                Create and manage AI agents that can execute checklist items automatically.
+              </p>
+              <Button className="mt-6" asChild>
+                <Link to={`/app/orgs/${orgId}/agents`}>
+                  <Icon icon={AiCloud02Icon} size="sm" className="mr-2" />
+                  Manage Agents
+                </Link>
+              </Button>
+            </div>
+          </TabsContent>
+
           {/* Settings Tab */}
-          <TabsContent value="settings">
+          <TabsContent value="settings" className="mt-0 focus-visible:outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
             {org && <OrganizationSettings org={org} onUpdate={setOrg} />}
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Modals */}
+      {org && user && (
+        <CreateRepositoryModal
+          organizationId={org.id}
+          userId={user.id}
+          isOpen={createRepoOpen}
+          onClose={() => setCreateRepoOpen(false)}
+          onRepoCreated={refreshRepos}
+        />
+      )}
 
       {org && (
         <CreateTeamModal
@@ -423,5 +456,26 @@ export function OrganizationDashboard() {
         />
       )}
     </div>
+  )
+}
+
+// Helper Components
+function TabTrigger({ value, icon, label, count }: { value: string, icon: any, label: string, count?: number }) {
+  return (
+    <TabsTrigger
+      value={value}
+      className={cn(
+        "group relative flex items-center gap-2 rounded-t-md rounded-b-none px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground data-[state=active]:text-foreground outline-none ring-0 focus-visible:ring-0",
+        "after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-foreground after:content-[''] after:opacity-0 data-[state=active]:after:opacity-100"
+      )}
+    >
+      <Icon icon={icon} size="sm" className="text-muted-foreground group-hover:text-foreground group-data-[state=active]:text-foreground transition-colors" />
+      <span>{label}</span>
+      {count !== undefined && (
+        <span className="ml-1 flex h-4 min-w-[1.25rem] items-center justify-center rounded-full bg-muted px-1 text-[10px] font-medium text-muted-foreground group-hover:bg-background/80 group-data-[state=active]:bg-muted group-data-[state=active]:text-foreground">
+          {count}
+        </span>
+      )}
+    </TabsTrigger>
   )
 }
