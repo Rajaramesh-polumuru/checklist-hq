@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
-import { CheckmarkCircle02Icon, CommandIcon, SecurityCheckIcon, FlashIcon } from '@hugeicons/core-free-icons'
+import { CheckmarkCircle02Icon, SecurityCheckIcon, FlashIcon } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
+import { Logo } from '@/components/ui/logo'
 
 interface AuthLayoutProps {
     children: React.ReactNode
@@ -21,9 +22,7 @@ export function AuthLayout({ children, greeting, subtitle }: AuthLayoutProps) {
                 {/* Header */}
                 <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-8">
-                        <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20">
-                            <Icon icon={CommandIcon} className="w-6 h-6" />
-                        </div>
+                        <Logo size="sm" forceTheme="dark" />
                         <span className="text-xl font-bold tracking-tight">Checklist HQ</span>
                     </div>
                 </div>

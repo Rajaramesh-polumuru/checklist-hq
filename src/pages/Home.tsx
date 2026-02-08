@@ -21,6 +21,7 @@ import {
   Globe02Icon,
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
+import { Logo } from '@/components/ui/logo'
 import { useAuthStore } from '@/stores/auth-store'
 import { cn } from '@/lib/utils'
 
@@ -676,9 +677,7 @@ export function Home() {
             {/* Brand */}
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
-                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center shadow-lg shadow-primary/25">
-                  <Icon icon={GitForkIcon} className="h-5 w-5 text-white" />
-                </div>
+                <Logo size="lg" />
                 <span className="font-bold text-lg">Checklist HQ</span>
               </div>
               <p className="text-sm text-muted-foreground max-w-md">

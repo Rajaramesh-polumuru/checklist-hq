@@ -8,7 +8,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useIsMobile } from '@/hooks/useMobile'
 import { useAuthStore } from '@/stores/auth-store'
 import {
-    GitForkIcon,
     DashboardSquare01Icon,
     Search01Icon,
     PlusSignIcon,
@@ -24,6 +23,7 @@ import {
     ArrowUp01Icon,
     UserGroupIcon,
 } from '@hugeicons/core-free-icons'
+import { Logo } from '@/components/ui/logo'
 import { useThemeStore } from '@/stores/theme-store'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { getMyOrganizations, getOrganizationTeams } from '@/services/organization'
@@ -212,9 +212,7 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
                     <div className="flex flex-col h-full">
                         {/* Logo */}
                         <div className="flex items-center gap-3 mb-8 px-2">
-                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                <Icon icon={GitForkIcon} className="h-5 w-5 text-primary" />
-                            </div>
+                            <Logo size="md" />
                             <span className="font-bold text-lg">Checklist HQ</span>
                         </div>
 
@@ -386,9 +384,7 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
             <div className="flex flex-col h-full p-4">
                 {/* Header */}
                 <div className={cn("flex items-center gap-3 mb-8 px-2 h-10", collapsed && "justify-center px-0")}>
-                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                        <Icon icon={GitForkIcon} className="h-5 w-5 text-primary" />
-                    </div>
+                    <Logo size="md" className="shrink-0" />
                     {!collapsed && (
                         <motion.span
                             initial={{ opacity: 0 }}

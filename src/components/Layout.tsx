@@ -6,6 +6,7 @@ import { Sidebar } from '@/components/Sidebar'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
+import { Logo } from '@/components/ui/logo'
 import { Menu01Icon } from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 
@@ -79,7 +80,10 @@ export function Layout() {
           <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(true)}>
             <Icon icon={Menu01Icon} className="h-5 w-5" />
           </Button>
-          <span className="font-semibold text-lg">Checklist HQ</span>
+          <div className="flex items-center gap-2">
+            <Logo size="sm" />
+            <span className="font-semibold text-lg">Checklist HQ</span>
+          </div>
 
         </header>
 
