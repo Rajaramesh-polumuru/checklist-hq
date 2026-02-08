@@ -13,7 +13,7 @@
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS public.run_participants (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     run_id UUID REFERENCES public.runs(id) ON DELETE CASCADE NOT NULL,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
 
@@ -101,7 +101,7 @@ USING (
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS public.run_item_assignments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     run_id UUID REFERENCES public.runs(id) ON DELETE CASCADE NOT NULL,
     item_id TEXT NOT NULL,  -- References item in the checklist JSON
 
@@ -198,7 +198,7 @@ USING (
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS public.run_comments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     run_id UUID REFERENCES public.runs(id) ON DELETE CASCADE NOT NULL,
     item_id TEXT,  -- NULL for general run comments, item_id for item-specific
 

@@ -17,7 +17,7 @@ DROP TABLE IF EXISTS public.repositories CASCADE;
 -- 1. REPOSITORIES: The "Project" Container
 -- ============================================
 CREATE TABLE public.repositories (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     owner_id UUID REFERENCES auth.users(id) NOT NULL,
     
     -- Metadata
@@ -69,7 +69,7 @@ USING (auth.uid() = owner_id);
 -- 2. COMMITS: The Immutable History
 -- ============================================
 CREATE TABLE public.commits (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     repo_id UUID REFERENCES public.repositories(id) ON DELETE CASCADE NOT NULL,
     
     -- The Snapshot of the Checklist (JSONB)
@@ -123,7 +123,7 @@ WITH CHECK (
 -- 3. RUNS: The Active Instances
 -- ============================================
 CREATE TABLE public.runs (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     repo_id UUID REFERENCES public.repositories(id) ON DELETE CASCADE NOT NULL,
     commit_id UUID REFERENCES public.commits(id) NOT NULL,
     user_id UUID REFERENCES auth.users(id),
@@ -179,6 +179,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger for repositories
+DROP TRIGGER IF EXISTS on_repo_updated ON public.repositories;
 CREATE TRIGGER on_repo_updated
     BEFORE UPDATE ON public.repositories
     FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
@@ -197,6 +198,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger for fork count
+DROP TRIGGER IF EXISTS increment_fork_count_trigger ON public.repositories;
 CREATE TRIGGER increment_fork_count_trigger
   AFTER INSERT ON public.repositories
   FOR EACH ROW

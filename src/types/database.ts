@@ -12,6 +12,9 @@ export interface Repository {
   created_at: string
   updated_at: string
   organization_id: string | null
+  // Polymorphic ownership (ORGS.md)
+  owner_type?: 'user' | 'team' | 'org'
+  team_id?: string | null
 }
 
 export interface Commit {
@@ -48,6 +51,9 @@ export interface Run {
   is_collaborative?: boolean  // Multi-user mode enabled
   share_token?: string | null  // Shareable link token
   share_expires_at?: string | null  // When share link expires
+  // Team/Org context (ORGS.md)
+  team_id?: string | null
+  organization_id?: string | null
 }
 
 // Time segment for accurate duration tracking
@@ -254,6 +260,9 @@ export interface RepositoryInsert {
   origin_repo_id?: string | null
   upstream_repo_id?: string | null
   organization_id?: string | null
+  // Polymorphic ownership (ORGS.md)
+  owner_type?: 'user' | 'team' | 'org'
+  team_id?: string | null
 }
 
 export interface CommitInsert {
@@ -273,6 +282,9 @@ export interface RunInsert {
   description?: string | null
   device_id?: string | null
   device_name?: string | null
+  // Team/Org context (ORGS.md)
+  team_id?: string | null
+  organization_id?: string | null
 }
 
 // Update types
@@ -302,6 +314,72 @@ export interface RunTimeSegmentInsert {
   started_at?: string
   device_id?: string | null
   device_name?: string | null
+}
+
+// ==================== Activity & Notifications (ORGS.md) ====================
+
+export type NotificationType =
+  | 'run_completed'
+  | 'run_failed'
+  | 'run_assigned'
+  | 'mention'
+  | 'comment'
+  | 'team_invite'
+  | 'org_invite'
+  | 'repo_shared'
+  | 'repo_forked'
+  | 'system'
+
+export interface Notification {
+  id: string
+  user_id: string
+  type: NotificationType
+  title: string
+  message: string | null
+  action_url: string | null
+  resource_type: string | null
+  resource_id: string | null
+  read_at: string | null
+  archived_at: string | null
+  created_at: string
+}
+
+export type ActivityActorType = 'human' | 'agent' | 'system'
+
+export interface Activity {
+  id: string
+  organization_id: string | null
+  team_id: string | null
+  actor_id: string
+  actor_type: ActivityActorType
+  action: string
+  resource_type: string
+  resource_id: string
+  resource_name: string | null
+  metadata: Record<string, unknown>
+  created_at: string
+}
+
+export interface NotificationInsert {
+  user_id: string
+  type: NotificationType
+  title: string
+  message?: string | null
+  action_url?: string | null
+  resource_type?: string | null
+  resource_id?: string | null
+}
+
+export interface ActivityInsert {
+  organization_id?: string | null
+  team_id?: string | null
+  actor_id: string
+  actor_type?: ActivityActorType
+  action: string
+  resource_type: string
+  resource_id: string
+  resource_name?: string | null
+  metadata?: Record<string, unknown>
 }
 
 // Supabase database schema type

@@ -12,7 +12,7 @@
 */
 
 CREATE TABLE IF NOT EXISTS public.background_jobs (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- What kind of job is this?
     type TEXT NOT NULL,   -- e.g. 'webhook.deliver', 'slack.notify'

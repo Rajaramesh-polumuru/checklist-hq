@@ -54,7 +54,7 @@ CHECK (status IN ('active', 'paused', 'completed', 'archived'));
 
 -- Time segments track each active period for accurate duration
 CREATE TABLE IF NOT EXISTS public.run_time_segments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     run_id UUID REFERENCES public.runs(id) ON DELETE CASCADE NOT NULL,
     started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     ended_at TIMESTAMPTZ,

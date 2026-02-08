@@ -11,7 +11,7 @@
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS public.api_keys (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     
     -- Display name for the key (e.g. "CI/CD Pipeline")
@@ -64,7 +64,7 @@ CREATE POLICY "Users can delete own api keys" ON public.api_keys
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS public.webhooks (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     
     -- Webhooks belong to a repository OR an organization
     repository_id UUID REFERENCES public.repositories(id) ON DELETE CASCADE,

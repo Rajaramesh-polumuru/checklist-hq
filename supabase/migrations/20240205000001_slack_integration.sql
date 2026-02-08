@@ -9,7 +9,7 @@
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS public.slack_connections (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     organization_id UUID REFERENCES public.organizations(id) ON DELETE CASCADE,
@@ -66,7 +66,7 @@ CREATE POLICY "Org admins manage slack connections" ON public.slack_connections
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS public.slack_notifications (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     
     slack_connection_id UUID REFERENCES public.slack_connections(id) ON DELETE CASCADE NOT NULL,
     

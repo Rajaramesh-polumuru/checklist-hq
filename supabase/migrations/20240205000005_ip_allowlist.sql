@@ -12,7 +12,7 @@
 -- ──────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS public.ip_allowlist (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     organization_id UUID REFERENCES public.organizations(id)
         ON DELETE CASCADE NOT NULL,

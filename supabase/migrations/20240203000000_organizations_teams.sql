@@ -20,7 +20,7 @@
 -- They serve as the top-level container for team collaboration.
 
 CREATE TABLE IF NOT EXISTS public.organizations (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- Unique slug for URL-friendly identification (e.g., /org/acme-corp)
     slug TEXT NOT NULL UNIQUE,
@@ -71,7 +71,7 @@ ALTER TABLE public.organizations ENABLE ROW LEVEL SECURITY;
 -- Supports Owner, Admin, Member, and Viewer roles.
 
 CREATE TABLE IF NOT EXISTS public.organization_members (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- Foreign keys
     organization_id UUID REFERENCES public.organizations(id) ON DELETE CASCADE NOT NULL,
@@ -111,7 +111,7 @@ ALTER TABLE public.organization_members ENABLE ROW LEVEL SECURITY;
 -- They allow fine-grained permission management.
 
 CREATE TABLE IF NOT EXISTS public.teams (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- Parent organization
     organization_id UUID REFERENCES public.organizations(id) ON DELETE CASCADE NOT NULL,
@@ -169,7 +169,7 @@ ALTER TABLE public.teams ENABLE ROW LEVEL SECURITY;
 -- Junction table linking users to teams with roles.
 
 CREATE TABLE IF NOT EXISTS public.team_members (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- Foreign keys
     team_id UUID REFERENCES public.teams(id) ON DELETE CASCADE NOT NULL,
@@ -206,7 +206,7 @@ ALTER TABLE public.team_members ENABLE ROW LEVEL SECURITY;
 -- This enables team-based repository access control.
 
 CREATE TABLE IF NOT EXISTS public.repository_team_access (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- Foreign keys
     repository_id UUID REFERENCES public.repositories(id) ON DELETE CASCADE NOT NULL,

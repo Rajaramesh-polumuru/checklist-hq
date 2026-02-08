@@ -9,7 +9,7 @@
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS public.audit_logs (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     
     -- Organization context (nullable for system-level actions)
     organization_id UUID REFERENCES public.organizations(id) ON DELETE SET NULL,

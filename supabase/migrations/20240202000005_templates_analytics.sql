@@ -12,7 +12,7 @@
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS public.run_templates (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     repo_id UUID REFERENCES public.repositories(id) ON DELETE CASCADE NOT NULL,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
 
@@ -63,7 +63,7 @@ USING (user_id = auth.uid());
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS public.scheduled_runs (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     template_id UUID REFERENCES public.run_templates(id) ON DELETE CASCADE NOT NULL,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
 
@@ -361,11 +361,13 @@ END;
 $$;
 
 -- Trigger to update template updated_at
+DROP TRIGGER IF EXISTS on_template_updated ON public.run_templates;
 CREATE TRIGGER on_template_updated
     BEFORE UPDATE ON public.run_templates
     FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
 
 -- Trigger to update scheduled_runs updated_at
+DROP TRIGGER IF EXISTS on_scheduled_run_updated ON public.scheduled_runs;
 CREATE TRIGGER on_scheduled_run_updated
     BEFORE UPDATE ON public.scheduled_runs
     FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
