@@ -473,7 +473,7 @@ function TabTrigger({ value, icon, label, count }: { value: string, icon: any, l
     <TabsTrigger
       value={value}
       className={cn(
-        "group relative flex items-center gap-2 rounded-t-md rounded-b-none px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground data-[state=active]:text-foreground outline-none ring-0 focus-visible:ring-0",
+        "group relative flex items-center gap-2 rounded-t-md rounded-b-none px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground data-[state=active]:text-foreground data-[state=active]:hover:bg-muted outline-none ring-0 focus-visible:ring-0",
         "after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-foreground after:content-[''] after:opacity-0 data-[state=active]:after:opacity-100"
       )}
     >
