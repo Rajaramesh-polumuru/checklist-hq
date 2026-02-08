@@ -35,7 +35,7 @@ export function Layout() {
         {/* Skip to main content link */}
         <a
           href="#main-content"
-          className="skip-link sr-only-focusable focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-lg transition-all"
+          className="skip-link sr-only-focusable focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-100 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-lg transition-all"
         >
           Skip to main content
         </a>
@@ -57,7 +57,7 @@ export function Layout() {
       {/* Skip to main content link */}
       <a
         href="#main-content"
-        className="skip-link sr-only-focusable focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-lg transition-all"
+        className="skip-link sr-only-focusable focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-100 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-lg transition-all"
       >
         Skip to main content
       </a>
@@ -80,10 +80,7 @@ export function Layout() {
           <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(true)}>
             <Icon icon={Menu01Icon} className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-2">
-            <Logo size="sm" />
-            <span className="font-semibold text-lg">Checklist HQ</span>
-          </div>
+            <Logo size="sm" withText />
 
         </header>
 

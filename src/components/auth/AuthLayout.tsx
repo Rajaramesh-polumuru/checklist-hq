@@ -21,9 +21,8 @@ export function AuthLayout({ children, greeting, subtitle }: AuthLayoutProps) {
 
                 {/* Header */}
                 <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-8">
-                        <Logo size="sm" forceTheme="dark" />
-                        <span className="text-xl font-bold tracking-tight">Checklist HQ</span>
+                    <div className="mb-8">
+                        <Logo size="sm" forceTheme="dark" withText />
                     </div>
                 </div>
 

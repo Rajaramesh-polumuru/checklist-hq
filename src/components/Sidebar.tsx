@@ -211,9 +211,8 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
                 >
                     <div className="flex flex-col h-full">
                         {/* Logo */}
-                        <div className="flex items-center gap-3 mb-8 px-2">
-                            <Logo size="md" />
-                            <span className="font-bold text-lg">Checklist HQ</span>
+                        <div className="mb-8 px-2">
+                            <Logo size="md" withText />
                         </div>
 
                         <nav className="flex-1 space-y-2 overflow-y-auto">
@@ -391,7 +390,7 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="font-bold text-lg truncate"
+                            className="font-brand font-bold text-xl truncate tracking-tight pl-1"
                         >
                             Checklist HQ
                         </motion.span>

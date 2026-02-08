@@ -166,6 +166,18 @@ export function Home() {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative overflow-hidden min-h-[90vh] flex items-center">
+        {/* Navigation Header */}
+        <div className="absolute top-0 left-0 right-0 z-50 container mx-auto px-4 py-6 flex justify-between items-center">
+          <Logo size="md" withText />
+          <div className="hidden sm:flex gap-4">
+             <Button variant="ghost" asChild>
+                <Link to="/login">Sign In</Link>
+             </Button>
+             <Button asChild>
+                <Link to="/signup">Get Started</Link>
+             </Button>
+          </div>
+        </div>
         {/* Premium gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-orange-500/5" />
 
@@ -676,9 +688,8 @@ export function Home() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             {/* Brand */}
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <Logo size="lg" />
-                <span className="font-bold text-lg">Checklist HQ</span>
+              <div className="mb-4">
+                <Logo size="lg" withText />
               </div>
               <p className="text-sm text-muted-foreground max-w-md">
                 The GitHub for Standard Operating Procedures. Version control your processes,
