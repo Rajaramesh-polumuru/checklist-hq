@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getOrganization, getOrganizationMembers, getOrganizationTeams, type OrganizationMemberWithUser } from '@/services/organization'
 import { getOrganizationRepositories } from '@/services/repository'
-import type { Organization, Team, Repository } from '@/types/database'
+import type { Organization, Team, Repository, RepositoryWithTags } from '@/types/database'
 import { useAuthStore } from '@/stores/auth-store'
 import { usePermissionStore } from '@/stores/permission-store'
 import { useOrgPermission } from '@/hooks/usePermissions'
@@ -45,7 +45,7 @@ export function OrganizationDashboard() {
   const [org, setOrg] = useState<Organization | null>(null)
   const [members, setMembers] = useState<OrganizationMemberWithUser[]>([])
   const [teams, setTeams] = useState<Team[]>([])
-  const [repos, setRepos] = useState<Repository[]>([])
+  const [repos, setRepos] = useState<RepositoryWithTags[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('repositories')
 
@@ -267,7 +267,7 @@ export function OrganizationDashboard() {
                 <EmptyState variant="repositories" onAction={() => setCreateRepoOpen(true)} />
               )
             ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
                 {filteredRepos.map((repo, index) => (
                   <RepositoryCard
                     key={repo.id}
@@ -301,7 +301,7 @@ export function OrganizationDashboard() {
             {teams.length === 0 ? (
               <EmptyState variant="teams" onAction={() => setCreateTeamOpen(true)} />
             ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
                 {teams.map(team => (
                   <Card key={team.id} className="group hover:shadow-md transition-all duration-300 border-border/60">
                     <CardHeader className="pb-3">

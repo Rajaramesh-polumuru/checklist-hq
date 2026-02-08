@@ -41,7 +41,7 @@ export async function getRepository(id: string): Promise<Repository | null> {
   return data as Repository
 }
 
-export async function getUserRepositories(userId: string): Promise<Repository[]> {
+export async function getUserRepositories(userId: string): Promise<RepositoryWithTags[]> {
   const { data, error } = await supabase
     .from('repositories')
     .select()
@@ -49,10 +49,12 @@ export async function getUserRepositories(userId: string): Promise<Repository[]>
     .order('updated_at', { ascending: false })
 
   if (error) throw error
-  return (data || []) as Repository[]
+  
+  const repos = (data || []) as Repository[]
+  return await attachTagsToRepositories(repos)
 }
 
-export async function getOrganizationRepositories(orgId: string): Promise<Repository[]> {
+export async function getOrganizationRepositories(orgId: string): Promise<RepositoryWithTags[]> {
   const { data, error } = await supabase
     .from('repositories')
     .select()
@@ -60,7 +62,9 @@ export async function getOrganizationRepositories(orgId: string): Promise<Reposi
     .order('updated_at', { ascending: false })
 
   if (error) throw error
-  return (data || []) as Repository[]
+  
+  const repos = (data || []) as Repository[]
+  return await attachTagsToRepositories(repos)
 }
 
 export async function updateRepository(

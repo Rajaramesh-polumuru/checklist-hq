@@ -27,7 +27,7 @@ import {
   type FilterState,
   type SortOption,
 } from '@/lib/dashboard-utils'
-import type { Repository, Run } from '@/types/database'
+import type { Repository, Run, RepositoryWithTags } from '@/types/database'
 
 // New modular components
 import { DashboardHeader } from '@/pages/dashboard/DashboardHeader'
@@ -43,7 +43,7 @@ export function Dashboard() {
   const { toasts, dismissToast, success, error: showError } = useToast()
 
   // Data State
-  const [repositories, setRepositories] = useState<Repository[]>([])
+  const [repositories, setRepositories] = useState<RepositoryWithTags[]>([])
   const [activeRuns, setActiveRuns] = useState<(Run & { repository: { title: string; owner_id: string } })[]>([])
   const [activity, setActivity] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
