@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getTeam, getTeamMembers, getTeamRepositories, removeRepositoryFromTeam, type TeamMemberWithUser, type TeamRepositoryWithAccess } from '@/services/team'
 import type { Team } from '@/types/database'
@@ -26,11 +27,12 @@ import { ShareRepositoryToTeamModal } from '@/components/team/ShareRepositoryToT
 import { TeamActivityFeed } from '@/components/team/TeamActivityFeed'
 import { VisibilityBadge } from '@/components/ui/visibility-badge'
 import { EmptyState } from '@/components/organization/EmptyStates'
-import { MemberListSkeleton, RepositoryGridSkeleton } from '@/components/organization/OrganizationSkeletons'
+import { MemberListSkeleton, RepositoryGridSkeleton, TabsSkeleton } from '@/components/organization/OrganizationSkeletons'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 export function TeamDashboard() {
   const { orgId, teamId } = useParams()
@@ -68,7 +70,6 @@ export function TeamDashboard() {
         setMembers(membersData)
         setRepositories(reposData)
 
-        // Set user's team permission
         const userMember = membersData.find(m => m.user_id === user.id)
         if (userMember) {
           setTeamPermission(teamId, userMember.role)
@@ -126,19 +127,17 @@ export function TeamDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="border-b bg-card">
-          <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="h-16 w-16 rounded-xl bg-muted animate-pulse" />
+        <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
+          <div className="rounded-2xl border bg-muted/5 p-6 mb-6 animate-pulse">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-xl bg-muted" />
               <div className="space-y-2">
-                <div className="h-8 w-64 bg-muted animate-pulse rounded" />
-                <div className="h-4 w-48 bg-muted animate-pulse rounded" />
+                <div className="h-6 w-48 bg-muted rounded" />
+                <div className="h-4 w-32 bg-muted rounded" />
               </div>
             </div>
           </div>
-        </div>
-        <div className="container mx-auto px-4 py-8">
-          <MemberListSkeleton />
+          <TabsSkeleton />
         </div>
       </div>
     )
@@ -146,8 +145,8 @@ export function TeamDashboard() {
 
   if (!team) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="text-2xl font-bold">Team not found</h1>
+      <div className="container mx-auto px-4 py-8 text-center pt-24">
+        <h1 className="text-2xl font-bold tracking-tight">Team not found</h1>
         <Button variant="outline" className="mt-4" asChild>
           <Link to={`/app/orgs/${orgId}`}>Back to Organization</Link>
         </Button>
@@ -156,102 +155,88 @@ export function TeamDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-12">
-      {/* Header */}
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center gap-4 mb-6">
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="active:scale-95 transition-transform"
-              aria-label="Back to organization"
-            >
-              <Link to={`/app/orgs/${orgId}`}>
-                <Icon icon={ArrowLeft01Icon} className="h-4 w-4 mr-2" />
-                Back
-              </Link>
-            </Button>
-          </div>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
+        {/* Back link */}
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="mb-4 -ml-2 h-8 text-muted-foreground hover:text-foreground"
+        >
+          <Link to={`/app/orgs/${orgId}`}>
+            <Icon icon={ArrowLeft01Icon} size="sm" className="mr-1.5" />
+            Back
+          </Link>
+        </Button>
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-purple-500/20 to-violet-500/20 flex items-center justify-center border">
-                <Icon icon={UserGroupIcon} className="h-8 w-8 text-purple-500" />
+        {/* Header Card */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-orange-500/5 border p-6 mb-6"
+        >
+          <div className="absolute -top-16 -right-16 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-orange-400/10 rounded-full blur-2xl pointer-events-none" />
+          <Icon icon={UserGroupIcon} size={128} className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/6 pointer-events-none select-none" />
+
+          <div className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+            {/* Team Profile */}
+            <div className="flex items-center gap-5">
+              <div className="relative group shrink-0">
+                <div className="size-16 rounded-xl bg-gradient-to-br from-primary/5 to-muted border border-border/50 flex items-center justify-center overflow-hidden shadow-sm transition-all group-hover:shadow-md ring-1 ring-transparent group-hover:ring-primary/10">
+                  <Icon icon={UserGroupIcon} size="xl" className="text-primary/70" />
+                </div>
               </div>
-              <div>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold">{team.name}</h1>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold tracking-tight text-foreground">{team.name}</h1>
                   <VisibilityBadge visibility={team.visibility} />
                 </div>
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mt-1">
-                  <span className="bg-muted px-2 py-0.5 rounded text-xs font-mono">@{team.slug}</span>
-                  <span>•</span>
-                  <span>{members.length} {members.length === 1 ? 'member' : 'members'}</span>
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <span className="font-mono text-xs">@{team.slug}</span>
+                  <span className="text-border mx-1">•</span>
+                  <span className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-pointer">
+                    <Icon icon={UserGroupIcon} size="xs" />
+                    {members.length} {members.length === 1 ? 'member' : 'members'}
+                  </span>
+                  <span className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-pointer">
+                    <Icon icon={GitForkIcon} size="xs" />
+                    {repositories.length} {repositories.length === 1 ? 'repository' : 'repositories'}
+                  </span>
                 </div>
                 {team.description && (
-                  <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
-                    {team.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground max-w-2xl">{team.description}</p>
                 )}
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setActiveTab('settings')}
-                className="active:scale-95 transition-transform"
-                aria-label="Team settings"
-              >
-                <Icon icon={Settings02Icon} className="h-4 w-4 mr-2" />
+            {/* Actions */}
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" onClick={() => setActiveTab('settings')} className="hidden sm:flex h-9">
+                <Icon icon={Settings02Icon} size="sm" className="mr-2" />
                 Settings
               </Button>
-              <Button
-                onClick={() => setAddMemberOpen(true)}
-                className="active:scale-95 transition-transform"
-                aria-label="Add team member"
-              >
-                <Icon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+              <Button size="sm" onClick={() => setAddMemberOpen(true)} className="h-9 px-4 shadow-sm active:scale-95 transition-all">
+                <Icon icon={PlusSignIcon} size="sm" className="mr-2" />
                 Add Member
               </Button>
             </div>
           </div>
+        </motion.div>
 
-          <div className="mt-8">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList>
-                <TabsTrigger value="members" className="gap-2">
-                  <Icon icon={UserGroupIcon} className="h-4 w-4" />
-                  Members
-                  <span className="ml-1 bg-muted px-1.5 py-0.5 rounded-full text-xs">{members.length}</span>
-                </TabsTrigger>
-                <TabsTrigger value="repositories" className="gap-2">
-                  <Icon icon={GitForkIcon} className="h-4 w-4" />
-                  Repositories
-                  {repositories.length > 0 && (
-                    <span className="ml-1 bg-muted px-1.5 py-0.5 rounded-full text-xs">{repositories.length}</span>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="activity" className="gap-2">
-                  <Icon icon={Activity01Icon} className="h-4 w-4" />
-                  Activity
-                </TabsTrigger>
-                <TabsTrigger value="settings" className="gap-2">
-                  <Icon icon={Settings02Icon} className="h-4 w-4" />
-                  Settings
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
+        {/* Navigation Tabs + Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="h-auto w-full justify-start gap-2 bg-transparent p-0 border-b border-border/40 mb-8">
+            <TabTrigger value="members" icon={UserGroupIcon} label="Members" count={members.length} />
+            <TabTrigger value="repositories" icon={GitForkIcon} label="Repositories" count={repositories.length} />
+            <TabTrigger value="activity" icon={Activity01Icon} label="Activity" />
+            <TabTrigger value="settings" icon={Settings02Icon} label="Settings" />
+          </TabsList>
           {/* Members Tab */}
-          <TabsContent value="members" className="space-y-6">
+          <TabsContent value="members" className="mt-0 focus-visible:outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
             {members.length === 0 ? (
               <EmptyState variant="members" onAction={() => setAddMemberOpen(true)} />
             ) : (
@@ -260,7 +245,7 @@ export function TeamDashboard() {
           </TabsContent>
 
           {/* Repositories Tab */}
-          <TabsContent value="repositories" className="space-y-6">
+          <TabsContent value="repositories" className="mt-0 focus-visible:outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-lg font-semibold tracking-tight">Team Repositories</h2>
@@ -275,12 +260,9 @@ export function TeamDashboard() {
             {reposLoading ? (
               <RepositoryGridSkeleton />
             ) : repositories.length === 0 ? (
-              <EmptyState
-                variant="repositories"
-                onAction={() => setShareRepoOpen(true)}
-              />
+              <EmptyState variant="repositories" onAction={() => setShareRepoOpen(true)} />
             ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
                 {repositories.map(repo => (
                   <Card key={repo.id} className="group hover:shadow-md transition-all duration-300 border-border/60">
                     <CardHeader className="pb-3">
@@ -343,18 +325,12 @@ export function TeamDashboard() {
           </TabsContent>
 
           {/* Activity Tab */}
-          <TabsContent value="activity" className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-lg font-semibold tracking-tight">Team Activity</h2>
-                <p className="text-sm text-muted-foreground">Recent actions and changes in this team.</p>
-              </div>
-            </div>
+          <TabsContent value="activity" className="mt-0 focus-visible:outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
             <TeamActivityFeed teamId={team.id} />
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings">
+          <TabsContent value="settings" className="mt-0 focus-visible:outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
             <TeamSettings team={team} onUpdate={setTeam} />
           </TabsContent>
         </Tabs>
@@ -380,5 +356,26 @@ export function TeamDashboard() {
         />
       )}
     </div>
+  )
+}
+
+// Helper Components
+function TabTrigger({ value, icon, label, count }: { value: string, icon: any, label: string, count?: number }) {
+  return (
+    <TabsTrigger
+      value={value}
+      className={cn(
+        "group relative flex items-center gap-2 rounded-t-md rounded-b-none px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground data-[state=active]:text-foreground data-[state=active]:hover:bg-muted outline-none ring-0 focus-visible:ring-0",
+        "after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-foreground after:content-[''] after:opacity-0 after:transition-opacity after:duration-200 data-[state=active]:after:opacity-100"
+      )}
+    >
+      <Icon icon={icon} size="sm" className="text-muted-foreground group-hover:text-foreground group-data-[state=active]:text-foreground transition-colors" />
+      <span>{label}</span>
+      {count !== undefined && (
+        <span className="ml-1 flex h-4 min-w-5 items-center justify-center rounded-full bg-muted px-1 text-[10px] font-medium text-muted-foreground group-hover:bg-background/80 group-data-[state=active]:bg-muted group-data-[state=active]:text-foreground">
+          {count}
+        </span>
+      )}
+    </TabsTrigger>
   )
 }

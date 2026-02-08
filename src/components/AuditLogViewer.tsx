@@ -18,7 +18,16 @@ import {
   Clock01Icon,
   Tick01Icon,
   AlertCircleIcon,
-  ViewIcon
+  ViewIcon,
+  Folder01Icon,
+  PencilEdit01Icon,
+  Delete01Icon,
+  PlayIcon,
+  User02Icon,
+  Cancel01Icon,
+  UserGroupIcon,
+  LockKeyIcon,
+  CheckListIcon,
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { getOrgAuditLogs, exportAuditLogsCSV, type AuditLog } from '@/services/audit'
@@ -28,16 +37,17 @@ interface AuditLogViewerProps {
   organizationId: string
 }
 
-const ACTION_ICONS: Record<string, React.ReactNode> = {
-  'repository.created': '📁',
-  'repository.updated': '✏️',
-  'repository.deleted': '🗑️',
-  'run.started': '▶️',
-  'run.completed': '✅',
-  'member.invited': '👤',
-  'member.removed': '❌',
-  'team.created': '👥',
-  'permission.changed': '🔐',
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ACTION_ICONS: Record<string, any> = {
+  'repository.created': Folder01Icon,
+  'repository.updated': PencilEdit01Icon,
+  'repository.deleted': Delete01Icon,
+  'run.started': PlayIcon,
+  'run.completed': Tick01Icon,
+  'member.invited': User02Icon,
+  'member.removed': Cancel01Icon,
+  'team.created': UserGroupIcon,
+  'permission.changed': LockKeyIcon,
 }
 
 export function AuditLogViewer({ organizationId }: AuditLogViewerProps) {
@@ -200,7 +210,7 @@ export function AuditLogViewer({ organizationId }: AuditLogViewerProps) {
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">{ACTION_ICONS[log.action] || '📋'}</span>
+                    <Icon icon={ACTION_ICONS[log.action] ?? CheckListIcon} className="h-4 w-4 shrink-0" />
                     <span className="font-medium text-sm">{log.action}</span>
                     <Badge variant="outline" className="text-[10px]">
                       {log.resource_type}

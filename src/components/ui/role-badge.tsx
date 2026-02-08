@@ -2,6 +2,8 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import type { OrgRole, TeamRole } from "@/stores/permission-store"
+import { Icon } from "@/components/ui/icon"
+import { CrownIcon, Settings01Icon, User02Icon, EyeIcon, Wrench01Icon } from "@hugeicons/core-free-icons"
 
 const roleBadgeVariants = cva(
   "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium transition-colors",
@@ -28,12 +30,13 @@ export interface RoleBadgeProps
   showIcon?: boolean
 }
 
-const roleIcons = {
-  owner: "👑",
-  admin: "⚙️",
-  member: "👤",
-  viewer: "👁️",
-  maintainer: "🔧",
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const roleIcons: Record<string, any> = {
+  owner: CrownIcon,
+  admin: Settings01Icon,
+  member: User02Icon,
+  viewer: EyeIcon,
+  maintainer: Wrench01Icon,
 }
 
 const roleLabels = {
@@ -53,7 +56,7 @@ export const RoleBadge = React.forwardRef<HTMLDivElement, RoleBadgeProps>(
         aria-label={`Role: ${roleLabels[role]}`}
         {...props}
       >
-        {showIcon && <span aria-hidden="true">{roleIcons[role]}</span>}
+        {showIcon && <Icon icon={roleIcons[role]} className="h-3 w-3" aria-hidden="true" />}
         {roleLabels[role]}
       </div>
     )

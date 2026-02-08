@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getOrganization, getOrganizationMembers, getOrganizationTeams, type OrganizationMemberWithUser } from '@/services/organization'
 import { getOrganizationRepositories } from '@/services/repository'
@@ -129,18 +130,16 @@ export function OrganizationDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
+          <div className="rounded-2xl border bg-muted/5 p-6 mb-6 animate-pulse">
             <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-xl bg-muted animate-pulse" />
+              <div className="h-16 w-16 rounded-xl bg-muted" />
               <div className="space-y-2">
-                <div className="h-6 w-48 bg-muted animate-pulse rounded" />
-                <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+                <div className="h-6 w-48 bg-muted rounded" />
+                <div className="h-4 w-32 bg-muted rounded" />
               </div>
             </div>
           </div>
-        </div>
-        <div className="container mx-auto px-4 py-8">
           <TabsSkeleton />
         </div>
       </div>
@@ -164,11 +163,19 @@ export function OrganizationDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header Section */}
-      <div className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-20">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+      <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
+        {/* Header Card */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-orange-500/5 border p-6 mb-6"
+        >
+          <div className="absolute -top-16 -right-16 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-orange-400/10 rounded-full blur-2xl pointer-events-none" />
+          <Icon icon={Building02Icon} size={128} className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/6 pointer-events-none select-none" />
 
+          <div className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-6">
             {/* Org Profile */}
             <div className="flex items-center gap-5">
               <div className="relative group shrink-0">
@@ -205,7 +212,7 @@ export function OrganizationDashboard() {
 
             {/* Actions */}
             <div className="flex items-center gap-3">
-              {/* Search - Desktop */}
+              {/* Search */}
               <div className="hidden md:block relative w-64">
                 <Icon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" size="sm" />
                 <Input
@@ -229,27 +236,20 @@ export function OrganizationDashboard() {
               </Button>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Navigation Tabs */}
-        <div className="container mx-auto px-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="h-auto w-full justify-start gap-2 bg-transparent p-0 border-b border-border/40">
-              <TabTrigger value="repositories" icon={GitForkIcon} label="Repositories" count={repos.length} />
-              <TabTrigger value="teams" icon={LayoutGridIcon} label="Teams" count={teams.length} />
-              <TabTrigger value="members" icon={UserGroupIcon} label="People" />
-              <TabTrigger value="activity" icon={Activity01Icon} label="Activity" />
-              <TabTrigger value="analytics" icon={Analytics01Icon} label="Analytics" />
-              <TabTrigger value="agents" icon={AiCloud02Icon} label="Agents" />
-              {canAccessSettings && <TabTrigger value="settings" icon={Settings02Icon} label="Settings" />}
-            </TabsList>
-          </Tabs>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+        {/* Navigation Tabs + Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="h-auto w-full justify-start gap-2 bg-transparent p-0 border-b border-border/40 mb-8">
+            <TabTrigger value="repositories" icon={GitForkIcon} label="Repositories" count={repos.length} />
+            <TabTrigger value="teams" icon={LayoutGridIcon} label="Teams" count={teams.length} />
+            <TabTrigger value="members" icon={UserGroupIcon} label="People" />
+            <TabTrigger value="activity" icon={Activity01Icon} label="Activity" />
+            <TabTrigger value="analytics" icon={Analytics01Icon} label="Analytics" />
+            <TabTrigger value="agents" icon={AiCloud02Icon} label="Agents" />
+            {canAccessSettings && <TabTrigger value="settings" icon={Settings02Icon} label="Settings" />}
+          </TabsList>
+
           {/* Repositories Tab */}
           <TabsContent value="repositories" className="mt-0 focus-visible:outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
             {filteredRepos.length === 0 ? (

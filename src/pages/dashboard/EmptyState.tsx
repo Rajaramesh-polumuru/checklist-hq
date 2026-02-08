@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { TaskDaily01Icon, PlusSignIcon, FileSearchIcon, Search01Icon } from '@hugeicons/core-free-icons'
+import { TaskDaily01Icon, PlusSignIcon, FileSearchIcon, Search01Icon, Edit02Icon, PlayIcon, GitForkIcon } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 
 interface EmptyStateProps {
@@ -126,15 +126,15 @@ export function EmptyState({ searchQuery, onClearSearch }: EmptyStateProps) {
                     </p>
                     <div className="grid sm:grid-cols-3 gap-4 text-left">
                         <div className="p-3 rounded-lg bg-background/50">
-                            <p className="text-sm font-medium mb-1">📝 Create</p>
+                            <p className="text-sm font-medium mb-1 flex items-center gap-1.5"><Icon icon={Edit02Icon} className="h-3.5 w-3.5" /> Create</p>
                             <p className="text-xs text-muted-foreground">Build checklists with nested items and rich descriptions</p>
                         </div>
                         <div className="p-3 rounded-lg bg-background/50">
-                            <p className="text-sm font-medium mb-1">🏃 Run</p>
+                            <p className="text-sm font-medium mb-1 flex items-center gap-1.5"><Icon icon={PlayIcon} className="h-3.5 w-3.5" /> Run</p>
                             <p className="text-xs text-muted-foreground">Execute checklists and track your progress</p>
                         </div>
                         <div className="p-3 rounded-lg bg-background/50">
-                            <p className="text-sm font-medium mb-1">🔀 Fork</p>
+                            <p className="text-sm font-medium mb-1 flex items-center gap-1.5"><Icon icon={GitForkIcon} className="h-3.5 w-3.5" /> Fork</p>
                             <p className="text-xs text-muted-foreground">Copy community templates and customize them</p>
                         </div>
                     </div>

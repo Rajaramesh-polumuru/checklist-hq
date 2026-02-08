@@ -7,6 +7,8 @@ import {
   CheckListIcon,
   ChartBarLineIcon,
   PlusSignIcon,
+  Building01Icon,
+  Rocket01Icon,
 } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
 
@@ -22,28 +24,28 @@ const emptyStateConfig = {
     title: "No teams yet",
     description: "Create your first team to organize members and manage repository access.",
     actionLabel: "Create Team",
-    illustration: "🏢",
+    illustration: Building01Icon,
   },
   members: {
     icon: UserGroupIcon,
     title: "No members yet",
     description: "Invite team members to collaborate on checklists and processes.",
     actionLabel: "Invite Members",
-    illustration: "👥",
+    illustration: UserGroupIcon,
   },
   repositories: {
     icon: CheckListIcon,
     title: "No repositories yet",
     description: "Create or fork checklists to get started with your organization.",
     actionLabel: "Create Checklist",
-    illustration: "📋",
+    illustration: CheckListIcon,
   },
   analytics: {
     icon: ChartBarLineIcon,
     title: "No data yet",
     description: "Analytics will appear here once you start completing checklist runs.",
     actionLabel: null,
-    illustration: "📊",
+    illustration: ChartBarLineIcon,
   },
 }
 
@@ -64,10 +66,10 @@ export function EmptyState({ variant, onAction, className }: EmptyStateProps) {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.1, duration: 0.3 }}
-            className="mb-6 text-6xl"
+            className="mb-6 flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10"
             aria-hidden="true"
           >
-            {config.illustration}
+            <Icon icon={config.illustration} className="h-10 w-10 text-primary/60" />
           </motion.div>
 
           {/* Content */}
@@ -103,11 +105,6 @@ export function EmptyState({ variant, onAction, className }: EmptyStateProps) {
               </motion.div>
             )}
           </motion.div>
-
-          {/* Decorative Element */}
-          <div className="absolute top-4 right-4 opacity-10">
-            <Icon icon={config.icon} className="h-24 w-24" />
-          </div>
         </CardContent>
       </Card>
     </motion.div>
@@ -135,7 +132,9 @@ export function QuickStartChecklist({
       <Card className="bg-primary/5 border-primary/20">
         <CardContent className="p-6">
           <div className="flex items-start gap-4">
-            <div className="text-3xl" aria-hidden="true">🚀</div>
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10" aria-hidden="true">
+              <Icon icon={Rocket01Icon} className="h-5 w-5 text-primary" />
+            </div>
             <div className="flex-1 space-y-4">
               <div>
                 <h3 className="text-lg font-semibold mb-1">
