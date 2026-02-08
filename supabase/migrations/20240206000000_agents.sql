@@ -3,10 +3,14 @@
 -- =============================================
 
 -- Agent types enum
-CREATE TYPE agent_type AS ENUM ('claude', 'custom', 'webhook');
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'agent_type') THEN
+    CREATE TYPE agent_type AS ENUM ('claude', 'custom', 'webhook');
+  END IF;
+END $$;
 
 -- Agents table
-CREATE TABLE agents (
+CREATE TABLE IF NOT EXISTS agents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -20,7 +24,7 @@ CREATE TABLE agents (
 );
 
 -- Agent team memberships (which teams an agent can access)
-CREATE TABLE agent_team_memberships (
+CREATE TABLE IF NOT EXISTS agent_team_memberships (
   agent_id UUID NOT NULL REFERENCES agents(id) ON DELETE CASCADE,
   team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
   permissions JSONB DEFAULT NULL,
@@ -29,10 +33,10 @@ CREATE TABLE agent_team_memberships (
 );
 
 -- Indexes
-CREATE INDEX idx_agents_organization ON agents(organization_id);
-CREATE INDEX idx_agents_created_by ON agents(created_by);
-CREATE INDEX idx_agent_team_memberships_agent ON agent_team_memberships(agent_id);
-CREATE INDEX idx_agent_team_memberships_team ON agent_team_memberships(team_id);
+CREATE INDEX IF NOT EXISTS idx_agents_organization ON agents(organization_id);
+CREATE INDEX IF NOT EXISTS idx_agents_created_by ON agents(created_by);
+CREATE INDEX IF NOT EXISTS idx_agent_team_memberships_agent ON agent_team_memberships(agent_id);
+CREATE INDEX IF NOT EXISTS idx_agent_team_memberships_team ON agent_team_memberships(team_id);
 
 -- Enable RLS
 ALTER TABLE agents ENABLE ROW LEVEL SECURITY;
