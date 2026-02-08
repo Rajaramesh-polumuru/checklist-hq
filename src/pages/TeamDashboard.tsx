@@ -27,7 +27,7 @@ import { ShareRepositoryToTeamModal } from '@/components/team/ShareRepositoryToT
 import { TeamActivityFeed } from '@/components/team/TeamActivityFeed'
 import { VisibilityBadge } from '@/components/ui/visibility-badge'
 import { EmptyState } from '@/components/organization/EmptyStates'
-import { MemberListSkeleton, RepositoryGridSkeleton, TabsSkeleton } from '@/components/organization/OrganizationSkeletons'
+import { RepositoryGridSkeleton, TabsSkeleton } from '@/components/organization/OrganizationSkeletons'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'

@@ -12,6 +12,7 @@ import {
   Alert02Icon,
   ToggleOffIcon,
   ToggleOnIcon,
+  CheckmarkCircle01Icon,
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import {
@@ -183,7 +184,10 @@ export function IPAllowlistSettings({ organizationId }: IPAllowlistSettingsProps
           <span className="text-xs text-muted-foreground">Your current IP</span>
           <span className="text-xs font-mono font-semibold">{myIP || '…'}</span>
           {myIP && myIP !== 'unknown' && entries.some(e => e.is_active && e.cidr === `${myIP}/32`) && (
-            <Badge variant="outline" className="text-green-700 dark:text-green-400 border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/30 text-[10px]">✓ Allowed</Badge>
+            <Badge variant="outline" className="text-green-700 dark:text-green-400 border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/30 text-[10px] gap-1">
+              <Icon icon={CheckmarkCircle01Icon} className="h-3 w-3" />
+              Allowed
+            </Badge>
           )}
         </div>
         {myIP && myIP !== 'unknown' && !entries.some(e => e.cidr === `${myIP}/32`) && (

@@ -687,9 +687,24 @@ export function RunMode() {
               <div className="flex items-center gap-2">
                 <Badge
                   variant={isComplete ? 'success' : run?.status === 'paused' ? 'warning' : 'default'}
-                  className={cn("text-xs", isComplete && "animate-pulse")}
+                  className={cn("text-xs gap-1.5", isComplete && "animate-pulse")}
                 >
-                  {isComplete ? '✓ Complete' : run?.status === 'paused' ? '⏸ Paused' : 'In Progress'}
+                  {isComplete ? (
+                    <>
+                      <Icon icon={CheckmarkCircle01Icon} className="h-3.5 w-3.5" />
+                      Complete
+                    </>
+                  ) : run?.status === 'paused' ? (
+                    <>
+                      <Icon icon={PauseIcon} className="h-3.5 w-3.5" />
+                      Paused
+                    </>
+                  ) : (
+                    <>
+                      <Icon icon={PlayIcon} className="h-3.5 w-3.5" />
+                      In Progress
+                    </>
+                  )}
                 </Badge>
                 {/* Sync indicator */}
                 {!isComplete && (
