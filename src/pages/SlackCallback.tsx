@@ -51,13 +51,17 @@ export function SlackCallback() {
 
     const exchangeCode = async () => {
       try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+
         const { data, error } = await supabase.functions.invoke('slack-oauth', {
           body: {
             code,
             redirectUri: `${window.location.origin}/integrations/slack/callback`,
             orgId,
             userId
-          }
+          },
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
         })
 
         if (error) throw new Error(error.message)
