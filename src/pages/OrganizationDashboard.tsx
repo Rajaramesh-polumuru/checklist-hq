@@ -19,7 +19,8 @@ import {
   LayoutGridIcon,
   Analytics01Icon,
   MoreHorizontalIcon,
-  AiCloud02Icon
+  AiCloud02Icon,
+  Activity01Icon
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { RepositoryCard } from '@/pages/dashboard/RepositoryCard'
@@ -33,6 +34,7 @@ import { RoleBadge } from '@/components/ui/role-badge'
 import { VisibilityBadge } from '@/components/ui/visibility-badge'
 import { EmptyState } from '@/components/organization/EmptyStates'
 import { TabsSkeleton } from '@/components/organization/OrganizationSkeletons'
+import { OrgActivityFeed } from '@/components/organization/OrgActivityFeed'
 import { cn } from '@/lib/utils'
 
 export function OrganizationDashboard() {
@@ -236,6 +238,7 @@ export function OrganizationDashboard() {
               <TabTrigger value="repositories" icon={GitForkIcon} label="Repositories" count={repos.length} />
               <TabTrigger value="teams" icon={LayoutGridIcon} label="Teams" count={teams.length} />
               <TabTrigger value="members" icon={UserGroupIcon} label="People" />
+              <TabTrigger value="activity" icon={Activity01Icon} label="Activity" />
               <TabTrigger value="analytics" icon={Analytics01Icon} label="Analytics" />
               <TabTrigger value="agents" icon={AiCloud02Icon} label="Agents" />
               {canAccessSettings && <TabTrigger value="settings" icon={Settings02Icon} label="Settings" />}
@@ -394,6 +397,11 @@ export function OrganizationDashboard() {
                 </div>
               </Card>
             )}
+          </TabsContent>
+
+          {/* Activity Tab */}
+          <TabsContent value="activity" className="mt-0 focus-visible:outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
+            {orgId && <OrgActivityFeed organizationId={orgId} />}
           </TabsContent>
 
           {/* Analytics Tab */}

@@ -251,6 +251,101 @@ export async function forkRepository(params: {
   return data as string // Returns the new repo ID
 }
 
+/**
+ * Fork a repository to a team (creates a team-owned repository)
+ * This creates a fork that belongs to the team's organization
+ */
+export async function forkRepositoryToTeam(params: {
+  sourceRepoId: string
+  targetTeamId: string
+  newTitle?: string
+}): Promise<string> {
+  const { sourceRepoId, targetTeamId, newTitle } = params
+
+  // First, get the source repository and its latest commit
+  const sourceRepo = await getRepository(sourceRepoId)
+  if (!sourceRepo) {
+    throw new Error('Source repository not found')
+  }
+
+  const latestCommit = await getLatestCommit(sourceRepoId)
+  if (!latestCommit) {
+    throw new Error('Source repository has no commits')
+  }
+
+  // Get the team to find the organization
+  const { data: team, error: teamError } = await supabase
+    .from('teams')
+    .select('id, organization_id, name')
+    .eq('id', targetTeamId)
+    .single()
+
+  if (teamError || !team) {
+    throw new Error('Team not found')
+  }
+
+  // Get the current user
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  // Create the forked repository with organization and team association
+  const title = newTitle || sourceRepo.title
+  const originId = sourceRepo.origin_repo_id || sourceRepo.id
+
+  const { data: newRepo, error: repoError } = await supabase
+    .from('repositories')
+    .insert({
+      owner_id: user.id,
+      title,
+      description: sourceRepo.description,
+      is_public: false, // Team forks are private by default
+      origin_repo_id: originId,
+      upstream_repo_id: sourceRepo.id,
+      organization_id: team.organization_id,
+    })
+    .select()
+    .single()
+
+  if (repoError) throw repoError
+
+  // Create the initial commit with the forked content
+  const { error: commitError } = await supabase
+    .from('commits')
+    .insert({
+      repo_id: newRepo.id,
+      content: latestCommit.content,
+      message: `Forked from ${sourceRepo.title} to ${team.name}`,
+      parent_commit_id: null,
+    })
+
+  if (commitError) throw commitError
+
+  // Grant the team access to the repository
+  const { error: accessError } = await supabase
+    .from('repository_team_access')
+    .insert({
+      repository_id: newRepo.id,
+      team_id: targetTeamId,
+      permission: 'admin',
+      granted_by: user.id,
+    })
+
+  if (accessError) {
+    console.error('Failed to grant team access:', accessError)
+    // Don't throw - the fork was still created successfully
+  }
+
+  // Update fork count on source repo
+  await supabase
+    .from('repositories')
+    .update({ fork_count: (sourceRepo.fork_count || 0) + 1 })
+    .eq('id', sourceRepoId)
+
+  return newRepo.id
+}
+
 // ============================================
 // Public Repository Operations (Explore)
 // ============================================

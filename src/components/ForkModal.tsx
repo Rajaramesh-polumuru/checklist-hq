@@ -10,8 +10,17 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   GitForkIcon,
   Loading02Icon,
@@ -21,11 +30,15 @@ import {
   Copy01Icon,
   ArrowRight01Icon,
   SparklesIcon,
+  UserIcon,
+  UserGroupIcon,
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
-import { forkRepository, getLatestCommit } from '@/services/repository'
-import type { Repository, Commit, ChecklistItem } from '@/types/database'
+import { forkRepository, forkRepositoryToTeam, getLatestCommit } from '@/services/repository'
+import { getMyOrganizations } from '@/services/organization'
+import { getOrganizationTeams } from '@/services/team'
+import type { Repository, Commit, ChecklistItem, Organization, Team } from '@/types/database'
 
 interface ForkModalProps {
   repository: Repository | null
@@ -35,6 +48,11 @@ interface ForkModalProps {
 }
 
 type ForkState = 'idle' | 'loading-preview' | 'ready' | 'forking' | 'success' | 'error'
+type ForkTarget = 'personal' | 'team'
+
+interface TeamWithOrg extends Team {
+  organization?: Organization
+}
 
 export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalProps) {
   const navigate = useNavigate()
@@ -48,11 +66,45 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
   const [newRepoId, setNewRepoId] = useState<string | null>(null)
   const [progress, setProgress] = useState(0)
 
+  // Fork target state
+  const [forkTarget, setForkTarget] = useState<ForkTarget>('personal')
+  const [teams, setTeams] = useState<TeamWithOrg[]>([])
+  const [selectedTeamId, setSelectedTeamId] = useState<string>('')
+  const [loadingTeams, setLoadingTeams] = useState(false)
+
   // Calculate item count
   const itemCount = commit?.content?.items ? Object.keys(commit.content.items).length : 0
   const headerCount = commit?.content?.items
     ? Object.values(commit.content.items).filter((item: ChecklistItem) => item.type === 'header').length
     : 0
+
+  // Load user's organizations and teams
+  const loadOrganizationsAndTeams = useCallback(async () => {
+    if (!user) return
+
+    try {
+      setLoadingTeams(true)
+      const orgs = await getMyOrganizations()
+
+      // Load teams for all organizations
+      const allTeams: TeamWithOrg[] = []
+      for (const org of orgs) {
+        if (org.role === 'owner' || org.role === 'admin' || org.role === 'member') {
+          const orgTeams = await getOrganizationTeams(org.id)
+          allTeams.push(...orgTeams.map(t => ({ ...t, organization: org })))
+        }
+      }
+      setTeams(allTeams)
+
+      if (allTeams.length > 0) {
+        setSelectedTeamId(allTeams[0].id)
+      }
+    } catch (err) {
+      console.error('Error loading organizations:', err)
+    } finally {
+      setLoadingTeams(false)
+    }
+  }, [user])
 
   // Load commit for preview
   const loadCommit = useCallback(async () => {
@@ -93,7 +145,10 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
         setError(null)
         setNewRepoId(null)
         setProgress(0)
+        setForkTarget('personal')
+        setSelectedTeamId('')
         loadCommit()
+        loadOrganizationsAndTeams()
       }, 0)
       return () => clearTimeout(timer)
     } else {
@@ -104,7 +159,7 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
       }, 0)
       return () => clearTimeout(timer)
     }
-  }, [isOpen, repository, loadCommit])
+  }, [isOpen, repository, loadCommit, loadOrganizationsAndTeams])
 
   // Handle fork
   const handleFork = async () => {
@@ -126,18 +181,35 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
         setProgress((prev) => Math.min(prev + 15, 90))
       }, 200)
 
-      console.log('[ForkModal] Forking repository:', {
-        sourceRepoId: repository.id,
-        newOwnerId: user.id,
-        newTitle: title !== repository.title ? title : undefined,
-        originalItemCount: itemCount,
-      })
+      let repoId: string
 
-      const repoId = await forkRepository({
-        sourceRepoId: repository.id,
-        newOwnerId: user.id,
-        newTitle: title !== repository.title ? title : undefined,
-      })
+      if (forkTarget === 'team' && selectedTeamId) {
+        console.log('[ForkModal] Forking repository to team:', {
+          sourceRepoId: repository.id,
+          targetTeamId: selectedTeamId,
+          newTitle: title !== repository.title ? title : undefined,
+          originalItemCount: itemCount,
+        })
+
+        repoId = await forkRepositoryToTeam({
+          sourceRepoId: repository.id,
+          targetTeamId: selectedTeamId,
+          newTitle: title !== repository.title ? title : undefined,
+        })
+      } else {
+        console.log('[ForkModal] Forking repository to personal:', {
+          sourceRepoId: repository.id,
+          newOwnerId: user.id,
+          newTitle: title !== repository.title ? title : undefined,
+          originalItemCount: itemCount,
+        })
+
+        repoId = await forkRepository({
+          sourceRepoId: repository.id,
+          newOwnerId: user.id,
+          newTitle: title !== repository.title ? title : undefined,
+        })
+      }
 
       console.log('[ForkModal] Fork successful, new repoId:', repoId)
 
@@ -159,6 +231,13 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
   const handleGoToFork = () => {
     if (newRepoId) {
       onClose()
+      if (forkTarget === 'team' && selectedTeamId) {
+        const team = teams.find(t => t.id === selectedTeamId)
+        if (team) {
+          navigate(`/app/orgs/${team.organization_id}/teams/${team.id}`)
+          return
+        }
+      }
       navigate(`/app/repo/${newRepoId}`)
     }
   }
@@ -172,11 +251,14 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
       .slice(0, 5)
   }
 
+  // Get selected team info
+  const getSelectedTeam = () => teams.find(t => t.id === selectedTeamId)
+
   if (!repository) return null
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -252,6 +334,83 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
               <Icon icon={ArrowRight01Icon} className="h-4 w-4" />
             </div>
 
+            {/* Fork Target Selection */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Fork to</Label>
+              <RadioGroup
+                value={forkTarget}
+                onValueChange={(v: string) => setForkTarget(v as ForkTarget)}
+                className="grid grid-cols-2 gap-3"
+              >
+                <Label
+                  htmlFor="personal"
+                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                    forkTarget === 'personal'
+                      ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                      : 'border-border hover:bg-muted/50'
+                  }`}
+                >
+                  <RadioGroupItem value="personal" id="personal" className="sr-only" />
+                  <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                    <Icon icon={UserIcon} className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Personal</p>
+                    <p className="text-xs text-muted-foreground">Your account</p>
+                  </div>
+                </Label>
+
+                <Label
+                  htmlFor="team"
+                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                    forkTarget === 'team'
+                      ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                      : 'border-border hover:bg-muted/50'
+                  } ${teams.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <RadioGroupItem
+                    value="team"
+                    id="team"
+                    className="sr-only"
+                    disabled={teams.length === 0}
+                  />
+                  <div className="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
+                    <Icon icon={UserGroupIcon} className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Team</p>
+                    <p className="text-xs text-muted-foreground">
+                      {loadingTeams ? 'Loading...' : teams.length === 0 ? 'No teams' : `${teams.length} available`}
+                    </p>
+                  </div>
+                </Label>
+              </RadioGroup>
+
+              {/* Team Selector */}
+              {forkTarget === 'team' && teams.length > 0 && (
+                <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teams.map((team) => (
+                      <SelectItem key={team.id} value={team.id}>
+                        <div className="flex items-center gap-2">
+                          <Icon icon={UserGroupIcon} className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>{team.name}</span>
+                          {team.organization && (
+                            <span className="text-xs text-muted-foreground">
+                              ({team.organization.name})
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
             {/* New Fork Info */}
             <div className="space-y-3">
               <div>
@@ -270,7 +429,10 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Icon icon={SparklesIcon} className="h-3.5 w-3.5 text-primary" />
                 <span>
-                  All {itemCount} items will be copied to your checklist
+                  All {itemCount} items will be copied to{' '}
+                  {forkTarget === 'team' && getSelectedTeam()
+                    ? `"${getSelectedTeam()?.name}" team`
+                    : 'your personal account'}
                 </span>
               </div>
             </div>
@@ -286,7 +448,10 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
               </div>
               <p className="font-medium mb-1">Creating your fork...</p>
               <p className="text-sm text-muted-foreground">
-                Copying {itemCount} items to your checklist
+                Copying {itemCount} items{' '}
+                {forkTarget === 'team' && getSelectedTeam()
+                  ? `to "${getSelectedTeam()?.name}" team`
+                  : 'to your account'}
               </p>
             </div>
             <Progress value={progress} className="h-2" />
@@ -302,6 +467,11 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
             <p className="font-medium text-lg mb-1">Fork Created!</p>
             <p className="text-sm text-muted-foreground mb-4">
               Successfully copied {itemCount} items to "{title}"
+              {forkTarget === 'team' && getSelectedTeam() && (
+                <span className="block mt-1">
+                  in <strong>{getSelectedTeam()?.name}</strong> team
+                </span>
+              )}
             </p>
             <div className="inline-flex items-center gap-2 px-3 py-2 bg-muted rounded-lg text-sm">
               <Icon icon={CheckListIcon} className="h-4 w-4 text-primary" />
@@ -333,7 +503,10 @@ export function ForkModal({ repository, isOpen, onClose, onSuccess }: ForkModalP
               <Button variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button onClick={handleFork} disabled={!title.trim()}>
+              <Button
+                onClick={handleFork}
+                disabled={!title.trim() || (forkTarget === 'team' && !selectedTeamId)}
+              >
                 <Icon icon={GitForkIcon} className="mr-2 h-4 w-4" />
                 Create Fork
               </Button>
