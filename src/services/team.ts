@@ -361,20 +361,37 @@ export async function getTeamRepositories(teamId: string): Promise<TeamRepositor
     .select(`
       permission,
       granted_at,
-      repository:repositories(*)
+      repository_id
     `)
     .eq('team_id', teamId)
     .order('granted_at', { ascending: false })
 
   if (error) throw error
 
-  // Transform the data to include permission with repository
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data || []).map((item: any) => ({
-    ...item.repository,
-    permission: item.permission,
-    granted_at: item.granted_at,
-  }))
+  // Fetch repository details for each access entry
+  const repoIds = (data || []).map((item) => item.repository_id)
+  if (repoIds.length === 0) return []
+
+  const { data: repos, error: repoError } = await supabase
+    .from('repositories')
+    .select()
+    .in('id', repoIds)
+
+  if (repoError) throw repoError
+
+  // Map repositories and merge with access info
+  const repoMap = new Map(repos?.map((r) => [r.id, r]) || [])
+
+  return (data || [])
+    .map((item) => {
+      const repo = repoMap.get(item.repository_id)
+      return repo ? {
+        ...repo,
+        permission: item.permission,
+        granted_at: item.granted_at,
+      } : null
+    })
+    .filter((item) => item !== null) as TeamRepositoryWithAccess[]
 }
 
 /**
