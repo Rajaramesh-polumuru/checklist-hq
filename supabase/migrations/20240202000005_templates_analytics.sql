@@ -42,18 +42,22 @@ CREATE INDEX IF NOT EXISTS idx_run_templates_user ON public.run_templates(user_i
 ALTER TABLE public.run_templates ENABLE ROW LEVEL SECURITY;
 
 -- Users can view their own templates and public templates
+DROP POLICY IF EXISTS "Users can view their templates" ON public.run_templates;
 CREATE POLICY "Users can view their templates"
 ON public.run_templates FOR SELECT
 USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can create templates" ON public.run_templates;
 CREATE POLICY "Users can create templates"
 ON public.run_templates FOR INSERT
 WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can update their templates" ON public.run_templates;
 CREATE POLICY "Users can update their templates"
 ON public.run_templates FOR UPDATE
 USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can delete their templates" ON public.run_templates;
 CREATE POLICY "Users can delete their templates"
 ON public.run_templates FOR DELETE
 USING (user_id = auth.uid());
@@ -93,18 +97,22 @@ CREATE INDEX IF NOT EXISTS idx_scheduled_runs_next ON public.scheduled_runs(next
 -- Enable RLS
 ALTER TABLE public.scheduled_runs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their scheduled runs" ON public.scheduled_runs;
 CREATE POLICY "Users can view their scheduled runs"
 ON public.scheduled_runs FOR SELECT
 USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can create scheduled runs" ON public.scheduled_runs;
 CREATE POLICY "Users can create scheduled runs"
 ON public.scheduled_runs FOR INSERT
 WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can update their scheduled runs" ON public.scheduled_runs;
 CREATE POLICY "Users can update their scheduled runs"
 ON public.scheduled_runs FOR UPDATE
 USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can delete their scheduled runs" ON public.scheduled_runs;
 CREATE POLICY "Users can delete their scheduled runs"
 ON public.scheduled_runs FOR DELETE
 USING (user_id = auth.uid());

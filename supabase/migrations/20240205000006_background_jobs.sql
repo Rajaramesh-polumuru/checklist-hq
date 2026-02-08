@@ -59,6 +59,7 @@ CREATE INDEX IF NOT EXISTS idx_bg_jobs_type
 
 ALTER TABLE public.background_jobs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users see own jobs" ON public.background_jobs;
 CREATE POLICY "Users see own jobs"
     ON public.background_jobs
     FOR SELECT

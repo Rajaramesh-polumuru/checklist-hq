@@ -38,11 +38,13 @@ CREATE INDEX IF NOT EXISTS idx_run_participants_role ON public.run_participants(
 ALTER TABLE public.run_participants ENABLE ROW LEVEL SECURITY;
 
 -- Participants can view their own participations
+DROP POLICY IF EXISTS "Users can view their participations" ON public.run_participants;
 CREATE POLICY "Users can view their participations"
 ON public.run_participants FOR SELECT
 USING (user_id = auth.uid());
 
 -- Owners can view all participants
+DROP POLICY IF EXISTS "Owners can view all participants" ON public.run_participants;
 CREATE POLICY "Owners can view all participants"
 ON public.run_participants FOR SELECT
 USING (
@@ -55,6 +57,7 @@ USING (
 );
 
 -- Owners can manage participants
+DROP POLICY IF EXISTS "Owners can add participants" ON public.run_participants;
 CREATE POLICY "Owners can add participants"
 ON public.run_participants FOR INSERT
 WITH CHECK (
@@ -72,6 +75,7 @@ WITH CHECK (
     )
 );
 
+DROP POLICY IF EXISTS "Owners can update participants" ON public.run_participants;
 CREATE POLICY "Owners can update participants"
 ON public.run_participants FOR UPDATE
 USING (
@@ -83,6 +87,7 @@ USING (
     )
 );
 
+DROP POLICY IF EXISTS "Owners can remove participants" ON public.run_participants;
 CREATE POLICY "Owners can remove participants"
 ON public.run_participants FOR DELETE
 USING (
@@ -125,6 +130,7 @@ CREATE INDEX IF NOT EXISTS idx_item_assignments_user ON public.run_item_assignme
 ALTER TABLE public.run_item_assignments ENABLE ROW LEVEL SECURITY;
 
 -- Participants can view assignments
+DROP POLICY IF EXISTS "Participants can view assignments" ON public.run_item_assignments;
 CREATE POLICY "Participants can view assignments"
 ON public.run_item_assignments FOR SELECT
 USING (
@@ -142,6 +148,7 @@ USING (
 );
 
 -- Editors and owners can manage assignments
+DROP POLICY IF EXISTS "Editors can manage assignments" ON public.run_item_assignments;
 CREATE POLICY "Editors can manage assignments"
 ON public.run_item_assignments FOR INSERT
 WITH CHECK (
@@ -159,6 +166,7 @@ WITH CHECK (
     )
 );
 
+DROP POLICY IF EXISTS "Editors can update assignments" ON public.run_item_assignments;
 CREATE POLICY "Editors can update assignments"
 ON public.run_item_assignments FOR UPDATE
 USING (
@@ -176,6 +184,7 @@ USING (
     )
 );
 
+DROP POLICY IF EXISTS "Editors can delete assignments" ON public.run_item_assignments;
 CREATE POLICY "Editors can delete assignments"
 ON public.run_item_assignments FOR DELETE
 USING (
@@ -223,6 +232,7 @@ CREATE INDEX IF NOT EXISTS idx_run_comments_user ON public.run_comments(user_id)
 ALTER TABLE public.run_comments ENABLE ROW LEVEL SECURITY;
 
 -- Participants can view comments
+DROP POLICY IF EXISTS "Participants can view comments" ON public.run_comments;
 CREATE POLICY "Participants can view comments"
 ON public.run_comments FOR SELECT
 USING (
@@ -243,6 +253,7 @@ USING (
 );
 
 -- Participants can add comments
+DROP POLICY IF EXISTS "Participants can add comments" ON public.run_comments;
 CREATE POLICY "Participants can add comments"
 ON public.run_comments FOR INSERT
 WITH CHECK (
@@ -263,11 +274,13 @@ WITH CHECK (
 );
 
 -- Users can edit their own comments
+DROP POLICY IF EXISTS "Users can edit own comments" ON public.run_comments;
 CREATE POLICY "Users can edit own comments"
 ON public.run_comments FOR UPDATE
 USING (user_id = auth.uid() AND deleted_at IS NULL);
 
 -- Users can delete their own comments (soft delete)
+DROP POLICY IF EXISTS "Users can delete own comments" ON public.run_comments;
 CREATE POLICY "Users can delete own comments"
 ON public.run_comments FOR DELETE
 USING (user_id = auth.uid());

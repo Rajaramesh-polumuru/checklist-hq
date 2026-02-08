@@ -56,6 +56,7 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_resource ON public.audit_logs(resource
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
 -- Org admins can view audit logs for their org
+DROP POLICY IF EXISTS "Org admins view audit logs" ON public.audit_logs;
 CREATE POLICY "Org admins view audit logs" ON public.audit_logs
     FOR SELECT USING (
         organization_id IS NULL OR

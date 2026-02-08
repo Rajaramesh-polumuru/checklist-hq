@@ -51,10 +51,12 @@ CREATE INDEX IF NOT EXISTS idx_gdpr_requests_user
 ALTER TABLE public.gdpr_data_requests ENABLE ROW LEVEL SECURITY;
 
 -- Users can see & manage only their own requests
+DROP POLICY IF EXISTS "Users own gdpr requests" ON public.gdpr_data_requests;
 CREATE POLICY "Users own gdpr requests"
     ON public.gdpr_data_requests
     USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users insert gdpr requests" ON public.gdpr_data_requests;
 CREATE POLICY "Users insert gdpr requests"
     ON public.gdpr_data_requests
     FOR INSERT WITH CHECK (user_id = auth.uid());

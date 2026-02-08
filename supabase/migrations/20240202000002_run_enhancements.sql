@@ -73,6 +73,7 @@ CREATE INDEX IF NOT EXISTS idx_time_segments_active ON public.run_time_segments(
 ALTER TABLE public.run_time_segments ENABLE ROW LEVEL SECURITY;
 
 -- Time segments follow run ownership
+DROP POLICY IF EXISTS "Users can view their run segments" ON public.run_time_segments;
 CREATE POLICY "Users can view their run segments"
 ON public.run_time_segments FOR SELECT
 USING (
@@ -83,6 +84,7 @@ USING (
     )
 );
 
+DROP POLICY IF EXISTS "Users can manage their run segments" ON public.run_time_segments;
 CREATE POLICY "Users can manage their run segments"
 ON public.run_time_segments FOR INSERT
 WITH CHECK (
@@ -93,6 +95,7 @@ WITH CHECK (
     )
 );
 
+DROP POLICY IF EXISTS "Users can update their run segments" ON public.run_time_segments;
 CREATE POLICY "Users can update their run segments"
 ON public.run_time_segments FOR UPDATE
 USING (
@@ -103,6 +106,7 @@ USING (
     )
 );
 
+DROP POLICY IF EXISTS "Users can delete their run segments" ON public.run_time_segments;
 CREATE POLICY "Users can delete their run segments"
 ON public.run_time_segments FOR DELETE
 USING (

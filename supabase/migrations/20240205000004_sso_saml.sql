@@ -49,6 +49,7 @@ CREATE INDEX IF NOT EXISTS idx_sso_domains
 ALTER TABLE public.sso_configurations ENABLE ROW LEVEL SECURITY;
 
 -- Only org owners / admins can read or write
+DROP POLICY IF EXISTS "Org admins manage SSO" ON public.sso_configurations;
 CREATE POLICY "Org admins manage SSO"
     ON public.sso_configurations
     USING (

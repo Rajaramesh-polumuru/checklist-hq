@@ -42,6 +42,7 @@ CREATE INDEX IF NOT EXISTS idx_run_presence_active ON public.run_presence(run_id
 ALTER TABLE public.run_presence ENABLE ROW LEVEL SECURITY;
 
 -- Users can see presence for runs they participate in
+DROP POLICY IF EXISTS "Users can view presence for their runs" ON public.run_presence;
 CREATE POLICY "Users can view presence for their runs"
 ON public.run_presence FOR SELECT
 USING (
@@ -53,14 +54,17 @@ USING (
 );
 
 -- Users can update their own presence
+DROP POLICY IF EXISTS "Users can manage their presence" ON public.run_presence;
 CREATE POLICY "Users can manage their presence"
 ON public.run_presence FOR INSERT
 WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can update their presence" ON public.run_presence;
 CREATE POLICY "Users can update their presence"
 ON public.run_presence FOR UPDATE
 USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can delete their presence" ON public.run_presence;
 CREATE POLICY "Users can delete their presence"
 ON public.run_presence FOR DELETE
 USING (user_id = auth.uid());

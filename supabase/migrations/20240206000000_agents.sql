@@ -43,6 +43,7 @@ ALTER TABLE agent_team_memberships ENABLE ROW LEVEL SECURITY;
 -- =============================================
 
 -- Organization members can view agents in their organization
+DROP POLICY IF EXISTS "Organization members can view agents" ON public.agents;
 CREATE POLICY "Organization members can view agents"
   ON agents FOR SELECT
   USING (
@@ -54,6 +55,7 @@ CREATE POLICY "Organization members can view agents"
   );
 
 -- Organization admins/owners can create agents
+DROP POLICY IF EXISTS "Organization admins can create agents" ON public.agents;
 CREATE POLICY "Organization admins can create agents"
   ON agents FOR INSERT
   WITH CHECK (
@@ -66,6 +68,7 @@ CREATE POLICY "Organization admins can create agents"
   );
 
 -- Organization admins/owners can update agents
+DROP POLICY IF EXISTS "Organization admins can update agents" ON public.agents;
 CREATE POLICY "Organization admins can update agents"
   ON agents FOR UPDATE
   USING (
@@ -78,6 +81,7 @@ CREATE POLICY "Organization admins can update agents"
   );
 
 -- Organization admins/owners can delete agents
+DROP POLICY IF EXISTS "Organization admins can delete agents" ON public.agents;
 CREATE POLICY "Organization admins can delete agents"
   ON agents FOR DELETE
   USING (
@@ -94,6 +98,7 @@ CREATE POLICY "Organization admins can delete agents"
 -- =============================================
 
 -- Organization members can view agent team memberships
+DROP POLICY IF EXISTS "Organization members can view agent team memberships" ON public.agent_team_memberships;
 CREATE POLICY "Organization members can view agent team memberships"
   ON agent_team_memberships FOR SELECT
   USING (
@@ -106,6 +111,7 @@ CREATE POLICY "Organization members can view agent team memberships"
   );
 
 -- Organization admins can manage agent team memberships
+DROP POLICY IF EXISTS "Organization admins can insert agent team memberships" ON public.agent_team_memberships;
 CREATE POLICY "Organization admins can insert agent team memberships"
   ON agent_team_memberships FOR INSERT
   WITH CHECK (
@@ -118,6 +124,7 @@ CREATE POLICY "Organization admins can insert agent team memberships"
     )
   );
 
+DROP POLICY IF EXISTS "Organization admins can delete agent team memberships" ON public.agent_team_memberships;
 CREATE POLICY "Organization admins can delete agent team memberships"
   ON agent_team_memberships FOR DELETE
   USING (

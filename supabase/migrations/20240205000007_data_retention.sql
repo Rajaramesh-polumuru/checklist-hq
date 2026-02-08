@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS public.retention_policies (
 
 ALTER TABLE public.retention_policies ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Org admins manage retention" ON public.retention_policies;
 CREATE POLICY "Org admins manage retention"
     ON public.retention_policies
     USING (

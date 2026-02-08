@@ -44,18 +44,22 @@ CREATE INDEX IF NOT EXISTS idx_api_keys_prefix ON public.api_keys(key_prefix);
 ALTER TABLE public.api_keys ENABLE ROW LEVEL SECURITY;
 
 -- Users can view their own keys (but not the hash/secret)
+DROP POLICY IF EXISTS "Users can view own api keys" ON public.api_keys;
 CREATE POLICY "Users can view own api keys" ON public.api_keys
     FOR SELECT USING (user_id = auth.uid());
 
 -- Users can create keys
+DROP POLICY IF EXISTS "Users can create api keys" ON public.api_keys;
 CREATE POLICY "Users can create api keys" ON public.api_keys
     FOR INSERT WITH CHECK (user_id = auth.uid());
 
 -- Users can revoke (update) their keys
+DROP POLICY IF EXISTS "Users can update own api keys" ON public.api_keys;
 CREATE POLICY "Users can update own api keys" ON public.api_keys
     FOR UPDATE USING (user_id = auth.uid());
 
 -- Users can delete keys
+DROP POLICY IF EXISTS "Users can delete own api keys" ON public.api_keys;
 CREATE POLICY "Users can delete own api keys" ON public.api_keys
     FOR DELETE USING (user_id = auth.uid());
 
@@ -103,6 +107,7 @@ CREATE TABLE IF NOT EXISTS public.webhooks (
 ALTER TABLE public.webhooks ENABLE ROW LEVEL SECURITY;
 
 -- Repo owners can manage webhooks
+DROP POLICY IF EXISTS "Repo owners manage webhooks" ON public.webhooks;
 CREATE POLICY "Repo owners manage webhooks" ON public.webhooks
     USING (
         EXISTS (
@@ -113,6 +118,7 @@ CREATE POLICY "Repo owners manage webhooks" ON public.webhooks
     );
 
 -- Org admins can manage webhooks
+DROP POLICY IF EXISTS "Org admins manage webhooks" ON public.webhooks;
 CREATE POLICY "Org admins manage webhooks" ON public.webhooks
     USING (
         EXISTS (

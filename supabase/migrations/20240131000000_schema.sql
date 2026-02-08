@@ -45,22 +45,27 @@ CREATE INDEX idx_repos_public ON public.repositories(is_public) WHERE is_public 
 ALTER TABLE public.repositories ENABLE ROW LEVEL SECURITY;
 
 -- Policies
+DROP POLICY IF EXISTS "Public repos are viewable by everyone" ON public.repositories;
 CREATE POLICY "Public repos are viewable by everyone" 
 ON public.repositories FOR SELECT 
 USING (is_public = true);
 
+DROP POLICY IF EXISTS "Users can view their own repos" ON public.repositories;
 CREATE POLICY "Users can view their own repos" 
 ON public.repositories FOR SELECT 
 USING (auth.uid() = owner_id);
 
+DROP POLICY IF EXISTS "Users can create their own repos" ON public.repositories;
 CREATE POLICY "Users can create their own repos" 
 ON public.repositories FOR INSERT 
 WITH CHECK (auth.uid() = owner_id);
 
+DROP POLICY IF EXISTS "Users can update their own repos" ON public.repositories;
 CREATE POLICY "Users can update their own repos" 
 ON public.repositories FOR UPDATE 
 USING (auth.uid() = owner_id);
 
+DROP POLICY IF EXISTS "Users can delete their own repos" ON public.repositories;
 CREATE POLICY "Users can delete their own repos" 
 ON public.repositories FOR DELETE 
 USING (auth.uid() = owner_id);
@@ -89,6 +94,7 @@ CREATE INDEX idx_commits_parent ON public.commits(parent_commit_id);
 ALTER TABLE public.commits ENABLE ROW LEVEL SECURITY;
 
 -- Policies
+DROP POLICY IF EXISTS "Commits viewable if repo is public" ON public.commits;
 CREATE POLICY "Commits viewable if repo is public" 
 ON public.commits FOR SELECT 
 USING (
@@ -99,6 +105,7 @@ USING (
     )
 );
 
+DROP POLICY IF EXISTS "Users can view commits of their repos" ON public.commits;
 CREATE POLICY "Users can view commits of their repos" 
 ON public.commits FOR SELECT 
 USING (
@@ -109,6 +116,7 @@ USING (
     )
 );
 
+DROP POLICY IF EXISTS "Users can create commits in their repos" ON public.commits;
 CREATE POLICY "Users can create commits in their repos" 
 ON public.commits FOR INSERT 
 WITH CHECK (
@@ -145,11 +153,13 @@ CREATE INDEX idx_runs_active ON public.runs(status) WHERE status = 'active';
 ALTER TABLE public.runs ENABLE ROW LEVEL SECURITY;
 
 -- Policies
+DROP POLICY IF EXISTS "Users can view their own runs" ON public.runs;
 CREATE POLICY "Users can view their own runs" 
 ON public.runs FOR SELECT 
 USING (auth.uid() = user_id);
 
 
+DROP POLICY IF EXISTS "Users can create runs in their repos" ON public.runs;
 CREATE POLICY "Users can create runs in their repos" 
 ON public.runs FOR INSERT 
 WITH CHECK (
@@ -161,6 +171,7 @@ WITH CHECK (
     )
 );
 
+DROP POLICY IF EXISTS "Users can update their own runs" ON public.runs;
 CREATE POLICY "Users can update their own runs" 
 ON public.runs FOR UPDATE 
 USING (auth.uid() = user_id);

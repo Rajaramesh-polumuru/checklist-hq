@@ -43,14 +43,17 @@ CREATE INDEX IF NOT EXISTS idx_slack_connections_org ON public.slack_connections
 ALTER TABLE public.slack_connections ENABLE ROW LEVEL SECURITY;
 
 -- Users can view their own Slack connections
+DROP POLICY IF EXISTS "Users can view own slack connections" ON public.slack_connections;
 CREATE POLICY "Users can view own slack connections" ON public.slack_connections
     FOR SELECT USING (user_id = auth.uid());
 
 -- Users can create connections
+DROP POLICY IF EXISTS "Users can create slack connections" ON public.slack_connections;
 CREATE POLICY "Users can create slack connections" ON public.slack_connections
     FOR INSERT WITH CHECK (user_id = auth.uid());
 
 -- Org admins can manage org connections
+DROP POLICY IF EXISTS "Org admins manage slack connections" ON public.slack_connections;
 CREATE POLICY "Org admins manage slack connections" ON public.slack_connections
     FOR SELECT USING (
         EXISTS (
@@ -94,6 +97,7 @@ CREATE TABLE IF NOT EXISTS public.slack_notifications (
 ALTER TABLE public.slack_notifications ENABLE ROW LEVEL SECURITY;
 
 -- Repo owners and org admins can manage
+DROP POLICY IF EXISTS "Manage slack notifications" ON public.slack_notifications;
 CREATE POLICY "Manage slack notifications" ON public.slack_notifications
     USING (
         EXISTS (

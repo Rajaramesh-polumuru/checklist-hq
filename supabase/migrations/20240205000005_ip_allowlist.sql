@@ -46,6 +46,7 @@ ALTER TABLE public.organizations
 
 ALTER TABLE public.ip_allowlist ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Org admins manage ip allowlist" ON public.ip_allowlist;
 CREATE POLICY "Org admins manage ip allowlist"
     ON public.ip_allowlist
     USING (

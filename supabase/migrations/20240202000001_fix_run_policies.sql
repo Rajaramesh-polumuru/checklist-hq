@@ -19,6 +19,7 @@ DROP POLICY IF EXISTS "Users can create runs in their repos" ON public.runs;
 -- Allow users to create runs for:
 -- 1. Their own repositories (any visibility)
 -- 2. Public repositories (owned by anyone)
+DROP POLICY IF EXISTS "Users can create runs for accessible repos" ON public.runs;
 CREATE POLICY "Users can create runs for accessible repos"
 ON public.runs FOR INSERT
 WITH CHECK (

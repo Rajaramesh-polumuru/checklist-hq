@@ -37,6 +37,7 @@ CREATE INDEX IF NOT EXISTS idx_tags_category ON tags(category);
 -- RLS for tags (publicly readable)
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Tags are viewable by everyone" ON tags;
 CREATE POLICY "Tags are viewable by everyone"
   ON tags FOR SELECT
   USING (true);
@@ -44,6 +45,7 @@ CREATE POLICY "Tags are viewable by everyone"
 -- RLS for repository_tags
 ALTER TABLE repository_tags ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Repository tags viewable if repo is public or owned" ON repository_tags;
 CREATE POLICY "Repository tags viewable if repo is public or owned"
   ON repository_tags FOR SELECT
   USING (
@@ -54,6 +56,7 @@ CREATE POLICY "Repository tags viewable if repo is public or owned"
     )
   );
 
+DROP POLICY IF EXISTS "Repository tags manageable by repo owner" ON repository_tags;
 CREATE POLICY "Repository tags manageable by repo owner"
   ON repository_tags FOR ALL
   USING (
@@ -132,6 +135,7 @@ DROP POLICY IF EXISTS "Users can update their own repos" ON repositories;
 DROP POLICY IF EXISTS "Users can delete their own repos" ON repositories;
 
 -- Create new consolidated policies
+DROP POLICY IF EXISTS "Users can view their own repositories and public ones" ON public.repositories;
 CREATE POLICY "Users can view their own repositories and public ones"
   ON repositories FOR SELECT
   USING (
@@ -140,14 +144,17 @@ CREATE POLICY "Users can view their own repositories and public ones"
     OR owner_id IS NULL  -- System templates are viewable by all
   );
 
+DROP POLICY IF EXISTS "Users can create their own repos" ON public.repositories;
 CREATE POLICY "Users can create their own repos"
   ON repositories FOR INSERT
   WITH CHECK (auth.uid() = owner_id);
 
+DROP POLICY IF EXISTS "Users can update their own repos" ON public.repositories;
 CREATE POLICY "Users can update their own repos"
   ON repositories FOR UPDATE
   USING (auth.uid() = owner_id);
 
+DROP POLICY IF EXISTS "Users can delete their own repos" ON public.repositories;
 CREATE POLICY "Users can delete their own repos"
   ON repositories FOR DELETE
   USING (auth.uid() = owner_id);
