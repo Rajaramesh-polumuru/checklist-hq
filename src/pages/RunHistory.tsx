@@ -60,7 +60,7 @@ export function RunHistory() {
                     <p>No completed runs found.</p>
                 </div>
             ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,300px))] gap-6 justify-center">
                     {runs.map((run) => (
                         <RunCard key={run.id} run={run} />
                     ))}

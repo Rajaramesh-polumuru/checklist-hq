@@ -21,7 +21,7 @@ export function RepositoryList({
 }: RepositoryListProps) {
     if (loading) {
         return (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,300px))] gap-6 justify-center">
                 {Array.from({ length: 6 }).map((_, i) => (
                     <SkeletonCard key={i} />
                 ))}
@@ -30,7 +30,7 @@ export function RepositoryList({
     }
 
     return (
-        <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,300px))] gap-6 justify-center">
             {repositories.map((repo, index) => (
                 <RepositoryCard
                     key={repo.id}

@@ -80,7 +80,7 @@ export function Organizations() {
                 </Card>
             ) : (
                 /* Organization Grid */
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,300px))] gap-6 justify-center">
                     {orgs.map((org) => (
                         <Link
                             key={org.id}

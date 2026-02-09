@@ -134,7 +134,7 @@ export function AgentsDashboard() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,300px))] gap-6 justify-center">
           {agents.map((agent) => (
             <AgentCard
               key={agent.id}

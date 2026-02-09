@@ -412,7 +412,7 @@ export function Explore() {
 
         {/* Loading */}
         {loading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,300px))] gap-6 justify-center">
             {Array.from({ length: 6 }).map((_, i) => (
               <SkeletonCard key={i} />
             ))}
@@ -457,7 +457,7 @@ export function Explore() {
           </motion.div>
         ) : (
           /* Premium Template Grid */
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,300px))] gap-6 justify-center">
             {repositories.map((repo, index) => {
               const accent = getAccentColor(repo.title)
 
@@ -467,11 +467,12 @@ export function Explore() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.03 }}
+                  className="h-full"
                 >
-                  <Link to={`/repo/${repo.id}`}>
+                  <Link to={`/repo/${repo.id}`} className="block h-full">
                     <Card
                       className={cn(
-                        "group h-full relative overflow-hidden",
+                        "group h-full flex flex-col relative overflow-hidden",
                         "transition-all duration-300",
                         "hover:-translate-y-1 hover:shadow-xl hover:shadow-black/10"
                       )}
@@ -548,8 +549,8 @@ export function Explore() {
                         )}
                       </CardHeader>
 
-                      <CardContent className="pt-0">
-                        <div className="flex items-center justify-between pt-4 border-t">
+                      <CardContent className="pt-0 flex flex-col flex-1">
+                        <div className="flex items-center justify-between pt-4 border-t mt-auto">
                           <span className="text-xs text-muted-foreground flex items-center gap-1.5">
                             <Icon icon={Clock01Icon} className="h-3.5 w-3.5" />
                             {formatRelativeTime(repo.updated_at)}

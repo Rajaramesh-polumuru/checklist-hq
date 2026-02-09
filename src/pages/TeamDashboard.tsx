@@ -262,7 +262,7 @@ export function TeamDashboard() {
             ) : repositories.length === 0 ? (
               <EmptyState variant="repositories" onAction={() => setShareRepoOpen(true)} />
             ) : (
-              <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,300px))] gap-6 justify-center">
                 {repositories.map(repo => (
                   <Card key={repo.id} className="group hover:shadow-md transition-all duration-300 border-border/60">
                     <CardHeader className="pb-3">

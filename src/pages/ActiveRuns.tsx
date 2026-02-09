@@ -77,7 +77,7 @@ export function ActiveRuns() {
                                 <Icon icon={PauseIcon} className="h-5 w-5 text-warning" />
                                 <h2 className="text-xl font-semibold">Paused ({pausedRuns.length})</h2>
                             </div>
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,300px))] gap-6 justify-center">
                                 {pausedRuns.map((run) => (
                                     <RunCard key={run.id} run={run} />
                                 ))}
@@ -92,7 +92,7 @@ export function ActiveRuns() {
                                 <Icon icon={PlayIcon} className="h-5 w-5 text-primary" />
                                 <h2 className="text-xl font-semibold">In Progress ({activeRuns.length})</h2>
                             </div>
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,300px))] gap-6 justify-center">
                                 {activeRuns.map((run) => (
                                     <RunCard key={run.id} run={run} />
                                 ))}
