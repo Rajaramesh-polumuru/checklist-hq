@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { AlertCircleIcon, Loading02Icon } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input'
 
 export function LoginForm() {
     const navigate = useNavigate()
+    const location = useLocation()
+    const returnTo = (location.state as { returnTo?: string })?.returnTo
     const { signInWithPassword, signInWithGoogle, loading: authLoading } = useAuthStore()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -48,7 +50,7 @@ export function LoginForm() {
 
         try {
             await signInWithPassword(formData.email, formData.password)
-            navigate('/app')
+            navigate(returnTo || '/app')
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to sign in')
         } finally {

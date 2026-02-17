@@ -38,6 +38,10 @@ import {
 import { RunTimer } from '@/components/RunTimer'
 import { SyncIndicator } from '@/components/SyncIndicator'
 import { useRunSync } from '@/hooks/useRunSync'
+import { AgentExportButton } from '@/components/run/AgentExportButton'
+import { AgentStatusIndicator } from '@/components/run/AgentStatusIndicator'
+import { AgentSettingsModal } from '@/components/AgentSettingsModal'
+import { useAgentRunner } from '@/hooks/useAgentRunner'
 import type { Repository, Run, Commit, ChecklistItem, RunProgress } from '@/types/database'
 
 // Generate initial confetti pieces to avoid Math.random() during render
@@ -276,6 +280,9 @@ export function RunMode() {
   // Renaming state
   const [isEditingName, setIsEditingName] = useState(false)
   const [editName, setEditName] = useState('')
+
+  // Agent settings modal
+  const [showAgentSettings, setShowAgentSettings] = useState(false)
 
   // Real-time sync
   const {
@@ -533,11 +540,30 @@ export function RunMode() {
     return nextItem?.id || null
   }, [checkableItems, progress])
 
+  // Get the current item for agent execution
+  const currentItem = useMemo(() => {
+    if (!nextItemId || !commit?.content?.items) return null
+    return commit.content.items[nextItemId] || null
+  }, [nextItemId, commit])
+
   const rootItems = getRootItems()
   const totalItems = checkableItems.length
   const completedItems = checkableItems.filter(item => progress[item.id]?.completed).length
   const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0
   const isComplete = run?.status === 'completed' || progressPercent === 100
+
+  // Agent runner for auto-pilot (after isComplete is defined)
+  const agentRunner = useAgentRunner({
+    enabled: !isComplete && run?.status === 'active',
+    currentItem,
+    progress,
+    onComplete: (itemId, output) => {
+      handleToggle(itemId, true, `Completed by AI: ${JSON.stringify(output)}`);
+    },
+    onError: (itemId, error) => {
+      console.error(`Agent failed for item ${itemId}:`, error);
+    },
+  });
 
   // Auto-complete when all items done
   useEffect(() => {
@@ -775,6 +801,15 @@ export function RunMode() {
               )
             )}
 
+            {/* Agent Export Button */}
+            {repository && commit && (
+              <AgentExportButton 
+                repository={repository} 
+                commit={commit} 
+                run={run || undefined} 
+              />
+            )}
+
             {isComplete ? (
               <Button onClick={handleRestart} variant="outline" size="sm" className="gap-2">
                 <Icon icon={ArrowTurnBackwardIcon} className="h-4 w-4" />
@@ -839,6 +874,17 @@ export function RunMode() {
               </>
             )}
           </div>
+
+          {/* Agent status indicator */}
+          {currentItem?.agent_config?.enabled && !isComplete && (
+            <div className="mt-4">
+              <AgentStatusIndicator
+                status={agentRunner.status}
+                onExecute={agentRunner.executeManual}
+                onRetry={agentRunner.retry}
+              />
+            </div>
+          )}
         </div>
 
         {/* Completion celebration */}
@@ -909,6 +955,12 @@ export function RunMode() {
           )}
         </div>
       </main>
+
+      {/* Agent Settings Modal */}
+      <AgentSettingsModal
+        open={showAgentSettings}
+        onClose={() => setShowAgentSettings(false)}
+      />
     </div>
   )
 }

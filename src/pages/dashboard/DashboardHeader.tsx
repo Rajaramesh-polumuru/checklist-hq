@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { PlusSignIcon, GitForkIcon, PlayIcon } from '@hugeicons/core-free-icons'
+import { PlusSignIcon, GitForkIcon, PlayIcon, SparklesIcon } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge'
 interface DashboardHeaderProps {
     userEmail?: string
     activeRunsCount: number
+    onSmartImport?: () => void
 }
 
-export function DashboardHeader({ userEmail, activeRunsCount }: DashboardHeaderProps) {
+export function DashboardHeader({ userEmail, activeRunsCount, onSmartImport }: DashboardHeaderProps) {
     const hour = new Date().getHours()
     const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
     const username = userEmail?.split('@')[0] || 'User'
@@ -69,15 +70,28 @@ export function DashboardHeader({ userEmail, activeRunsCount }: DashboardHeaderP
                 </div>
 
                 {/* Action buttons with enhanced styling */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                     <Button variant="outline" asChild className="group relative overflow-hidden">
                         <Link to="/explore">
                             {/* Shimmer effect on hover */}
                             <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
                             <Icon icon={GitForkIcon} className="mr-2 h-4 w-4" />
-                            Explore Templates
+                            <span className="hidden sm:inline">Explore Templates</span>
+                            <span className="sm:hidden">Explore</span>
                         </Link>
                     </Button>
+                    {onSmartImport && (
+                      <Button 
+                        variant="outline" 
+                        onClick={onSmartImport}
+                        className="group relative overflow-hidden border-primary/30"
+                      >
+                        <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+                        <Icon icon={SparklesIcon} className="mr-2 h-4 w-4 text-primary" />
+                        <span className="hidden sm:inline">Smart Import</span>
+                        <span className="sm:hidden">Import</span>
+                      </Button>
+                    )}
                     <Button
                         asChild
                         id="onboarding-new-checklist"
@@ -85,7 +99,8 @@ export function DashboardHeader({ userEmail, activeRunsCount }: DashboardHeaderP
                     >
                         <Link to="/app/new">
                             <Icon icon={PlusSignIcon} className="mr-2 h-4 w-4" />
-                            New Checklist
+                            <span className="hidden sm:inline">New Checklist</span>
+                            <span className="sm:hidden">New</span>
                         </Link>
                     </Button>
                 </div>

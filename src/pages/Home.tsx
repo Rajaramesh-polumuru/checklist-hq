@@ -1,4 +1,4 @@
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -139,10 +139,12 @@ const useCases = [
 export function Home() {
   const { user, initialized } = useAuthStore()
   const navigate = useNavigate()
+  const location = useLocation()
+  const returnTo = (location.state as { returnTo?: string })?.returnTo
 
-  // Auto-redirect authenticated users to dashboard
+  // Auto-redirect authenticated users to dashboard or returnTo location
   if (initialized && user) {
-    return <Navigate to="/app" replace />
+    return <Navigate to={returnTo || '/app'} replace />
   }
 
   // Show loading state while checking auth status

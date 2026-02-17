@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Briefcase01Icon, UserIcon, Mortarboard01Icon, ArrowRight01Icon, Loading02Icon, CheckmarkCircle02Icon, Mail01Icon } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
@@ -220,16 +220,16 @@ function ProfileStep({ onNext, onBack }: { onNext: (name: string) => Promise<voi
 }
 
 // Step 4: Success/Completion
-function SuccessStep() {
+function SuccessStep({ returnTo }: { returnTo?: string }) {
     const navigate = useNavigate()
 
     useEffect(() => {
         // Auto redirect after animation
         const timer = setTimeout(() => {
-            navigate('/app')
+            navigate(returnTo || '/app')
         }, 1500)
         return () => clearTimeout(timer)
-    }, [navigate])
+    }, [navigate, returnTo])
 
     return (
         <motion.div
@@ -256,6 +256,8 @@ function SuccessStep() {
 
 export function OnboardingWizard() {
     const { updateProfile } = useAuthStore()
+    const location = useLocation()
+    const returnTo = (location.state as { returnTo?: string })?.returnTo
     const [step, setStep] = useState(1)
     const [data, setData] = useState({ intent: '', name: '' })
 
@@ -295,7 +297,7 @@ export function OnboardingWizard() {
                 {step === 1 && <SignupStep key="step1" onNext={() => setStep(2)} />}
                 {step === 2 && <IntentStep key="step2" onNext={handleIntent} />}
                 {step === 3 && <ProfileStep key="step3" onNext={handleProfile} onBack={() => setStep(2)} />}
-                {step === 4 && <SuccessStep key="step4" />}
+                {step === 4 && <SuccessStep key="step4" returnTo={returnTo} />}
             </AnimatePresence>
         </div>
     )

@@ -36,6 +36,7 @@ import { DashboardFilters } from '@/pages/dashboard/DashboardFilters'
 import { RepositoryList } from '@/pages/dashboard/RepositoryList'
 import { ActivityFeed } from '@/pages/dashboard/ActivityFeed'
 import { EmptyState } from '@/pages/dashboard/EmptyState'
+import { SmartImportModal } from '@/components/SmartImportModal'
 
 export function Dashboard() {
   const { user } = useAuthStore()
@@ -72,6 +73,7 @@ export function Dashboard() {
   const [runModalOpen, setRunModalOpen] = useState(false)
   const [, setDeletingId] = useState<string | null>(null)
   const [, setDuplicatingId] = useState<string | null>(null)
+  const [smartImportOpen, setSmartImportOpen] = useState(false)
 
   // -- Effects --
 
@@ -233,6 +235,7 @@ export function Dashboard() {
         <DashboardHeader
           userEmail={user?.email}
           activeRunsCount={activeRuns.length}
+          onSmartImport={() => setSmartImportOpen(true)}
         />
 
         {/* Hero Stats */}
@@ -368,6 +371,19 @@ export function Dashboard() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Smart Import Modal */}
+      <SmartImportModal
+        open={smartImportOpen}
+        onClose={async () => {
+          setSmartImportOpen(false);
+          // Refresh repositories after import
+          if (user) {
+            const repos = await getUserRepositories(user.id);
+            setRepositories(repos);
+          }
+        }}
+      />
 
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </main>

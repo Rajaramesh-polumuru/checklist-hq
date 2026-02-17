@@ -76,9 +76,17 @@ export interface ChecklistItem {
   type?: 'task' | 'header' | 'note'
   details?: string
 
-  // Agent execution configuration (Phase 6: AI Agent Integration)
+  // Agent execution configuration (Phase 4: Auto-Pilot + Phase 6: Advanced)
   agent_config?: {
-    action_type: 'manual' | 'browse' | 'api' | 'approve'
+    // Auto-Pilot settings (Phase 4)
+    enabled?: boolean // Enable automatic execution
+    provider?: 'openai' | 'anthropic' // LLM provider
+    model?: string // Model name (e.g., 'gpt-4', 'claude-sonnet-4')
+    system_prompt?: string // Custom instructions for this item
+    input_mapping?: Record<string, string> // Map run inputs to prompt vars
+    
+    // Advanced settings (Phase 6)
+    action_type?: 'manual' | 'browse' | 'api' | 'approve'
     assignee?: string // Agent ID or 'human' or 'any'
     parameters?: Record<string, unknown>
     expected_output?: Record<string, unknown>
