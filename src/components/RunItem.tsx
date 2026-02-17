@@ -7,7 +7,9 @@ import {
   Note01Icon,
   Target01Icon,
   ArrowRight01Icon,
-  Tick01Icon
+  Tick01Icon,
+  BrainIcon,
+  Link01Icon
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { Badge } from '@/components/ui/badge'
@@ -172,6 +174,7 @@ interface RunItemProps {
   totalSteps: number
   showStepNumber?: boolean
   readOnly?: boolean
+  context?: Record<string, unknown>
 }
 
 export function RunItem({
@@ -184,7 +187,8 @@ export function RunItem({
   isFocused,
   totalSteps,
   showStepNumber = true,
-  readOnly = false
+  readOnly = false,
+  context = {}
 }: RunItemProps) {
   const isCompleted = progress?.completed ?? false
   const [showNoteDialog, setShowNoteDialog] = useState(false)
@@ -218,7 +222,9 @@ export function RunItem({
           isCompleted && 'bg-success/5 hover:bg-success/10',
           !isCompleted && isNext && 'bg-primary/5 ring-1 ring-primary/20 hover:bg-primary/10',
           !isCompleted && !isNext && 'hover:bg-muted/50',
-          isFocused && 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+          isFocused && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
+          item.type === 'ref' && 'border-l-2 border-blue-500/50 bg-blue-500/5',
+          item.agent_config && 'border-l-2 border-purple-500/50 bg-purple-500/5'
         )}
         whileTap={{ scale: 0.99 }}
       >
@@ -302,7 +308,7 @@ export function RunItem({
                 isCompleted ? "text-muted-foreground" : "text-foreground"
               )}
             >
-              {item.text ? <FormattedText text={item.text} /> : <span className="italic text-muted-foreground">Untitled item</span>}
+              {item.text ? <FormattedText text={item.text} values={context} /> : <span className="italic text-muted-foreground">Untitled item</span>}
             </motion.p>
             {isCompleted && (
               <motion.div
@@ -312,6 +318,46 @@ export function RunItem({
               />
             )}
           </div>
+
+          {/* Reference Item Indicators */}
+          {item.type === 'ref' && item.ref_config && (
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <div className="flex items-center gap-1.5">
+                <Icon icon={Link01Icon} className="h-3.5 w-3.5 text-blue-600" />
+                <Badge variant="outline" className="text-xs border-blue-500/30 text-blue-600 bg-blue-500/5">
+                  Sub-Checklist
+                </Badge>
+              </div>
+              <Badge variant="outline" className="text-xs text-muted-foreground border-blue-200">
+                {item.ref_config.execution_mode === 'inline' ? 'Inline' : 'Spawn Run'}
+              </Badge>
+            </div>
+          )}
+
+          {/* Agent Configuration Indicators */}
+          {item.agent_config && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <Icon icon={BrainIcon} className="h-3.5 w-3.5 text-purple-600" />
+                <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-600 bg-purple-500/5">
+                  {item.agent_config.action_type === 'manual' && 'Manual'}
+                  {item.agent_config.action_type === 'browse' && 'Browse'}
+                  {item.agent_config.action_type === 'api_call' && 'API Call'}
+                  {item.agent_config.action_type === 'code' && 'Code'}
+                  {item.agent_config.action_type === 'approve' && 'Approval'}
+                </Badge>
+              </div>
+              {item.agent_config.assignee && (
+                <Badge variant="outline" className="text-xs border-purple-500/20 text-purple-600">
+                  {item.agent_config.assignee === 'human' && 'Assigned: Human'}
+                  {item.agent_config.assignee === 'any_agent' && 'Assigned: Any Agent'}
+                  {item.agent_config.assignee !== 'human' && 
+                   item.agent_config.assignee !== 'any_agent' && 
+                   `Agent: ${item.agent_config.assignee.slice(0, 8)}...`}
+                </Badge>
+              )}
+            </div>
+          )}
 
           {/* Details */}
           {item.details && (

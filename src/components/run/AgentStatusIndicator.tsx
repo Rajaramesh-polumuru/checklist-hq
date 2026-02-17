@@ -13,14 +13,16 @@ import {
   BrainIcon,
   RefreshIcon,
   PlayIcon,
+  ThumbsUpIcon,
 } from '@hugeicons/core-free-icons';
 import { cn } from '@/lib/utils';
-import type { AgentRunnerStatus } from '@/hooks/useAgentRunner';
+import type { OrchestratorStatus } from '@/hooks/useRunOrchestrator';
 
 interface AgentStatusIndicatorProps {
-  status: AgentRunnerStatus;
+  status: OrchestratorStatus;
   onExecute?: () => void;
   onRetry?: () => void;
+  onApprove?: () => void;
   compact?: boolean;
 }
 
@@ -28,9 +30,10 @@ export function AgentStatusIndicator({
   status,
   onExecute,
   onRetry,
+  onApprove,
   compact = false,
 }: AgentStatusIndicatorProps) {
-  if (status.status === 'idle' && !status.message) {
+  if (status.state === 'idle' && !status.message) {
     return null; // Don't show anything if idle with no message
   }
 
@@ -40,28 +43,35 @@ export function AgentStatusIndicator({
       compact ? 'text-sm' : 'text-base'
     )}>
       {/* Status badge */}
-      {status.status === 'processing' && (
+      {status.state === 'executing' && (
         <Badge variant="default" className="gap-1.5 animate-pulse">
           <Icon icon={Loading02Icon} className="h-3.5 w-3.5 animate-spin" />
           {!compact && <span>Thinking...</span>}
         </Badge>
       )}
 
-      {status.status === 'success' && (
+      {status.state === 'success' && (
         <Badge variant="success" className="gap-1.5">
           <Icon icon={CheckmarkCircle02Icon} className="h-3.5 w-3.5" />
           {!compact && <span>Done via AI</span>}
         </Badge>
       )}
 
-      {status.status === 'error' && (
+      {status.state === 'awaiting_approval' && (
+        <Badge variant="warning" className="gap-1.5">
+          <Icon icon={BrainIcon} className="h-3.5 w-3.5" />
+          {!compact && <span>Review Needed</span>}
+        </Badge>
+      )}
+
+      {status.state === 'error' && (
         <Badge variant="destructive" className="gap-1.5">
           <Icon icon={AlertCircleIcon} className="h-3.5 w-3.5" />
           {!compact && <span>Agent Failed</span>}
         </Badge>
       )}
 
-      {status.status === 'idle' && status.message && (
+      {status.state === 'idle' && status.message && (
         <Badge variant="outline" className="gap-1.5">
           <Icon icon={BrainIcon} className="h-3.5 w-3.5" />
           {!compact && <span>Ready</span>}
@@ -72,14 +82,14 @@ export function AgentStatusIndicator({
       {!compact && status.message && (
         <span className={cn(
           'text-sm',
-          status.status === 'error' ? 'text-destructive' : 'text-muted-foreground'
+          status.state === 'error' ? 'text-destructive' : 'text-muted-foreground'
         )}>
           {status.message}
         </span>
       )}
 
       {/* Action buttons */}
-      {status.status === 'idle' && status.message && onExecute && (
+      {status.state === 'idle' && status.message && onExecute && (
         <Button
           onClick={onExecute}
           size="sm"
@@ -91,7 +101,19 @@ export function AgentStatusIndicator({
         </Button>
       )}
 
-      {status.status === 'error' && onRetry && (
+      {status.state === 'awaiting_approval' && onApprove && (
+        <Button
+          onClick={onApprove}
+          size="sm"
+          variant="default"
+          className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+        >
+          <Icon icon={ThumbsUpIcon} className="h-4 w-4" />
+          Approve
+        </Button>
+      )}
+
+      {status.state === 'error' && onRetry && (
         <Button
           onClick={onRetry}
           size="sm"
@@ -112,17 +134,20 @@ export function AgentStatusIndicator({
 export function AgentStatusBadge({
   status,
 }: {
-  status: AgentRunnerStatus['status'];
+  status: OrchestratorStatus['state'];
 }) {
   if (status === 'idle') return null;
 
   return (
     <div className="flex items-center gap-1">
-      {status === 'processing' && (
+      {status === 'executing' && (
         <Icon icon={Loading02Icon} className="h-3 w-3 text-primary animate-spin" />
       )}
       {status === 'success' && (
         <Icon icon={CheckmarkCircle02Icon} className="h-3 w-3 text-success" />
+      )}
+      {status === 'awaiting_approval' && (
+        <Icon icon={ThumbsUpIcon} className="h-3 w-3 text-warning" />
       )}
       {status === 'error' && (
         <Icon icon={AlertCircleIcon} className="h-3 w-3 text-destructive" />

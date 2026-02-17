@@ -58,87 +58,42 @@ Create a utility that serializes a Repository/Commit into a dense, token-efficie
 
 ---
 
-## Phase 2: Model Context Protocol (MCP) Server
+## Phase 2: Model Context Protocol (MCP) Server (COMPLETE ✅)
 
 **Objective:** Expose Checklist HQ data as a standard MCP server so generic AI clients (Cursor, Windsurf, Claude Desktop) can connect directly.
 
-### 2.1 Project Setup
+### 2.1 Project Setup ✅
+- **Directory:** `/src/mcp`
+- **Dependencies:** `@modelcontextprotocol/sdk`
 
-- **Directory:** `/packages/mcp-server` (Monorepo style) or `/src/app/api/mcp` (Next.js API route adapter).
-- **Dependencies:** `@modelcontextprotocol/sdk`.
-
-### 2.2 Resource: Read-Only Checklists
-
-Allow agents to "load" a checklist into their context.
-
+### 2.2 Resource: Read-Only Checklists ✅
 - **URI:** `checklist://{repo_id}/latest`
 - **Handler:** `read_resource`
-- **Logic:** Calls `Supabase.from('commits').select('*').eq('repo_id', id).order('created_at', { ascending: false }).limit(1)`.
-- **Return format:** Plain text (Markdown representation from Phase 1.1).
 
-### 2.3 Resource: Run Status
-
-Allow agents to see the _live_ status of an execution.
-
+### 2.3 Resource: Run Status ✅
 - **URI:** `checklist://runs/{run_id}/status`
 - **Handler:** `read_resource`
-- **Logic:** Calls `Supabase.from('runs').select('progress')`.
-- **Return format:** JSON `{ "item_id": { "completed": true } }`.
 
-### 2.4 Tool: `list_repositories`
-
+### 2.4 Tool: `list_repositories` ✅
 - **Description:** "List available checklists for the user."
-- **Arguments:** `{ limit?: number, query?: string }`.
-- **Postgres:** `SELECT id, title FROM repositories WHERE owner_id = [user_id]`.
 
-### 2.5 Tool: `start_run`
-
+### 2.5 Tool: `start_run` ✅
 - **Description:** "Start a new execution of a specific checklist."
-- **Arguments:** `{ repo_id: string, run_name?: string }`.
-- **Action:**
-  1.  Fetch latest `commit_id` for `repo_id`.
-  2.  Insert into `runs` table via Supabase.
-  3.  Return `run_id`.
 
-### 2.6 Tool: `update_item`
-
+### 2.6 Tool: `update_item` ✅
 - **Description:** "Mark a step as complete or update its status."
-- **Arguments:**
-  - `run_id`: string
-  - `item_id`: string
-  - `completed`: boolean
-  - `note`: string (optional)
-  - `output`: object (optional, for agent outputs)
-- **Validation:** Ensure `run_id` exists and user owns it.
 
 ---
 
-## Phase 3: Agent-Authored Checklists (Creation)
+## Phase 3: Agent-Authored Checklists (Creation) (COMPLETE ✅)
 
 **Objective:** Allow agents to _create_ and _edit_ checklists via MCP.
 
-### 3.1 Tool: `create_repository`
-
+### 3.1 Tool: `create_repository` ✅
 - **Description:** "Create a new blank checklist process."
-- **Arguments:** `{ title: string, description: string }`.
-- **Action:**
-  1.  Insert into `repositories`.
-  2.  Create initial empty `commit` (root node only).
-  3.  Return `repo_id`.
 
-### 3.2 Tool: `commit_changes` (The Core Edit Loop)
-
+### 3.2 Tool: `commit_changes` (The Core Edit Loop) ✅
 - **Description:** "Update the structure of a checklist."
-- **Arguments:**
-  - `repo_id`: string
-  - `parent_commit_id`: string (Must match current HEAD)
-  - `content_json`: string (Serialized `ChecklistContent`)
-  - `message`: string ("Added standard deployment steps")
-- **Logic:**
-  1.  **Validate JSON:** schema check (`zod` schema for `ChecklistContent`).
-  2.  **Verify Parent:** Ensure `parent_commit_id` is actually the latest (concurrency check).
-  3.  **Insert:** Create new row in `commits`.
-- **Why this is powerful:** Agents don't "edit lines". They "commit versions". This allows infinite undo/redo if the agent messes up.
 
 ---
 

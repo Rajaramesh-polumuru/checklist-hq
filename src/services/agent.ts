@@ -45,7 +45,7 @@ export async function createAgent(params: AgentInsert): Promise<string> {
     resourceType: 'agent',
     resourceId: agentId,
     newValues: params,
-  }).catch(err => console.error('Audit log failed:', err))
+  }).catch((err: any) => console.error('Audit log failed:', err))
 
   return agentId
 }
@@ -147,7 +147,7 @@ export async function updateAgent(
     resourceType: 'agent',
     resourceId: id,
     newValues: updates,
-  }).catch(err => console.error('Audit log failed:', err))
+  }).catch((err: any) => console.error('Audit log failed:', err))
 
   return agent
 }
@@ -181,7 +181,7 @@ export async function deleteAgent(id: string): Promise<void> {
     resourceType: 'agent',
     resourceId: id,
     oldValues: agent,
-  }).catch(err => console.error('Audit log failed:', err))
+  }).catch((err: any) => console.error('Audit log failed:', err))
 }
 
 // ==================== Agent Team Membership ====================
@@ -225,7 +225,7 @@ export async function addAgentToTeam(
       resourceType: 'agent_team',
       resourceId: agentId,
       newValues: { teamId, permissions },
-    }).catch(err => console.error('Audit log failed:', err))
+    }).catch((err: any) => console.error('Audit log failed:', err))
   }
 }
 

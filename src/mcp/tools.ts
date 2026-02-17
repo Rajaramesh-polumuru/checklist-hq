@@ -1,417 +1,588 @@
 /**
- * MCP Tool Handlers
- * Expose Checklist HQ actions as callable tools
+ * MCP Tools (Actions)
+ * 
+ * Tools allow AI clients to modify checklist data and execute operations.
  */
 
-import { supabase } from '@/lib/supabase';
-import { startRunFromLatestCommit } from '@/services/run';
-import { updateRunProgress } from '@/services/run';
-import { validateChecklistContentFull, createEmptyChecklistContent } from './validation';
-import type {
-  ListRepositoriesArgs,
-  StartRunArgs,
-  UpdateItemArgs,
-  CreateRepositoryArgs,
-  CommitChangesArgs,
-  MCPTool,
-} from './types';
+import { getSupabaseClient } from './auth.js';
+import type { AuthContext } from './types.js';
+import { validateChecklistContent } from '../lib/agent/schemas.js';
+import type { ChecklistContent } from '../types/database.js';
+
+const supabase = getSupabaseClient();
+
+/**
+ * List all available tools
+ */
+export async function listTools() {
+  return {
+    tools: [
+      {
+        name: 'list_repositories',
+        description: 'Search and list available checklists',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            query: {
+              type: 'string',
+              description: 'Search query to filter repositories by title',
+            },
+            limit: {
+              type: 'number',
+              description: 'Maximum number of results (default: 20, max: 100)',
+              default: 20,
+            },
+            tag: {
+              type: 'string',
+              description: 'Filter by tag',
+            },
+          },
+        },
+      },
+      {
+        name: 'get_checklist',
+        description: 'Get full checklist content in structured format',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            repo_id: {
+              type: 'string',
+              description: 'Repository ID',
+            },
+          },
+          required: ['repo_id'],
+        },
+      },
+      {
+        name: 'start_run',
+        description: 'Begin executing a checklist',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            repo_id: {
+              type: 'string',
+              description: 'Repository ID to execute',
+            },
+            name: {
+              type: 'string',
+              description: 'Optional name for this run',
+            },
+          },
+          required: ['repo_id'],
+        },
+      },
+      {
+        name: 'update_item',
+        description: 'Mark a checklist item as complete or incomplete',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            run_id: {
+              type: 'string',
+              description: 'Run ID',
+            },
+            item_id: {
+              type: 'string',
+              description: 'Item ID to update',
+            },
+            completed: {
+              type: 'boolean',
+              description: 'Whether the item is completed',
+            },
+            note: {
+              type: 'string',
+              description: 'Optional note about completion',
+            },
+            output: {
+              type: 'object',
+              description: 'Optional structured output data from the step',
+            },
+          },
+          required: ['run_id', 'item_id', 'completed'],
+        },
+      },
+      {
+        name: 'get_run_status',
+        description: 'Check execution progress for a run',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            run_id: {
+              type: 'string',
+              description: 'Run ID',
+            },
+          },
+          required: ['run_id'],
+        },
+      },
+      {
+        name: 'create_repository',
+        description: 'Create a new checklist',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'Checklist title',
+            },
+            description: {
+              type: 'string',
+              description: 'Optional description',
+            },
+            items: {
+              type: 'object',
+              description: 'Optional initial checklist structure',
+            },
+          },
+          required: ['title'],
+        },
+      },
+      {
+        name: 'commit_changes',
+        description: 'Update checklist structure (create a new version)',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            repo_id: {
+              type: 'string',
+              description: 'Repository ID',
+            },
+            parent_commit_id: {
+              type: 'string',
+              description: 'Parent commit ID (must match current HEAD)',
+            },
+            content: {
+              type: 'string',
+              description: 'JSON string of ChecklistContent',
+            },
+            message: {
+              type: 'string',
+              description: 'Commit message describing changes',
+            },
+          },
+          required: ['repo_id', 'parent_commit_id', 'content', 'message'],
+        },
+      },
+    ],
+  };
+}
+
+/**
+ * Execute a tool by name
+ */
+export async function executeTool(
+  toolName: string,
+  args: Record<string, unknown>,
+  authContext: AuthContext
+) {
+  switch (toolName) {
+    case 'list_repositories':
+      return await toolListRepositories(args, authContext);
+    case 'get_checklist':
+      return await toolGetChecklist(args, authContext);
+    case 'start_run':
+      return await toolStartRun(args, authContext);
+    case 'update_item':
+      return await toolUpdateItem(args, authContext);
+    case 'get_run_status':
+      return await toolGetRunStatus(args, authContext);
+    case 'create_repository':
+      return await toolCreateRepository(args, authContext);
+    case 'commit_changes':
+      return await toolCommitChanges(args, authContext);
+    default:
+      throw new Error(`Unknown tool: ${toolName}`);
+  }
+}
 
 /**
  * Tool: list_repositories
- * List available checklists for the user
  */
-export async function listRepositories(
-  args: ListRepositoriesArgs,
-  userId: string
-): Promise<Array<{ id: string; title: string; description: string | null }>> {
-  const limit = args.limit || 50;
-  const query = args.query || '';
+async function toolListRepositories(args: Record<string, unknown>, authContext: AuthContext) {
+  const query = args.query as string | undefined;
+  const limit = Math.min((args.limit as number) || 20, 100);
+  // const tag = args.tag as string | undefined; // TODO: implement tag filtering
 
-  let dbQuery = supabase
+  let queryBuilder = supabase
     .from('repositories')
-    .select('id, title, description')
-    .eq('owner_id', userId)
+    .select('id, title, description, is_public, created_at, updated_at')
+    .eq('owner_id', authContext.userId)
     .order('updated_at', { ascending: false })
     .limit(limit);
 
-  // Add search filter if query provided
   if (query) {
-    dbQuery = dbQuery.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
+    queryBuilder = queryBuilder.ilike('title', `%${query}%`);
   }
 
-  const { data, error } = await dbQuery;
+  const { data: repos, error } = await queryBuilder;
 
-  if (error) {
-    throw new Error(`Failed to list repositories: ${error.message}`);
+  if (error) throw error;
+
+  return {
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(repos, null, 2),
+      },
+    ],
+  };
+}
+
+/**
+ * Tool: get_checklist
+ */
+async function toolGetChecklist(args: Record<string, unknown>, authContext: AuthContext) {
+  const repoId = args.repo_id as string;
+
+  // Verify ownership
+  const { data: repo, error: repoError } = await supabase
+    .from('repositories')
+    .select('*')
+    .eq('id', repoId)
+    .eq('owner_id', authContext.userId)
+    .single();
+
+  if (repoError || !repo) {
+    throw new Error('Repository not found or access denied');
   }
 
-  return data || [];
+  // Get latest commit
+  const { data: commit, error: commitError } = await supabase
+    .from('commits')
+    .select('*')
+    .eq('repo_id', repoId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (commitError || !commit) {
+    throw new Error('No commits found for this repository');
+  }
+
+  return {
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify({ repository: repo, commit }, null, 2),
+      },
+    ],
+  };
 }
 
 /**
  * Tool: start_run
- * Start a new execution of a specific checklist
  */
-export async function startRun(
-  args: StartRunArgs,
-  userId: string
-): Promise<{ run_id: string; message: string }> {
-  const { repo_id, run_name } = args;
+async function toolStartRun(args: Record<string, unknown>, authContext: AuthContext) {
+  const repoId = args.repo_id as string;
+  // const runName = args.name as string | undefined; // TODO: implement run naming
 
-  // Verify repository exists and user owns it
+  // Verify ownership and get latest commit
   const { data: repo, error: repoError } = await supabase
     .from('repositories')
-    .select('id, title, owner_id')
-    .eq('id', repo_id)
+    .select('id, title')
+    .eq('id', repoId)
+    .eq('owner_id', authContext.userId)
     .single();
 
   if (repoError || !repo) {
-    throw new Error(`Repository not found: ${repo_id}`);
+    throw new Error('Repository not found or access denied');
   }
 
-  if (repo.owner_id !== userId) {
-    throw new Error('Access denied: Repository not owned by user');
+  const { data: commit, error: commitError } = await supabase
+    .from('commits')
+    .select('id')
+    .eq('repo_id', repoId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (commitError || !commit) {
+    throw new Error('No commits found for this repository');
   }
 
-  // Start run from latest commit
-  const run = await startRunFromLatestCommit(repo_id, userId);
+  // Create run
+  const { data: run, error: runError } = await supabase
+    .from('runs')
+    .insert({
+      repo_id: repoId,
+      commit_id: commit.id,
+      status: 'in_progress',
+      started_at: new Date().toISOString(),
+      runner_id: authContext.userId,
+      progress: {},
+    })
+    .select()
+    .single();
 
-  // Update run name if provided
-  if (run_name) {
-    await supabase
-      .from('runs')
-      .update({ name: run_name })
-      .eq('id', run.id);
+  if (runError || !run) {
+    throw new Error('Failed to create run');
   }
 
   return {
-    run_id: run.id,
-    message: `Started run for "${repo.title}"${run_name ? ` (${run_name})` : ''}`,
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify({ run_id: run.id, repository: repo.title }, null, 2),
+      },
+    ],
   };
 }
 
 /**
  * Tool: update_item
- * Mark a step as complete or update its status
  */
-export async function updateItem(
-  args: UpdateItemArgs,
-  userId: string
-): Promise<{ success: boolean; message: string }> {
-  const { run_id, item_id, completed, note, output } = args;
+async function toolUpdateItem(args: Record<string, unknown>, authContext: AuthContext) {
+  const runId = args.run_id as string;
+  const itemId = args.item_id as string;
+  const completed = args.completed as boolean;
+  const note = args.note as string | undefined;
+  const output = args.output as Record<string, unknown> | undefined;
 
-  // Verify run exists and user owns it
+  // Get run and verify ownership
   const { data: run, error: runError } = await supabase
     .from('runs')
-    .select('*, repositories(owner_id)')
-    .eq('id', run_id)
+    .select('*, repository:repositories(owner_id)')
+    .eq('id', runId)
     .single();
 
   if (runError || !run) {
-    throw new Error(`Run not found: ${run_id}`);
+    throw new Error('Run not found');
   }
 
-  const repository = run.repositories as unknown as { owner_id: string };
-  if (repository.owner_id !== userId) {
-    throw new Error('Access denied: Run not owned by user');
+  if (run.repository.owner_id !== authContext.userId) {
+    throw new Error('Access denied');
   }
 
-  // Update item progress
-  await updateRunProgress(run_id, item_id, completed, note);
+  // Update progress
+  const currentProgress = run.progress || {};
+  currentProgress[itemId] = {
+    completed,
+    completed_at: completed ? new Date().toISOString() : null,
+    completed_by: authContext.userId,
+    completed_by_type: 'agent' as const,
+    completed_by_name: 'MCP Client',
+    note,
+    agent_output: output,
+  };
 
-  // If output is provided, store it in the progress metadata
-  if (output && completed) {
-    const currentProgress = run.progress || {};
-    const updatedProgress = {
-      ...currentProgress,
-      [item_id]: {
-        ...currentProgress[item_id],
-        completed,
-        timestamp: new Date().toISOString(),
-        user_id: userId,
-        note,
-        output, // Store agent output
-      },
-    };
+  const { error: updateError } = await supabase
+    .from('runs')
+    .update({ progress: currentProgress })
+    .eq('id', runId);
 
-    await supabase
-      .from('runs')
-      .update({ progress: updatedProgress })
-      .eq('id', run_id);
+  if (updateError) {
+    throw new Error('Failed to update item');
   }
 
   return {
-    success: true,
-    message: `Item ${completed ? 'completed' : 'uncompleted'}: ${item_id}`,
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify({ success: true, item_id: itemId, completed }, null, 2),
+      },
+    ],
+  };
+}
+
+/**
+ * Tool: get_run_status
+ */
+async function toolGetRunStatus(args: Record<string, unknown>, authContext: AuthContext) {
+  const runId = args.run_id as string;
+
+  const { data: run, error } = await supabase
+    .from('runs')
+    .select(`
+      *,
+      repository:repositories(id, title, owner_id)
+    `)
+    .eq('id', runId)
+    .single();
+
+  if (error || !run) {
+    throw new Error('Run not found');
+  }
+
+  if (run.repository.owner_id !== authContext.userId) {
+    throw new Error('Access denied');
+  }
+
+  const progress = run.progress || {};
+  const total = Object.keys(progress).length;
+  const completed = Object.values(progress).filter((p: any) => p.completed).length;
+
+  return {
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(
+          {
+            run_id: run.id,
+            repository: run.repository.title,
+            status: run.status,
+            total_items: total,
+            completed_items: completed,
+            progress_percent: total > 0 ? Math.round((completed / total) * 100) : 0,
+          },
+          null,
+          2
+        ),
+      },
+    ],
   };
 }
 
 /**
  * Tool: create_repository
- * Create a new blank checklist process
  */
-export async function createRepository(
-  args: CreateRepositoryArgs,
-  userId: string
-): Promise<{ repo_id: string; message: string }> {
-  const { title, description } = args;
+async function toolCreateRepository(args: Record<string, unknown>, authContext: AuthContext) {
+  const title = args.title as string;
+  const description = args.description as string | undefined;
+  const items = args.items as Record<string, unknown> | undefined;
 
   // Create repository
   const { data: repo, error: repoError } = await supabase
     .from('repositories')
     .insert({
       title,
-      description: description || null,
-      owner_id: userId,
+      description,
+      owner_id: authContext.userId,
+      is_public: false,
     })
     .select()
     .single();
 
   if (repoError || !repo) {
-    throw new Error(`Failed to create repository: ${repoError?.message}`);
+    throw new Error('Failed to create repository');
   }
 
-  // Create initial empty commit
-  const emptyContent = createEmptyChecklistContent();
-  
-  const { error: commitError } = await supabase
+  // Create initial commit
+  let content: ChecklistContent;
+  if (items) {
+    const validationResult = validateChecklistContent(items);
+    if (!validationResult.success) {
+      throw new Error(`Invalid checklist content: ${JSON.stringify(validationResult.errors)}`);
+    }
+    if (!validationResult.data) {
+      throw new Error('Validation succeeded but no data returned');
+    }
+    content = validationResult.data;
+  } else {
+    content = {
+      version: '2.0',
+      items: {
+        root: {
+          id: 'root',
+          text: '',
+          parent: null,
+          order: 0,
+        },
+      },
+    };
+  }
+
+  const { data: commit, error: commitError } = await supabase
     .from('commits')
     .insert({
       repo_id: repo.id,
-      content: emptyContent,
       message: 'Initial commit',
-      parent_commit_id: null,
-    });
+      author_id: authContext.userId,
+      content,
+    })
+    .select()
+    .single();
 
-  if (commitError) {
-    // Rollback repository creation
-    await supabase.from('repositories').delete().eq('id', repo.id);
-    throw new Error(`Failed to create initial commit: ${commitError.message}`);
+  if (commitError || !commit) {
+    throw new Error('Failed to create initial commit');
   }
 
   return {
-    repo_id: repo.id,
-    message: `Created repository "${title}" with initial commit`,
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify({ repo_id: repo.id, commit_id: commit.id }, null, 2),
+      },
+    ],
   };
 }
 
 /**
  * Tool: commit_changes
- * Update the structure of a checklist (the core edit loop)
  */
-export async function commitChanges(
-  args: CommitChangesArgs,
-  userId: string
-): Promise<{ commit_id: string; message: string }> {
-  const { repo_id, parent_commit_id, content_json, message } = args;
+async function toolCommitChanges(args: Record<string, unknown>, authContext: AuthContext) {
+  const repoId = args.repo_id as string;
+  const parentCommitId = args.parent_commit_id as string;
+  const contentJson = args.content as string;
+  const message = args.message as string;
 
-  // Verify repository exists and user owns it
+  // Verify ownership
   const { data: repo, error: repoError } = await supabase
     .from('repositories')
-    .select('id, title, owner_id')
-    .eq('id', repo_id)
+    .select('id')
+    .eq('id', repoId)
+    .eq('owner_id', authContext.userId)
     .single();
 
   if (repoError || !repo) {
-    throw new Error(`Repository not found: ${repo_id}`);
+    throw new Error('Repository not found or access denied');
   }
 
-  if (repo.owner_id !== userId) {
-    throw new Error('Access denied: Repository not owned by user');
-  }
-
-  // Parse and validate content JSON
-  let parsedContent;
-  try {
-    parsedContent = JSON.parse(content_json);
-  } catch (error) {
-    throw new Error('Invalid JSON in content_json parameter');
-  }
-
-  const validation = validateChecklistContentFull(parsedContent);
-  if (!validation.valid) {
-    throw new Error(`Content validation failed: ${validation.errors.join(', ')}`);
-  }
-
-  // Verify parent commit is the latest (concurrency check)
+  // Verify parent commit is latest
   const { data: latestCommit, error: commitError } = await supabase
     .from('commits')
     .select('id')
-    .eq('repo_id', repo_id)
+    .eq('repo_id', repoId)
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
 
-  if (commitError) {
-    throw new Error(`Failed to fetch latest commit: ${commitError.message}`);
+  if (commitError || !latestCommit) {
+    throw new Error('No commits found for this repository');
   }
 
-  if (latestCommit.id !== parent_commit_id) {
-    throw new Error(
-      `Concurrency conflict: Parent commit ${parent_commit_id} is not the latest. Current HEAD is ${latestCommit.id}.`
-    );
+  if (latestCommit.id !== parentCommitId) {
+    throw new Error('Conflict: parent_commit_id does not match current HEAD');
   }
 
-  // Insert new commit
-  const { data: newCommit, error: insertError } = await supabase
+  // Parse and validate content
+  let content: ChecklistContent;
+  try {
+    const parsed = JSON.parse(contentJson);
+    const validationResult = validateChecklistContent(parsed);
+    if (!validationResult.success) {
+      throw new Error(`Invalid checklist content: ${JSON.stringify(validationResult.errors)}`);
+    }
+    if (!validationResult.data) {
+      throw new Error('Validation succeeded but no data returned');
+    }
+    content = validationResult.data;
+  } catch (error) {
+    throw new Error(`Invalid content JSON: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  // Create new commit
+  const { data: newCommit, error: newCommitError } = await supabase
     .from('commits')
     .insert({
-      repo_id,
-      content: validation.data,
+      repo_id: repoId,
+      parent_id: parentCommitId,
       message,
-      parent_commit_id,
+      author_id: authContext.userId,
+      content,
     })
     .select()
     .single();
 
-  if (insertError || !newCommit) {
-    throw new Error(`Failed to create commit: ${insertError?.message}`);
+  if (newCommitError || !newCommit) {
+    throw new Error('Failed to create commit');
   }
 
   return {
-    commit_id: newCommit.id,
-    message: `Committed changes to "${repo.title}": ${message}`,
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify({ commit_id: newCommit.id }, null, 2),
+      },
+    ],
   };
-}
-
-/**
- * List available tools for discovery
- */
-export function listTools(): MCPTool[] {
-  return [
-    {
-      name: 'list_repositories',
-      description: 'List available checklists for the user',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          limit: {
-            type: 'number',
-            description: 'Maximum number of repositories to return (default: 50)',
-          },
-          query: {
-            type: 'string',
-            description: 'Search query to filter repositories by title or description',
-          },
-        },
-        required: [],
-      },
-    },
-    {
-      name: 'start_run',
-      description: 'Start a new execution of a specific checklist',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          repo_id: {
-            type: 'string',
-            description: 'ID of the repository to run',
-          },
-          run_name: {
-            type: 'string',
-            description: 'Optional name for the run (e.g., "Production Deploy 2024-02-17")',
-          },
-        },
-        required: ['repo_id'],
-      },
-    },
-    {
-      name: 'update_item',
-      description: 'Mark a checklist step as complete or update its status',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          run_id: {
-            type: 'string',
-            description: 'ID of the run',
-          },
-          item_id: {
-            type: 'string',
-            description: 'ID of the checklist item',
-          },
-          completed: {
-            type: 'boolean',
-            description: 'Whether the item is completed',
-          },
-          note: {
-            type: 'string',
-            description: 'Optional note about the completion',
-          },
-          output: {
-            type: 'object',
-            description: 'Optional structured output from agent execution',
-          },
-        },
-        required: ['run_id', 'item_id', 'completed'],
-      },
-    },
-    {
-      name: 'create_repository',
-      description: 'Create a new blank checklist process',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          title: {
-            type: 'string',
-            description: 'Title of the checklist (e.g., "Production Deployment")',
-          },
-          description: {
-            type: 'string',
-            description: 'Optional description of what this checklist is for',
-          },
-        },
-        required: ['title'],
-      },
-    },
-    {
-      name: 'commit_changes',
-      description: 'Update the structure of a checklist (commit a new version)',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          repo_id: {
-            type: 'string',
-            description: 'ID of the repository to update',
-          },
-          parent_commit_id: {
-            type: 'string',
-            description: 'ID of the parent commit (must be the current HEAD)',
-          },
-          content_json: {
-            type: 'string',
-            description: 'JSON string of the new ChecklistContent structure',
-          },
-          message: {
-            type: 'string',
-            description: 'Commit message describing the changes (e.g., "Added deployment steps")',
-          },
-        },
-        required: ['repo_id', 'parent_commit_id', 'content_json', 'message'],
-      },
-    },
-  ];
-}
-
-/**
- * Main tool handler router
- */
-export async function handleToolRequest(
-  toolName: string,
-  args: Record<string, unknown>,
-  userId: string
-): Promise<unknown> {
-  switch (toolName) {
-    case 'list_repositories':
-      return listRepositories(args as unknown as ListRepositoriesArgs, userId);
-    case 'start_run':
-      return startRun(args as unknown as StartRunArgs, userId);
-    case 'update_item':
-      return updateItem(args as unknown as UpdateItemArgs, userId);
-    case 'create_repository':
-      return createRepository(args as unknown as CreateRepositoryArgs, userId);
-    case 'commit_changes':
-      return commitChanges(args as unknown as CommitChangesArgs, userId);
-    default:
-      throw new Error(`Unknown tool: ${toolName}`);
-  }
 }

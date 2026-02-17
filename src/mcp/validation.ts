@@ -1,133 +1,159 @@
 /**
- * Validation Schemas for Agent-Authored Content
- * Uses Zod to ensure checklist structure integrity
+ * MCP Validation Utilities
+ * 
+ * Rate limiting, input sanitization, and security checks for MCP operations.
  */
 
-import { z } from 'zod';
+import type { AuthContext } from './types.js';
 
 /**
- * ChecklistItem schema
- * Matches the database structure from types/database.ts
+ * Simple in-memory rate limiter
+ * In production, use Redis or similar
  */
-export const ChecklistItemSchema = z.object({
-  id: z.string().uuid(),
-  text: z.string(),
-  parent: z.string().uuid().nullable(),
-  order: z.number().int().min(0),
-  type: z.enum(['task', 'header', 'note']).optional(),
-  details: z.string().optional(),
-  agent_config: z
-    .object({
-      action_type: z.enum(['manual', 'browse', 'api', 'approve']),
-      assignee: z.string().optional(),
-      parameters: z.record(z.string(), z.unknown()).optional(),
-      expected_output: z.record(z.string(), z.unknown()).optional(),
-      timeout_ms: z.number().int().positive().optional(),
-      fallback_assignee: z.string().optional(),
-    })
-    .optional(),
-});
+class RateLimiter {
+  private requests: Map<string, number[]> = new Map();
+  private readonly limit: number;
+  private readonly windowMs: number;
 
-/**
- * ChecklistContent schema
- * The root structure stored in commits
- */
-export const ChecklistContentSchema = z.object({
-  version: z.string().regex(/^\d+\.\d+\.\d+$/), // Semantic versioning
-  items: z.record(z.string().uuid(), ChecklistItemSchema),
-});
-
-/**
- * Validate checklist content JSON
- * @throws {z.ZodError} If validation fails
- */
-export function validateChecklistContent(content: unknown): {
-  version: string;
-  items: Record<string, z.infer<typeof ChecklistItemSchema>>;
-} {
-  return ChecklistContentSchema.parse(content);
-}
-
-/**
- * Create minimal valid checklist content
- * Useful for creating empty repositories
- */
-export function createEmptyChecklistContent(): {
-  version: string;
-  items: Record<string, never>;
-} {
-  return {
-    version: '1.0.0',
-    items: {},
-  };
-}
-
-/**
- * Validate that all parent references exist
- * Ensures no orphaned items
- */
-export function validateItemReferences(
-  items: Record<string, z.infer<typeof ChecklistItemSchema>>
-): { valid: boolean; errors: string[] } {
-  const errors: string[] = [];
-  const itemIds = new Set(Object.keys(items));
-
-  for (const [id, item] of Object.entries(items)) {
-    // Check parent exists
-    if (item.parent && !itemIds.has(item.parent)) {
-      errors.push(`Item ${id} has invalid parent: ${item.parent}`);
-    }
-
-    // Check for circular references (simple check)
-    if (item.parent === id) {
-      errors.push(`Item ${id} cannot be its own parent`);
-    }
+  constructor(limit: number, windowMs: number) {
+    this.limit = limit;
+    this.windowMs = windowMs;
   }
 
-  return {
-    valid: errors.length === 0,
-    errors,
-  };
+  check(key: string): boolean {
+    const now = Date.now();
+    const userRequests = this.requests.get(key) || [];
+
+    // Remove old requests outside the window
+    const recentRequests = userRequests.filter((timestamp) => now - timestamp < this.windowMs);
+
+    if (recentRequests.length >= this.limit) {
+      return false; // Rate limit exceeded
+    }
+
+    // Add current request
+    recentRequests.push(now);
+    this.requests.set(key, recentRequests);
+
+    // Clean up old entries periodically
+    if (Math.random() < 0.01) {
+      this.cleanup();
+    }
+
+    return true;
+  }
+
+  private cleanup() {
+    const now = Date.now();
+    for (const [key, timestamps] of this.requests.entries()) {
+      const recentRequests = timestamps.filter((ts) => now - ts < this.windowMs);
+      if (recentRequests.length === 0) {
+        this.requests.delete(key);
+      } else {
+        this.requests.set(key, recentRequests);
+      }
+    }
+  }
+}
+
+// Global rate limiter: 100 requests per minute per user
+export const rateLimiter = new RateLimiter(100, 60 * 1000);
+
+/**
+ * Check rate limit for a user
+ */
+export function checkRateLimit(authContext: AuthContext): boolean {
+  return rateLimiter.check(authContext.userId);
 }
 
 /**
- * Validate checklist content with full validation
- * Includes schema validation + reference checks
+ * Sanitize user input to prevent injection attacks
  */
-export function validateChecklistContentFull(content: unknown): {
-  valid: boolean;
-  errors: string[];
-  data?: {
-    version: string;
-    items: Record<string, z.infer<typeof ChecklistItemSchema>>;
-  };
-} {
-  try {
-    const validated = validateChecklistContent(content);
-    const refCheck = validateItemReferences(validated.items);
-
-    if (!refCheck.valid) {
-      return {
-        valid: false,
-        errors: refCheck.errors,
-      };
-    }
-
-    return {
-      valid: true,
-      errors: [],
-      data: validated,
-    };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        valid: false,
-        errors: error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`),
-      };
-    }
-    return {
-      valid: false,
-      errors: ['Unknown validation error'],
-    };
+export function sanitizeInput(input: unknown): unknown {
+  if (typeof input === 'string') {
+    // Remove null bytes and control characters
+    return input.replace(/[\x00-\x1F\x7F]/g, '');
   }
+
+  if (Array.isArray(input)) {
+    return input.map(sanitizeInput);
+  }
+
+  if (input && typeof input === 'object') {
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(input)) {
+      sanitized[sanitizeInput(key) as string] = sanitizeInput(value);
+    }
+    return sanitized;
+  }
+
+  return input;
+}
+
+/**
+ * Validate UUID format
+ */
+export function isValidUuid(uuid: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+}
+
+/**
+ * Validate repository ID
+ */
+export function validateRepoId(repoId: unknown): string {
+  if (typeof repoId !== 'string' || !isValidUuid(repoId)) {
+    throw new Error('Invalid repo_id: must be a valid UUID');
+  }
+  return repoId;
+}
+
+/**
+ * Validate run ID
+ */
+export function validateRunId(runId: unknown): string {
+  if (typeof runId !== 'string' || !isValidUuid(runId)) {
+    throw new Error('Invalid run_id: must be a valid UUID');
+  }
+  return runId;
+}
+
+/**
+ * Validate item ID
+ */
+export function validateItemId(itemId: unknown): string {
+  if (typeof itemId !== 'string' || itemId.length === 0) {
+    throw new Error('Invalid item_id: must be a non-empty string');
+  }
+  return itemId;
+}
+
+/**
+ * Validate search query
+ */
+export function validateSearchQuery(query: unknown): string {
+  if (typeof query !== 'string') {
+    throw new Error('Invalid query: must be a string');
+  }
+
+  if (query.length > 200) {
+    throw new Error('Invalid query: maximum length is 200 characters');
+  }
+
+  return query.trim();
+}
+
+/**
+ * Validate limit parameter
+ */
+export function validateLimit(limit: unknown, max: number = 100): number {
+  if (typeof limit === 'undefined') {
+    return 20; // Default
+  }
+
+  if (typeof limit !== 'number' || limit < 1) {
+    throw new Error('Invalid limit: must be a positive number');
+  }
+
+  return Math.min(limit, max);
 }

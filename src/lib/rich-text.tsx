@@ -9,14 +9,14 @@ import React from 'react'
  */
 
 interface TextSegment {
-  type: 'text' | 'bold' | 'italic' | 'link'
+  type: 'text' | 'bold' | 'italic' | 'link' | 'variable'
   content: string
   href?: string
 }
 
 /**
  * Parse markdown-style text into segments for rendering.
- * Handles bold (**text** or *text*), italic (_text_), and links [text](url).
+ * Handles bold (**text** or *text*), italic (_text_), links [text](url), and variables {{ key }}.
  */
 export function parseRichText(text: string): TextSegment[] {
   if (!text) return []
@@ -28,7 +28,8 @@ export function parseRichText(text: string): TextSegment[] {
   // Bold: **text** or *text* (non-greedy)
   // Italic: _text_ (non-greedy)
   // HTML em: <em>text</em>
-  const combinedRegex = /(\[([^\]]+)\]\(([^)]+)\))|(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(_([^_]+)_)|(<em>([^<]+)<\/em>)/g
+  // Variables: {{ key }}
+  const combinedRegex = /(\[([^\]]+)\]\(([^)]+)\))|(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(_([^_]+)_)|(<em>([^<]+)<\/em>)|(\{\{\s*([a-zA-Z0-9_.]+)\s*\}\})/g
 
   let lastIndex = 0
   let match: RegExpExecArray | null
@@ -73,6 +74,12 @@ export function parseRichText(text: string): TextSegment[] {
         type: 'italic',
         content: match[11],
       })
+    } else if (match[12]) {
+      // Variable: {{ key }}
+      segments.push({
+        type: 'variable',
+        content: match[13], // The key name
+      })
     }
 
     lastIndex = match.index + match[0].length
@@ -94,19 +101,20 @@ export function parseRichText(text: string): TextSegment[] {
  */
 export function hasRichText(text: string): boolean {
   if (!text) return false
-  return /(\[.+\]\(.+\))|(\*\*.+\*\*)|(\*.+\*)|(_[^_]+_)|(<em>.+<\/em>)/.test(text)
+  return /(\[.+\]\(.+\))|(\*\*.+\*\*)|(\*.+\*)|(_[^_]+_)|(<em>.+<\/em>)|(\{\{.+\}\})/.test(text)
 }
 
 interface FormattedTextProps {
   text: string
   className?: string
+  values?: Record<string, unknown>
 }
 
 /**
  * Renders text with basic markdown formatting.
  * For use in display contexts (not in input fields).
  */
-export function FormattedText({ text, className }: FormattedTextProps) {
+export function FormattedText({ text, className, values = {} }: FormattedTextProps) {
   const segments = parseRichText(text)
 
   return (
@@ -137,6 +145,25 @@ export function FormattedText({ text, className }: FormattedTextProps) {
               >
                 {segment.content}
               </a>
+            )
+          case 'variable':
+            const key = segment.content
+            const val = values[key] ?? values[key.replace('context.', '')]
+            const display = val !== undefined ? String(val) : key // Show key if no value
+            const hasValue = val !== undefined
+            
+            return (
+              <span 
+                key={index} 
+                className={`inline-flex items-center px-1.5 py-0.5 rounded text-[0.9em] font-medium mx-0.5 align-baseline ${
+                  hasValue 
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' 
+                    : 'bg-muted text-muted-foreground border border-dashed border-muted-foreground/30'
+                }`}
+                title={hasValue ? `Variable: ${key}` : `Missing value: ${key}`}
+              >
+                {display}
+              </span>
             )
           default:
             return <React.Fragment key={index}>{segment.content}</React.Fragment>

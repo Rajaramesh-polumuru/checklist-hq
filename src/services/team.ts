@@ -45,7 +45,7 @@ export async function createTeam(params: TeamInsert): Promise<string> {
     resourceType: 'team',
     resourceId: teamId,
     newValues: params,
-  }).catch(err => console.error('Audit log failed:', err))
+  }).catch((err: any) => console.error('Audit log failed:', err))
 
   return teamId
 }
@@ -111,7 +111,7 @@ export async function updateTeam(
     resourceType: 'team',
     resourceId: id,
     newValues: updates,
-  }).catch(err => console.error('Audit log failed:', err))
+  }).catch((err: any) => console.error('Audit log failed:', err))
 
   return team
 }
@@ -145,7 +145,7 @@ export async function deleteTeam(id: string): Promise<void> {
     resourceType: 'team',
     resourceId: id,
     oldValues: team,
-  }).catch(err => console.error('Audit log failed:', err))
+  }).catch((err: any) => console.error('Audit log failed:', err))
 }
 
 // ==================== Team Member Management ====================

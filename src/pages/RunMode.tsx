@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { Icon } from '@/components/ui/icon'
 import { formatRelativeTime } from '@/lib/date-utils'
 import {
@@ -20,9 +22,11 @@ import {
   PencilEdit02Icon,
   Tick01Icon,
   Cancel01Icon,
+  AiCloud02Icon,
 } from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
+import { useAgentSettingsStore } from '@/stores/agent-settings-store'
 import { getRepository } from '@/services/repository'
 import { RunItem, SectionHeader } from '@/components/RunItem'
 import {
@@ -35,13 +39,15 @@ import {
   calculateRunDuration,
   updateRunName,
 } from '@/services/run'
+import { spawnSubRun, getSubRunForItem } from '@/services/composed-run'
 import { RunTimer } from '@/components/RunTimer'
 import { SyncIndicator } from '@/components/SyncIndicator'
 import { useRunSync } from '@/hooks/useRunSync'
 import { AgentExportButton } from '@/components/run/AgentExportButton'
 import { AgentStatusIndicator } from '@/components/run/AgentStatusIndicator'
+import { RunTimeline } from '@/components/run/RunTimeline'
 import { AgentSettingsModal } from '@/components/AgentSettingsModal'
-import { useAgentRunner } from '@/hooks/useAgentRunner'
+import { useRunOrchestrator } from '@/hooks/useRunOrchestrator'
 import type { Repository, Run, Commit, ChecklistItem, RunProgress } from '@/types/database'
 
 // Generate initial confetti pieces to avoid Math.random() during render
@@ -154,6 +160,7 @@ function RecursiveRunItems({
   checkableItems,
   nextItemId,
   focusedItemId,
+  context,
 }: {
   items: ChecklistItem[]
   allItems: Record<string, ChecklistItem>
@@ -163,6 +170,7 @@ function RecursiveRunItems({
   checkableItems: ChecklistItem[]
   nextItemId: string | null
   focusedItemId: string | null
+  context?: Record<string, unknown>
 }) {
   // Get children for a given parent
   const getChildren = (parentId: string): ChecklistItem[] => {
@@ -214,6 +222,7 @@ function RecursiveRunItems({
                   checkableItems={checkableItems}
                   nextItemId={nextItemId}
                   focusedItemId={focusedItemId}
+                  context={context}
                 />
               </div>
             </div>
@@ -233,6 +242,7 @@ function RecursiveRunItems({
               isNext={isNext}
               isFocused={item.id === focusedItemId}
               showStepNumber={depth === 0}
+              context={context}
             />
             {/* Render children if this item has any */}
             {children.length > 0 && (
@@ -246,6 +256,7 @@ function RecursiveRunItems({
                   checkableItems={checkableItems}
                   nextItemId={nextItemId}
                   focusedItemId={focusedItemId}
+                  context={context}
                 />
               </div>
             )}
@@ -260,6 +271,7 @@ export function RunMode() {
   const { runId, repoId } = useParams()
   const navigate = useNavigate()
   const { user } = useAuthStore()
+  const agentSettings = useAgentSettingsStore()
 
   // Data state
   const [repository, setRepository] = useState<Repository | null>(null)
@@ -419,6 +431,38 @@ export function RunMode() {
   const handleToggle = useCallback(async (itemId: string, completed: boolean, note?: string) => {
     if (!run || !user) return
 
+    // Handle Ref Items (Sub-Runs)
+    const item = commit?.content?.items[itemId]
+    if (item?.type === 'ref' && item.ref_config) {
+      if (item.ref_config.execution_mode === 'spawn') {
+        try {
+          // Check if sub-run exists
+          const link = await getSubRunForItem(run.id, itemId)
+          if (link) {
+            navigate(`/app/run/${link.child_run_id}`)
+            return
+          }
+          
+          // Spawn new sub-run
+          // We don't mark as complete yet. The sub-run completion will trigger that (eventually)
+          // For now, navigating starts the process.
+          const subRun = await spawnSubRun(
+            run.id, 
+            itemId, 
+            item.ref_config.repo_id, 
+            user.id,
+            item.ref_config.commit_id
+          )
+          navigate(`/app/run/${subRun.id}`)
+          return
+        } catch (err) {
+          console.error('Error handling sub-run:', err)
+          setError('Failed to open sub-checklist')
+          return
+        }
+      }
+    }
+
     // Optimistic update
     setProgress((prev) => ({
       ...prev,
@@ -440,7 +484,7 @@ export function RunMode() {
         return newProgress
       })
     }
-  }, [run, user])
+  }, [run, user, commit, navigate])
 
   // Complete the run
   const handleComplete = useCallback(async () => {
@@ -551,14 +595,19 @@ export function RunMode() {
   const completedItems = checkableItems.filter(item => progress[item.id]?.completed).length
   const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0
   const isComplete = run?.status === 'completed' || progressPercent === 100
+  const runContext = (run?.metadata?.context as Record<string, unknown>) || {}
 
-  // Agent runner for auto-pilot (after isComplete is defined)
-  const agentRunner = useAgentRunner({
+  // Agent orchestrator for auto-pilot
+  const orchestrator = useRunOrchestrator({
     enabled: !isComplete && run?.status === 'active',
     currentItem,
     progress,
-    onComplete: (itemId, output) => {
-      handleToggle(itemId, true, `Completed by AI: ${JSON.stringify(output)}`);
+    onComplete: (itemId, _output, _durationMs) => {
+      // Optimistic update handled by hook, but we need to ensure DB update has metadata
+      // The current handleToggle function doesn't support rich metadata well enough
+      // For now, passing output stringified in note is a fallback, but we should upgrade handleToggle
+      handleToggle(itemId, true, `Completed by AI`); 
+      // In a real implementation, we'd pass durationMs and output object directly to updateRunProgress
     },
     onError: (itemId, error) => {
       console.error(`Agent failed for item ${itemId}:`, error);
@@ -766,6 +815,28 @@ export function RunMode() {
               <span className="text-muted-foreground tabular-nums">{totalItems}</span>
             </div>
 
+            {/* Auto-Pilot Toggle */}
+            {run && !isComplete && (
+              <div className="flex items-center gap-2 mr-2 border-r pr-4 h-6">
+                <Switch
+                  id="auto-pilot"
+                  checked={agentSettings.autoPilotEnabled}
+                  onCheckedChange={agentSettings.setAutoPilotEnabled}
+                  className="scale-75 data-[state=checked]:bg-purple-600"
+                />
+                <Label 
+                  htmlFor="auto-pilot" 
+                  className={cn(
+                    "text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors",
+                    agentSettings.autoPilotEnabled ? "text-purple-600" : "text-muted-foreground"
+                  )}
+                >
+                  <Icon icon={AiCloud02Icon} className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Auto-Pilot</span>
+                </Label>
+              </div>
+            )}
+
             {/* Pause/Resume button */}
             {run && !isComplete && (
               run.status === 'paused' ? (
@@ -879,9 +950,10 @@ export function RunMode() {
           {currentItem?.agent_config?.enabled && !isComplete && (
             <div className="mt-4">
               <AgentStatusIndicator
-                status={agentRunner.status}
-                onExecute={agentRunner.executeManual}
-                onRetry={agentRunner.retry}
+                status={orchestrator.status}
+                onExecute={orchestrator.executeManual}
+                onRetry={orchestrator.executeManual}
+                onApprove={orchestrator.approveResult}
               />
             </div>
           )}
@@ -951,9 +1023,20 @@ export function RunMode() {
               checkableItems={checkableItems}
               nextItemId={nextItemId}
               focusedItemId={focusedItemId}
+              context={runContext}
             />
           )}
         </div>
+
+        {/* Timeline */}
+        {run && (
+          <div className="mt-12 border-t pt-8">
+            <RunTimeline 
+              run={run} 
+              items={commit?.content?.items || {}} 
+            />
+          </div>
+        )}
       </main>
 
       {/* Agent Settings Modal */}

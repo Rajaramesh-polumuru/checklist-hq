@@ -9,7 +9,8 @@ import {
   Copy01Icon,
   ArrowUp01Icon,
   ArrowDown01Icon,
-  MoreVerticalIcon
+  MoreVerticalIcon,
+  Link01Icon
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
@@ -18,6 +19,7 @@ import { useChecklistStore } from '@/stores/checklist-store'
 import { useIsMobile } from '@/hooks/useMobile'
 import { DESIGN_TOKENS } from '@/lib/constants'
 import { useListItemInteraction } from '@/hooks/use-interaction'
+import { InsertRefModal } from '@/components/editor/InsertRefModal'
 
 // Helper for item numbering
 const getNumbering = (order: number) => {
@@ -63,6 +65,7 @@ export const ChecklistItem = memo(function ChecklistItem({
 
   const [isHovered, setIsHovered] = useState(false)
   const [showContextMenu, setShowContextMenu] = useState(false)
+  const [showRefModal, setShowRefModal] = useState(false)
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 })
   const [isAnimatingIn, setIsAnimatingIn] = useState(true)
 
@@ -239,6 +242,8 @@ export const ChecklistItem = memo(function ChecklistItem({
           isFocused && !isCurrentlyDragging && "bg-primary/10",
           // Hover state — accent background (only if not focused)
           isHovered && !isFocused && !isCurrentlyDragging && "bg-accent",
+          // Ref item styling
+          item.type === 'ref' && "border-l-2 border-blue-500/50 bg-blue-500/5 rounded-l-none",
           // Dragging/drop states
           isDropTarget && 'ring-2 ring-primary ring-offset-2 bg-accent/30',
           isCurrentlyDragging && 'bg-accent/20 border border-primary/20'
@@ -264,13 +269,14 @@ export const ChecklistItem = memo(function ChecklistItem({
           <Icon icon={DragDropVerticalIcon} className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
         </button>
 
-        {/* Numbering */}
+        {/* Numbering or Ref Icon */}
         <span className={cn(
-          'font-medium shrink-0 w-6 text-right tabular-nums',
+          'font-medium shrink-0 w-6 text-right tabular-nums flex items-center justify-end',
           isMobile ? 'text-sm' : 'text-xs',
-          item.text ? 'text-muted-foreground' : 'text-muted-foreground/40'
+          item.text ? 'text-muted-foreground' : 'text-muted-foreground/40',
+          item.type === 'ref' && "text-blue-500"
         )}>
-          {getNumbering(item.order)}
+          {item.type === 'ref' ? <Icon icon={Link01Icon} className="h-3.5 w-3.5" /> : getNumbering(item.order)}
         </span>
 
         {/* Expand Toggle */}
@@ -392,11 +398,32 @@ export const ChecklistItem = memo(function ChecklistItem({
           <button onClick={() => { moveItemDown(item.id); setShowContextMenu(false) }} className="w-full px-3 py-2 text-left hover:bg-accent text-sm flex items-center gap-2">
             <Icon icon={ArrowDown01Icon} size="sm" /> Move Down
           </button>
+          <button onClick={() => { setShowContextMenu(false); setShowRefModal(true) }} className="w-full px-3 py-2 text-left hover:bg-accent text-sm flex items-center gap-2">
+            <Icon icon={Link01Icon} size="sm" /> Link Sub-Checklist
+          </button>
           <div className="h-px bg-border my-1" />
           <button onClick={() => { handleDelete(); setShowContextMenu(false) }} className="w-full px-3 py-2 text-left hover:bg-destructive/10 text-destructive text-sm flex items-center gap-2">
             <Icon icon={Delete02Icon} size="sm" /> Delete
           </button>
         </div>
+      )}
+
+      {showRefModal && (
+        <InsertRefModal
+          open={showRefModal}
+          onOpenChange={setShowRefModal}
+          onInsert={(config) => {
+            updateItem(item.id, {
+              text: config.title,
+              type: 'ref',
+              ref_config: {
+                repo_id: config.repoId,
+                title: config.title,
+                execution_mode: config.executionMode
+              }
+            })
+          }}
+        />
       )}
     </div>
   )

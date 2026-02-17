@@ -1,47 +1,13 @@
 #!/usr/bin/env node
+
 /**
- * MCP Server CLI
+ * Checklist HQ MCP CLI Wrapper
  * 
- * Usage:
- *   node cli.ts --user-id <user_id>
+ * This is a thin wrapper that allows the MCP server to be run via:
+ * - npx checklist-hq-mcp
+ * - npm exec checklist-hq-mcp
  * 
- * Environment variables:
- *   CHECKLIST_USER_ID - User ID to run the server for
- *   SUPABASE_URL - Supabase project URL
- *   SUPABASE_ANON_KEY - Supabase anonymous key
+ * It simply forwards to the main server entry point.
  */
 
-import { runMCPServer } from './server';
-
-async function main() {
-  // Get user ID from command line args or environment
-  const args = process.argv.slice(2);
-  const userIdIndex = args.indexOf('--user-id');
-  const userId =
-    userIdIndex !== -1
-      ? args[userIdIndex + 1]
-      : process.env.CHECKLIST_USER_ID;
-
-  if (!userId) {
-    console.error('Error: User ID is required');
-    console.error('Usage: node cli.ts --user-id <user_id>');
-    console.error('Or set CHECKLIST_USER_ID environment variable');
-    process.exit(1);
-  }
-
-  // Validate environment variables
-  if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_ANON_KEY) {
-    console.error('Error: Supabase environment variables not set');
-    console.error('Required: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY');
-    process.exit(1);
-  }
-
-  try {
-    await runMCPServer(userId);
-  } catch (error) {
-    console.error('Fatal error:', error);
-    process.exit(1);
-  }
-}
-
-main();
+import './index.js';

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getTeamActivityLogs, type AuditLog } from '@/services/audit'
+import { getTeamActivityLogs, type TeamAuditLog } from '@/services/audit'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
@@ -21,7 +21,7 @@ interface TeamActivityFeedProps {
 
 export function TeamActivityFeed({ teamId, limit = 20 }: TeamActivityFeedProps) {
   const [loading, setLoading] = useState(true)
-  const [logs, setLogs] = useState<AuditLog[]>([])
+  const [logs, setLogs] = useState<TeamAuditLog[]>([])
   const [total, setTotal] = useState(0)
 
   const loadActivity = async () => {
@@ -63,7 +63,7 @@ export function TeamActivityFeed({ teamId, limit = 20 }: TeamActivityFeedProps) 
     }
   }
 
-  const getActivityDescription = (log: AuditLog) => {
+  const getActivityDescription = (log: TeamAuditLog) => {
     const values = log.new_values || log.changes || {}
 
     switch (log.action) {

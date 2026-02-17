@@ -27,7 +27,7 @@ export function DashboardHeader({ userEmail, activeRunsCount, onSmartImport }: D
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-orange-500/5 border p-6 mb-8"
+            className="relative overflow-hidden rounded-2xl bg-linear-to-br from-primary/5 via-background to-orange-500/5 border p-6 mb-8"
         >
             {/* Decorative gradient orb */}
             <div className="absolute -top-16 -right-16 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
@@ -47,7 +47,7 @@ export function DashboardHeader({ userEmail, activeRunsCount, onSmartImport }: D
                     </h1>
 
                     {/* Active runs indicator */}
-                    <p className="text-muted-foreground mt-2 flex items-center gap-2">
+                    <div className="text-muted-foreground mt-2 flex items-center gap-2">
                         {activeRunsCount > 0 ? (
                             <>
                                 <Badge variant="default" className="gap-1.5 h-6 px-2.5 bg-primary/10 text-primary border-0 hover:bg-primary/15">
@@ -66,7 +66,7 @@ export function DashboardHeader({ userEmail, activeRunsCount, onSmartImport }: D
                                 No active runs — start one to track progress
                             </span>
                         )}
-                    </p>
+                    </div>
                 </div>
 
                 {/* Action buttons with enhanced styling */}
@@ -74,7 +74,7 @@ export function DashboardHeader({ userEmail, activeRunsCount, onSmartImport }: D
                     <Button variant="outline" asChild className="group relative overflow-hidden">
                         <Link to="/explore">
                             {/* Shimmer effect on hover */}
-                            <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+                            <span className="absolute inset-0 bg-linear-to-r from-primary/0 via-primary/5 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
                             <Icon icon={GitForkIcon} className="mr-2 h-4 w-4" />
                             <span className="hidden sm:inline">Explore Templates</span>
                             <span className="sm:hidden">Explore</span>
@@ -86,7 +86,7 @@ export function DashboardHeader({ userEmail, activeRunsCount, onSmartImport }: D
                         onClick={onSmartImport}
                         className="group relative overflow-hidden border-primary/30"
                       >
-                        <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+                        <span className="absolute inset-0 bg-linear-to-r from-primary/0 via-primary/5 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
                         <Icon icon={SparklesIcon} className="mr-2 h-4 w-4 text-primary" />
                         <span className="hidden sm:inline">Smart Import</span>
                         <span className="sm:hidden">Import</span>

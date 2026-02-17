@@ -4,13 +4,17 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Icon } from '@/components/ui/icon';
-import { BrainIcon, Copy01Icon } from '@hugeicons/core-free-icons';
+import { BrainIcon, Copy01Icon, FileEditIcon } from '@hugeicons/core-free-icons';
 import { toast } from 'sonner';
 import type { Repository, Commit, Run } from '@/types/database';
-import { generateAgentContext, generateExecutionPrompt } from '@/lib/agent/prompt-transformer';
+import { generateAgentContext, generateExecutionPrompt, type AgentContextOptions } from '@/lib/agent/prompt-transformer';
 
 interface AgentExportButtonProps {
   repository: Repository;
@@ -24,7 +28,11 @@ export function AgentExportButton({ repository, commit, run }: AgentExportButton
   const copyToClipboard = async (text: string, message: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success(message);
+      
+      // Estimate token count (rough: ~4 chars per token)
+      const estimatedTokens = Math.ceil(text.length / 4);
+      
+      toast.success(`${message} (~${estimatedTokens} tokens)`);
       setIsOpen(false);
     } catch (error) {
       toast.error('Failed to copy to clipboard');
@@ -32,14 +40,21 @@ export function AgentExportButton({ repository, commit, run }: AgentExportButton
     }
   };
 
-  const handleCopyContext = () => {
-    const context = generateAgentContext(repository, commit, run);
-    copyToClipboard(context, 'Copied context for Claude/ChatGPT');
-  };
-
-  const handleCopyExecutionPrompt = () => {
-    const prompt = generateExecutionPrompt(repository, commit, run);
-    copyToClipboard(prompt, 'Copied execution prompt for AI agent');
+  const handleCopy = (format: AgentContextOptions['format'], scope: 'full' | 'remaining', withPrompt: boolean) => {
+    const options: AgentContextOptions = {
+      format,
+      onlyIncomplete: scope === 'remaining',
+    };
+    
+    const context = withPrompt 
+      ? generateExecutionPrompt(repository, commit, run, options)
+      : generateAgentContext(repository, commit, run, options);
+    
+    const formatName = format === 'json' ? 'JSON' : format === 'xml' ? 'XML' : 'Markdown';
+    const scopeName = scope === 'remaining' ? 'remaining items' : 'full checklist';
+    const typeName = withPrompt ? 'prompt' : 'context';
+    
+    copyToClipboard(context, `Copied ${formatName} ${typeName} (${scopeName})`);
   };
 
   return (
@@ -51,22 +66,55 @@ export function AgentExportButton({ repository, commit, run }: AgentExportButton
           <span className="sm:hidden">AI</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuItem onClick={handleCopyContext} className="gap-2">
+      <DropdownMenuContent align="end" className="w-64">
+        {/* Quick Actions */}
+        <DropdownMenuItem onClick={() => handleCopy('markdown', 'full', false)} className="gap-2">
           <Icon icon={Copy01Icon} className="h-4 w-4" />
           <div className="flex flex-col">
-            <span>Copy Context Only</span>
+            <span>Copy Context (Markdown)</span>
             <span className="text-xs text-muted-foreground">
-              Just the checklist state
+              Full checklist, human-readable
             </span>
           </div>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleCopyExecutionPrompt} className="gap-2">
+        <DropdownMenuItem onClick={() => handleCopy('markdown', 'full', true)} className="gap-2">
           <Icon icon={BrainIcon} className="h-4 w-4" />
           <div className="flex flex-col">
             <span>Copy Execution Prompt</span>
             <span className="text-xs text-muted-foreground">
-              State + instructions
+              With instructions for AI
+            </span>
+          </div>
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        {/* Format Submenu */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Icon icon={FileEditIcon} className="h-4 w-4 mr-2" />
+            Choose Format
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem onClick={() => handleCopy('markdown', 'full', false)}>
+              Markdown (Human-readable)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleCopy('json', 'full', false)}>
+              JSON (Structured)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleCopy('xml', 'full', false)}>
+              XML (Best for Claude)
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        
+        {/* Scope Options */}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => handleCopy('markdown', 'remaining', false)} className="gap-2">
+          <div className="flex flex-col">
+            <span>Remaining Items Only</span>
+            <span className="text-xs text-muted-foreground">
+              Skip completed steps
             </span>
           </div>
         </DropdownMenuItem>

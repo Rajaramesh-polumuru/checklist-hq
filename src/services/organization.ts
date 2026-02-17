@@ -61,7 +61,7 @@ export async function createOrganization(params: {
     resourceType: 'organization',
     resourceId: orgId,
     newValues: { name, slug, description },
-  }).catch(err => console.error('Audit log failed:', err))
+  }).catch((err: any) => console.error('Audit log failed:', err))
 
   return orgId
 }

@@ -51,7 +51,9 @@ import {
     Logout02Icon,
 } from '@hugeicons/core-free-icons'
 import { Icon } from '@/components/ui/icon'
-import { ApiKeyManager } from '@/components/ApiKeyManager'
+import { ApiKeyManager } from '@/components/settings/ApiKeyManager'
+import { McpConnectionGuide } from '@/components/settings/McpConnectionGuide'
+import { ProviderKeyManager } from '@/components/settings/ProviderKeyManager'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { variants, staticVariants, transitions } from '@/lib/motion'
 
@@ -1081,7 +1083,7 @@ export function Profile() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={transitions.default}
-                        className="max-w-3xl space-y-6"
+                        className="max-w-4xl space-y-8"
                     >
                         <div className="flex items-center justify-between">
                             <div>
@@ -1090,12 +1092,16 @@ export function Profile() {
                                     Integrations & API
                                 </h2>
                                 <p className="text-sm text-muted-foreground">
-                                    Connect Checklist HQ with your external tools
+                                    Connect Checklist HQ with your AI assistants and external tools
                                 </p>
                             </div>
                         </div>
 
-                        <ApiKeyManager />
+                        <div className="grid gap-8">
+                            <ProviderKeyManager />
+                            <McpConnectionGuide />
+                            <ApiKeyManager />
+                        </div>
                     </motion.div>
                 )}
 

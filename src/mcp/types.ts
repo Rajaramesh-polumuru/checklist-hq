@@ -1,27 +1,55 @@
 /**
- * MCP Server Types for Checklist HQ
- * Model Context Protocol integration
+ * MCP Server Type Definitions
  */
 
-export interface MCPResourceRequest {
-  uri: string;
+import type { User } from '@supabase/supabase-js';
+
+/**
+ * Authentication context for MCP requests
+ */
+export interface AuthContext {
+  user: User;
+  apiKey: string;
   userId: string;
 }
 
-export interface MCPToolRequest {
+/**
+ * API Key record (from Supabase)
+ */
+export interface ApiKey {
+  id: string;
+  user_id: string;
+  key_hash: string;
   name: string;
-  arguments: Record<string, unknown>;
-  userId: string;
+  last_used: string | null;
+  created_at: string;
 }
 
+/**
+ * Resource URI patterns
+ */
+export type ResourceUri =
+  | 'checklist://repos'
+  | `checklist://repo/${string}/latest`
+  | `checklist://repo/${string}/history`
+  | `checklist://run/${string}/status`;
+
+/**
+ * Tool argument types
+ */
 export interface ListRepositoriesArgs {
-  limit?: number;
   query?: string;
+  limit?: number;
+  tag?: string;
+}
+
+export interface GetChecklistArgs {
+  repo_id: string;
 }
 
 export interface StartRunArgs {
   repo_id: string;
-  run_name?: string;
+  name?: string;
 }
 
 export interface UpdateItemArgs {
@@ -32,31 +60,35 @@ export interface UpdateItemArgs {
   output?: Record<string, unknown>;
 }
 
+export interface GetRunStatusArgs {
+  run_id: string;
+}
+
 export interface CreateRepositoryArgs {
   title: string;
   description?: string;
+  items?: Record<string, unknown>;
 }
 
 export interface CommitChangesArgs {
   repo_id: string;
   parent_commit_id: string;
-  content_json: string;
+  content: string; // JSON string of ChecklistContent
   message: string;
 }
 
-export interface MCPResource {
-  uri: string;
-  name: string;
-  description: string;
-  mimeType: string;
+/**
+ * Prompt argument types
+ */
+export interface ExecuteChecklistPromptArgs {
+  repo_id: string;
+  run_id?: string;
 }
 
-export interface MCPTool {
-  name: string;
-  description: string;
-  inputSchema: {
-    type: 'object';
-    properties: Record<string, unknown>;
-    required?: string[];
-  };
+export interface ReviewChecklistPromptArgs {
+  repo_id: string;
+}
+
+export interface ConvertToChecklistPromptArgs {
+  raw_text: string;
 }

@@ -1,117 +1,211 @@
-# MCP Server Quick Start Guide
+# MCP Quick Start Guide
 
-## 🚀 Get Your User ID
+## What is MCP?
 
-**Option 1: Browser Console**
-```javascript
-// Open Checklist HQ → F12 → Console
-const token = localStorage.getItem('supabase.auth.token');
-const user = JSON.parse(token);
-console.log(user.user.id); // Copy this!
-```
+Model Context Protocol (MCP) is a standard that allows AI assistants to interact with external data sources and tools. This Checklist HQ MCP server exposes your checklists to AI tools like Claude Desktop, Cursor, and Windsurf.
 
-**Option 2: Supabase Dashboard**
-```sql
-SELECT id FROM auth.users WHERE email = 'your@email.com';
-```
+---
 
-## 🔧 Configure Claude Desktop
+## Prerequisites
 
-**Location:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+1. ✅ Checklist HQ account
+2. ✅ API key generated (Settings → API Keys)
+3. ✅ Claude Desktop, Cursor, or Windsurf installed
+
+---
+
+## Setup (5 minutes)
+
+### Step 1: Generate API Key
+
+1. Open Checklist HQ
+2. Navigate to **Settings → API Keys**
+3. Click "Generate New Key"
+4. Name it (e.g., "Claude Desktop")
+5. Copy the key (starts with `chq_`)
+
+⚠️ **Important**: Save this key now! You won't be able to see it again.
+
+---
+
+### Step 2: Configure Claude Desktop
+
+**macOS/Linux:**
+Edit `~/.config/Claude/claude_desktop_config.json`
+
+**Windows:**
+Edit `%APPDATA%\Claude\claude_desktop_config.json`
+
+**Add this configuration:**
 
 ```json
 {
   "mcpServers": {
     "checklist-hq": {
-      "command": "node",
-      "args": [
-        "/Users/YOU/Desktop/checklist-hq/src/mcp/cli.ts",
-        "--user-id",
-        "paste-your-user-id-here"
-      ],
+      "command": "npx",
+      "args": ["-y", "tsx", "/absolute/path/to/checklist-hq/src/mcp/index.ts"],
       "env": {
-        "VITE_SUPABASE_URL": "https://yourproject.supabase.co",
-        "VITE_SUPABASE_ANON_KEY": "your-anon-key-from-env"
+        "CHQ_API_KEY": "chq_your_actual_key_here",
+        "CHQ_SUPABASE_URL": "https://your-project.supabase.co",
+        "CHQ_SUPABASE_ANON_KEY": "your_supabase_anon_key"
       }
     }
   }
 }
 ```
 
-**Get Supabase credentials:**
+**Important**:
+- Replace `/absolute/path/to/checklist-hq` with your actual project path
+- Replace the API key and Supabase credentials with your real values
+- Use absolute paths (not `~` or `./`)
+
+---
+
+### Step 3: Restart Claude Desktop
+
+1. Quit Claude Desktop completely
+2. Relaunch it
+3. Open a new chat
+
+---
+
+### Step 4: Test the Connection
+
+Try these commands in Claude:
+
+```
+List my checklists
+```
+
+```
+Show me the latest version of my deployment checklist
+```
+
+```
+Create a new checklist for customer onboarding
+```
+
+If everything is working, Claude will use the MCP tools to interact with your checklists!
+
+---
+
+## Example Workflows
+
+### Workflow 1: Execute a Checklist
+
+**You:** "Start executing my 'Deploy to Production' checklist"
+
+**Claude will:**
+1. Call `list_repositories` to find your checklist
+2. Call `start_run` to begin execution
+3. Call `update_item` for each completed step
+4. Provide real-time progress updates
+
+---
+
+### Workflow 2: Review a Process
+
+**You:** "Review my onboarding checklist for gaps"
+
+**Claude will:**
+1. Use the `review_checklist` prompt
+2. Analyze completeness, clarity, order
+3. Suggest improvements
+4. Recommend automation opportunities
+
+---
+
+### Workflow 3: Convert Documentation
+
+**You:** "Convert this SOP into a checklist: [paste text]"
+
+**Claude will:**
+1. Use the `convert_to_checklist` prompt
+2. Parse the text into structured steps
+3. Call `create_repository` to save it
+4. Return the new checklist ID
+
+---
+
+## Troubleshooting
+
+### "API key is invalid"
+
+- Check you copied the full key (no spaces)
+- Verify the key hasn't been revoked in Settings
+- Ensure `CHQ_API_KEY` is set in the config
+
+### "Command not found: npx"
+
+Install Node.js and npm:
+- macOS: `brew install node`
+- Windows: Download from nodejs.org
+- Linux: `sudo apt install nodejs npm`
+
+### "Module not found: @modelcontextprotocol/sdk"
+
+Run in your project directory:
 ```bash
-# From your .env or .env.local file
-cat /Users/YOU/Desktop/checklist-hq/.env
+npm install @modelcontextprotocol/sdk
 ```
 
-## ✅ Test It
+### "ENOENT: no such file or directory"
 
-1. Restart Claude Desktop completely (Cmd+Q, reopen)
-2. Start a new conversation
-3. Ask: **"List my checklists"**
+- Use absolute paths in the MCP config (not relative)
+- Check the path exists: `ls /path/to/checklist-hq/src/mcp/index.ts`
 
-If it works, you'll see your repositories!
+### "Supabase credentials missing"
 
-## 🎯 Example Prompts
+- Copy `.env` values to the MCP config
+- Check `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set
+
+---
+
+## Advanced: Cursor / Windsurf
+
+The setup is similar, but each tool has its own MCP configuration location:
+
+**Cursor:**
+- Settings → Extensions → MCP
+- Add server configuration (same JSON format)
+
+**Windsurf:**
+- Settings → AI → MCP Servers
+- Add server configuration
+
+---
+
+## Security Notes
+
+- ✅ API keys are hashed in the database (never stored in plaintext)
+- ✅ Rate limited: 100 requests/minute per user
+- ✅ Row-level security ensures data isolation
+- ⚠️ Keep your API key secret (treat it like a password)
+- ⚠️ Never commit API keys to Git
+
+---
+
+## What's Next?
+
+### Explore Available Tools
+
+Try:
+```
+What tools are available in Checklist HQ?
+```
+
+### Get Help
 
 ```
-"List my checklists"
-→ Shows all your repositories
-
-"Start a run for the deployment checklist"
-→ Creates a new run
-
-"Show me the status of run abc-123"
-→ Reads checklist://runs/abc-123/status
-
-"Read the latest version of repository xyz-456"
-→ Reads checklist://xyz-456/latest
-
-"Mark item def-789 as complete in run abc-123"
-→ Calls update_item tool
+How do I update a checklist item?
 ```
 
-## 🐛 Troubleshooting
+### Automate Workflows
 
-**Server won't start?**
-```bash
-# Test manually
-export VITE_SUPABASE_URL="https://yourproject.supabase.co"
-export VITE_SUPABASE_ANON_KEY="your-key"
-export CHECKLIST_USER_ID="your-user-id"
-node /Users/YOU/Desktop/checklist-hq/src/mcp/cli.ts
-
-# Should output: "Checklist HQ MCP server running on stdio"
-# Press Ctrl+C to stop
+```
+Execute my deployment checklist and notify me when done
 ```
 
-**"Access denied" errors?**
-- Double-check your user ID matches your Supabase auth user
-- Verify you own the repositories you're trying to access
+---
 
-**Claude doesn't see the tools?**
-- Restart Claude Desktop completely (not just close the window)
-- Check `~/Library/Logs/Claude/mcp*.log` for errors
-- Verify the path in config points to the correct file
-
-## 📚 Available Commands
-
-### Resources
-- `checklist://{repo_id}/latest` - Read checklist as Markdown
-- `checklist://runs/{run_id}/status` - Get run progress JSON
-
-### Tools
-- `list_repositories` - List your checklists
-- `start_run` - Begin a new execution
-- `update_item` - Mark steps complete
-
-## 🔒 Security Notes
-
-- The server has **full access** to your checklists
-- Only configure it with your own user ID
-- Keep credentials secure (never commit to git)
-- Each server instance serves one user only
-
-## 📖 Full Documentation
-
-See `/src/mcp/README.md` for complete API reference.
+**Need help?** Check the full documentation at `/src/mcp/README.md`

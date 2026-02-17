@@ -13,6 +13,8 @@ import { useThemeStore } from '@/stores/theme-store'
 const Home = lazy(() => import('@/pages/Home').then(module => ({ default: module.Home })))
 const Dashboard = lazy(() => import('@/pages/DashboardPage').then(module => ({ default: module.Dashboard })))
 const Explore = lazy(() => import('@/pages/Explore').then(module => ({ default: module.Explore })))
+const Marketplace = lazy(() => import('@/pages/Marketplace').then(module => ({ default: module.Marketplace })))
+const MarketplaceListing = lazy(() => import('@/pages/MarketplaceListing').then(module => ({ default: module.MarketplaceListing })))
 const Editor = lazy(() => import('@/pages/Editor').then(module => ({ default: module.Editor })))
 const RunMode = lazy(() => import('@/pages/RunMode').then(module => ({ default: module.RunMode })))
 const Activity = lazy(() => import('@/pages/Activity').then(module => ({ default: module.Activity })))
@@ -85,6 +87,8 @@ function App() {
               {/* Public routes */}
               <Route index element={<Suspense fallback={<PageLoader />}><Home /></Suspense>} />
               <Route path="explore" element={<Suspense fallback={<PageLoader />}><Explore /></Suspense>} />
+              <Route path="marketplace" element={<Suspense fallback={<PageLoader />}><Marketplace /></Suspense>} />
+              <Route path="marketplace/:listingId" element={<Suspense fallback={<PageLoader />}><MarketplaceListing /></Suspense>} />
               <Route path="auth/callback" element={<Suspense fallback={<PageLoader />}><AuthCallback /></Suspense>} />
 
               {/* Protected routes */}

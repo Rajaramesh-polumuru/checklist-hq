@@ -1,14 +1,37 @@
 {
-  "extends": "./tsconfig.app.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.mcp.tsbuildinfo",
-    "types": ["node"],
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "module": "ESNext",
-    "moduleResolution": "node",
-    "noEmit": false,
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "types": ["node"],
     "outDir": "./dist-mcp",
-    "verbatimModuleSyntax": false
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["src/mcp/**/*.ts"],
-  "exclude": []
+  "include": [
+    "src/mcp/**/*",
+    "src/lib/agent/prompt-transformer.ts",
+    "src/lib/agent/schemas.ts",
+    "src/types/database.ts"
+  ],
+  "exclude": ["node_modules", "dist", "dist-mcp", "src/mcp/cli.ts"]
 }

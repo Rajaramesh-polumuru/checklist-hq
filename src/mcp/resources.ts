@@ -1,41 +1,125 @@
 /**
- * MCP Resource Handlers
- * Expose Checklist HQ data as readable resources
+ * MCP Resources (Read-Only Data Exposure)
+ * 
+ * Resources allow AI clients to read checklist data without modifying it.
  */
 
-import { supabase } from '@/lib/supabase';
-import { generateAgentContext } from '@/lib/agent/prompt-transformer';
-import type { Repository, Commit } from '@/types/database';
-import type { MCPResourceRequest } from './types';
+import { getSupabaseClient } from './auth.js';
+import type { AuthContext } from './types.js';
+import { generateAgentContext } from '../lib/agent/prompt-transformer.js';
+
+const supabase = getSupabaseClient();
 
 /**
- * Read a checklist resource
- * URI format: checklist://{repo_id}/latest
+ * List all available resources for the authenticated user
  */
-export async function readChecklistResource(
-  request: MCPResourceRequest
-): Promise<{ content: string; mimeType: string }> {
-  const uriParts = request.uri.replace('checklist://', '').split('/');
-  const repoId = uriParts[0];
-  // const version = uriParts[1]; // 'latest' or commit_id - for future use
+export async function listResources(authContext: AuthContext) {
+  const { data: repos } = await supabase
+    .from('repositories')
+    .select('id, title')
+    .eq('owner_id', authContext.userId)
+    .order('updated_at', { ascending: false })
+    .limit(50);
 
-  // Fetch repository
+  const resources = [
+    {
+      uri: 'checklist://repos',
+      name: 'All Repositories',
+      description: 'List of all your checklists',
+      mimeType: 'application/json',
+    },
+  ];
+
+  // Add per-repo resources
+  if (repos) {
+    for (const repo of repos) {
+      resources.push(
+        {
+          uri: `checklist://repo/${repo.id}/latest`,
+          name: `${repo.title} (Latest)`,
+          description: `Latest version of ${repo.title}`,
+          mimeType: 'text/markdown',
+        },
+        {
+          uri: `checklist://repo/${repo.id}/history`,
+          name: `${repo.title} (History)`,
+          description: `Commit history for ${repo.title}`,
+          mimeType: 'application/json',
+        }
+      );
+    }
+  }
+
+  return { resources };
+}
+
+/**
+ * Read a specific resource by URI
+ */
+export async function readResource(uri: string, authContext: AuthContext) {
+  // Parse URI
+  if (uri === 'checklist://repos') {
+    return await getRepositoryList(authContext);
+  }
+
+  const repoLatestMatch = uri.match(/^checklist:\/\/repo\/([^/]+)\/latest$/);
+  if (repoLatestMatch) {
+    return await getLatestCommit(repoLatestMatch[1], authContext);
+  }
+
+  const repoHistoryMatch = uri.match(/^checklist:\/\/repo\/([^/]+)\/history$/);
+  if (repoHistoryMatch) {
+    return await getCommitHistory(repoHistoryMatch[1], authContext);
+  }
+
+  const runStatusMatch = uri.match(/^checklist:\/\/run\/([^/]+)\/status$/);
+  if (runStatusMatch) {
+    return await getRunStatus(runStatusMatch[1], authContext);
+  }
+
+  throw new Error(`Unknown resource URI: ${uri}`);
+}
+
+/**
+ * Get list of all repositories
+ */
+async function getRepositoryList(authContext: AuthContext) {
+  const { data: repos, error } = await supabase
+    .from('repositories')
+    .select('id, title, description, is_public, created_at, updated_at')
+    .eq('owner_id', authContext.userId)
+    .order('updated_at', { ascending: false });
+
+  if (error) throw error;
+
+  return {
+    contents: [
+      {
+        uri: 'checklist://repos',
+        mimeType: 'application/json',
+        text: JSON.stringify(repos, null, 2),
+      },
+    ],
+  };
+}
+
+/**
+ * Get latest commit for a repository
+ */
+async function getLatestCommit(repoId: string, authContext: AuthContext) {
+  // Verify ownership
   const { data: repo, error: repoError } = await supabase
     .from('repositories')
     .select('*')
     .eq('id', repoId)
+    .eq('owner_id', authContext.userId)
     .single();
 
   if (repoError || !repo) {
-    throw new Error(`Repository not found: ${repoId}`);
+    throw new Error('Repository not found or access denied');
   }
 
-  // Verify ownership/access
-  if (repo.owner_id !== request.userId) {
-    throw new Error('Access denied: Repository not owned by user');
-  }
-
-  // Fetch latest commit
+  // Get latest commit
   const { data: commit, error: commitError } = await supabase
     .from('commits')
     .select('*')
@@ -45,88 +129,109 @@ export async function readChecklistResource(
     .single();
 
   if (commitError || !commit) {
-    throw new Error(`No commits found for repository: ${repoId}`);
+    throw new Error('No commits found for this repository');
   }
 
-  // Generate agent-friendly context
-  const content = generateAgentContext(repo as Repository, commit as Commit);
+  // Generate agent-optimized context
+  const markdownContext = generateAgentContext(repo, commit, undefined, {
+    format: 'markdown',
+    includeMetadata: true,
+  });
 
   return {
-    content,
-    mimeType: 'text/markdown',
+    contents: [
+      {
+        uri: `checklist://repo/${repoId}/latest`,
+        mimeType: 'text/markdown',
+        text: markdownContext,
+      },
+    ],
   };
 }
 
 /**
- * Read run status resource
- * URI format: checklist://runs/{run_id}/status
+ * Get commit history for a repository
  */
-export async function readRunStatusResource(
-  request: MCPResourceRequest
-): Promise<{ content: string; mimeType: string }> {
-  const uriParts = request.uri.replace('checklist://runs/', '').split('/');
-  const runId = uriParts[0];
+async function getCommitHistory(repoId: string, authContext: AuthContext) {
+  // Verify ownership
+  const { data: repo, error: repoError } = await supabase
+    .from('repositories')
+    .select('id')
+    .eq('id', repoId)
+    .eq('owner_id', authContext.userId)
+    .single();
 
-  // Fetch run
-  const { data: run, error: runError } = await supabase
+  if (repoError || !repo) {
+    throw new Error('Repository not found or access denied');
+  }
+
+  // Get commit history
+  const { data: commits, error } = await supabase
+    .from('commits')
+    .select('id, message, created_at, author_id')
+    .eq('repo_id', repoId)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (error) throw error;
+
+  return {
+    contents: [
+      {
+        uri: `checklist://repo/${repoId}/history`,
+        mimeType: 'application/json',
+        text: JSON.stringify(commits, null, 2),
+      },
+    ],
+  };
+}
+
+/**
+ * Get run status
+ */
+async function getRunStatus(runId: string, authContext: AuthContext) {
+  const { data: run, error } = await supabase
     .from('runs')
-    .select('*, repositories(owner_id)')
+    .select(`
+      *,
+      repository:repositories(id, title, owner_id)
+    `)
     .eq('id', runId)
     .single();
 
-  if (runError || !run) {
-    throw new Error(`Run not found: ${runId}`);
+  if (error || !run) {
+    throw new Error('Run not found');
   }
 
-  // Verify ownership/access
-  const repository = run.repositories as unknown as { owner_id: string };
-  if (repository.owner_id !== request.userId) {
-    throw new Error('Access denied: Run not owned by user');
+  // Verify ownership
+  if (run.repository.owner_id !== authContext.userId) {
+    throw new Error('Access denied');
   }
 
-  // Return progress as JSON
-  return {
-    content: JSON.stringify(run.progress, null, 2),
-    mimeType: 'application/json',
+  // Calculate progress stats
+  const progress = run.progress || {};
+  const total = Object.keys(progress).length;
+  const completed = Object.values(progress).filter((p: any) => p.completed).length;
+
+  const status = {
+    run_id: run.id,
+    repository: run.repository.title,
+    status: run.status,
+    started_at: run.started_at,
+    completed_at: run.completed_at,
+    total_items: total,
+    completed_items: completed,
+    progress_percent: total > 0 ? Math.round((completed / total) * 100) : 0,
+    items: progress,
   };
-}
 
-/**
- * Main resource handler router
- */
-export async function handleResourceRequest(
-  request: MCPResourceRequest
-): Promise<{ content: string; mimeType: string }> {
-  if (request.uri.startsWith('checklist://runs/')) {
-    return readRunStatusResource(request);
-  } else if (request.uri.startsWith('checklist://')) {
-    return readChecklistResource(request);
-  } else {
-    throw new Error(`Unsupported resource URI: ${request.uri}`);
-  }
-}
-
-/**
- * List available resources for discovery
- */
-export function listResources(_userId: string): Array<{
-  uri: string;
-  name: string;
-  description: string;
-  mimeType: string;
-}> {
-  return [
-    {
-      uri: 'checklist://{repo_id}/latest',
-      name: 'Checklist (Latest Version)',
-      description: 'Read the latest version of a checklist in agent-friendly format',
-      mimeType: 'text/markdown',
-    },
-    {
-      uri: 'checklist://runs/{run_id}/status',
-      name: 'Run Status',
-      description: 'Get the current progress of a checklist execution',
-      mimeType: 'application/json',
-    },
-  ];
+  return {
+    contents: [
+      {
+        uri: `checklist://run/${runId}/status`,
+        mimeType: 'application/json',
+        text: JSON.stringify(status, null, 2),
+      },
+    ],
+  };
 }

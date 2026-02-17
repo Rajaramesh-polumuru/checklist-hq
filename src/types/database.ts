@@ -54,6 +54,17 @@ export interface Run {
   // Team/Org context (ORGS.md)
   team_id?: string | null
   organization_id?: string | null
+  // Pipeline context (Hybrid Network)
+  metadata?: Record<string, unknown>
+}
+
+// Sub-run linking (Hybrid Network)
+export interface RunLink {
+  id: string
+  parent_run_id: string
+  child_run_id: string
+  parent_item_id: string
+  created_at: string
 }
 
 // Time segment for accurate duration tracking
@@ -73,25 +84,59 @@ export interface ChecklistItem {
   text: string
   parent: string | null  // null means root level
   order: number
-  type?: 'task' | 'header' | 'note'
+  type?: 'task' | 'header' | 'note' | 'ref'
   details?: string
 
-  // Agent execution configuration (Phase 4: Auto-Pilot + Phase 6: Advanced)
+  // Reference to another checklist (Hybrid Network)
+  ref_config?: {
+    repo_id: string
+    commit_id?: string // Pin to specific version (null = latest)
+    title: string // Cached display title
+    input_mapping?: Record<string, string> // Map parent outputs -> child inputs
+    output_mapping?: Record<string, string> // Map child outputs -> parent context
+    execution_mode: 'inline' | 'spawn'
+  }
+
+  // Agent execution configuration (Agent Protocol)
   agent_config?: {
-    // Auto-Pilot settings (Phase 4)
-    enabled?: boolean // Enable automatic execution
-    provider?: 'openai' | 'anthropic' // LLM provider
-    model?: string // Model name (e.g., 'gpt-4', 'claude-sonnet-4')
-    system_prompt?: string // Custom instructions for this item
-    input_mapping?: Record<string, string> // Map run inputs to prompt vars
-    
-    // Advanced settings (Phase 6)
-    action_type?: 'manual' | 'browse' | 'api' | 'approve'
-    assignee?: string // Agent ID or 'human' or 'any'
-    parameters?: Record<string, unknown>
-    expected_output?: Record<string, unknown>
+    // Execution
+    action_type: 'manual' | 'browse' | 'api_call' | 'code' | 'approve'
+    assignee?: 'human' | 'any_agent' | string // Agent UUID
     timeout_ms?: number
-    fallback_assignee?: string // If agent fails
+    fallback_assignee?: 'human'
+
+    // Auto-Pilot settings (Phase 4 - backward compat)
+    enabled?: boolean
+    provider?: 'openai' | 'anthropic'
+    model?: string
+    system_prompt?: string
+
+    // Input: What data the step needs
+    input_schema?: {
+      type: 'object'
+      properties: Record<string, {
+        type: 'string' | 'number' | 'boolean' | 'url'
+        description: string
+        required?: boolean
+        default?: unknown
+      }>
+    }
+
+    // Output: What data the step produces
+    output_schema?: {
+      type: 'object'
+      properties: Record<string, {
+        type: 'string' | 'number' | 'boolean' | 'json'
+        description: string
+      }>
+    }
+
+    // Verification
+    verification?: {
+      type: 'none' | 'human_review' | 'artifact' | 'assertion'
+      artifact_type?: 'screenshot' | 'log' | 'file'
+      assertion?: string // e.g., "output.status_code === 200"
+    }
   }
 }
 
@@ -107,10 +152,22 @@ export interface ItemProgress {
   user_id?: string
   note?: string  // Optional note added when completing the item
 
-  // Agent execution tracking (Phase 6: AI Agent Integration)
+  // Agent execution tracking (Agent Protocol)
   completed_by?: string // User ID or Agent ID
   completed_by_type?: 'human' | 'agent'
+  completed_by_name?: string // "Claude 3.5 Sonnet" or "Raja"
   agent_output?: Record<string, unknown> // Structured output from agent
+  
+  // Traceability (Milestone 4.1)
+  duration_ms?: number // How long the step took
+  attempt_count?: number // Retries (for agents)
+  verification_status?: 'pending' | 'verified' | 'rejected'
+  verified_by?: string // Human who approved agent work
+  artifacts?: Array<{
+    type: 'screenshot' | 'log' | 'file' | 'url'
+    url: string
+    description: string
+  }>
 }
 
 export type RunProgress = Record<string, ItemProgress>
@@ -293,6 +350,7 @@ export interface RunInsert {
   // Team/Org context (ORGS.md)
   team_id?: string | null
   organization_id?: string | null
+  metadata?: Record<string, unknown>
 }
 
 // Update types
@@ -315,6 +373,7 @@ export interface RunUpdate {
   notes?: string | null
   device_id?: string | null
   device_name?: string | null
+  metadata?: Record<string, unknown>
 }
 
 export interface RunTimeSegmentInsert {
@@ -388,6 +447,30 @@ export interface ActivityInsert {
   resource_id: string
   resource_name?: string | null
   metadata?: Record<string, unknown>
+}
+
+// Marketplace (Phase 3)
+export interface MarketplaceListing {
+  id: string
+  repo_id: string
+  commit_id: string | null
+  publisher_id: string
+  organization_id: string | null
+  title: string
+  description: string | null
+  short_description: string | null
+  category: string
+  difficulty: 'beginner' | 'intermediate' | 'advanced' | null
+  estimated_duration: string | null
+  agent_compatibility: string[] | null
+  install_count: number
+  fork_count: number
+  rating_avg: number
+  rating_count: number
+  status: 'draft' | 'pending_review' | 'published' | 'featured' | 'deprecated'
+  published_at: string | null
+  created_at: string
+  updated_at: string
 }
 
 // Supabase database schema type
