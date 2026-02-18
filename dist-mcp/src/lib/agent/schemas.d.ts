@@ -90,8 +90,8 @@ export declare const itemProgressSchema: z.ZodObject<{
     verified_by: z.ZodOptional<z.ZodString>;
     artifacts: z.ZodOptional<z.ZodArray<z.ZodObject<{
         type: z.ZodEnum<{
-            file: "file";
             url: "url";
+            file: "file";
             screenshot: "screenshot";
             log: "log";
         }>;
