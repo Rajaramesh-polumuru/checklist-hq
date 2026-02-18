@@ -21,18 +21,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  GitForkIcon,
-  Loading02Icon,
-  CheckmarkCircle02Icon,
-  AlertCircleIcon,
-  CheckListIcon,
-  Copy01Icon,
-  ArrowRight01Icon,
-  SparklesIcon,
-  UserIcon,
-  UserGroupIcon,
-} from '@hugeicons/core-free-icons'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
+import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon'
+import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
+import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon'
+import UserIcon from '@hugeicons/core-free-icons/UserIcon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
 import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
 import { forkRepository, forkRepositoryToTeam, getLatestCommit } from '@/services/repository'

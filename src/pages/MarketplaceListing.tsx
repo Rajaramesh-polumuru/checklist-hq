@@ -4,15 +4,13 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Icon } from '@/components/ui/icon'
-import { 
-  ArrowLeft01Icon, 
-  StarIcon, 
-  Download01Icon, 
-  GitForkIcon, 
-  Shield01Icon,
-  Clock01Icon,
-  Share08Icon
-} from '@hugeicons/core-free-icons'
+import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon'
+import StarIcon from '@hugeicons/core-free-icons/StarIcon'
+import Download01Icon from '@hugeicons/core-free-icons/Download01Icon'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import Shield01Icon from '@hugeicons/core-free-icons/Shield01Icon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import Share08Icon from '@hugeicons/core-free-icons/Share08Icon'
 import { ListingCard } from '@/components/marketplace/ListingCard'
 import { Reviews } from '@/components/marketplace/Reviews'
 

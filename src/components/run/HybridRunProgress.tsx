@@ -1,12 +1,10 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Icon } from '@/components/ui/icon'
-import {
-  AiCloud02Icon,
-  UserIcon,
-  CheckmarkCircle01Icon,
-  Loading02Icon,
-} from '@hugeicons/core-free-icons'
+import AiCloud02Icon from '@hugeicons/core-free-icons/AiCloud02Icon'
+import UserIcon from '@hugeicons/core-free-icons/UserIcon'
+import CheckmarkCircle01Icon from '@hugeicons/core-free-icons/CheckmarkCircle01Icon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
 import { cn } from '@/lib/utils'
 import type { ChecklistItem, ItemProgress } from '@/types/database'
 

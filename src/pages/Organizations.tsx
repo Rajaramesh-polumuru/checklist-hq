@@ -6,13 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { RoleBadge } from '@/components/ui/role-badge'
 import { Icon } from '@/components/ui/icon'
-import {
-    Loading02Icon,
-    Building02Icon,
-    PlusSignIcon,
-    UserGroupIcon,
-    ArrowRight01Icon,
-} from '@hugeicons/core-free-icons'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import Building02Icon from '@hugeicons/core-free-icons/Building02Icon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
 import type { OrgRole } from '@/stores/permission-store'
 
 export function Organizations() {

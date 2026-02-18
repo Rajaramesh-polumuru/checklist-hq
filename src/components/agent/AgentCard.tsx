@@ -3,15 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Icon } from '@/components/ui/icon'
-import {
-  AiCloud02Icon,
-  MoreVerticalCircle01Icon,
-  Settings02Icon,
-  Delete02Icon,
-  UserGroupIcon,
-  FlashIcon,
-  WebhookIcon,
-} from '@hugeicons/core-free-icons'
+import AiCloud02Icon from '@hugeicons/core-free-icons/AiCloud02Icon'
+import MoreVerticalCircle01Icon from '@hugeicons/core-free-icons/MoreVerticalCircle01Icon'
+import Settings02Icon from '@hugeicons/core-free-icons/Settings02Icon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import FlashIcon from '@hugeicons/core-free-icons/FlashIcon'
+import WebhookIcon from '@hugeicons/core-free-icons/WebhookIcon'
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -5,12 +5,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Icon } from '@/components/ui/icon'
-import {
-  Shield01Icon,
-  PlusSignIcon,
-  Delete02Icon,
-  AlertCircleIcon,
-} from '@hugeicons/core-free-icons'
+import Shield01Icon from '@hugeicons/core-free-icons/Shield01Icon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
 import { cn } from '@/lib/utils'
 
 interface IPRule {

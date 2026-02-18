@@ -1,4 +1,6 @@
-import { Moon02Icon, Sun03Icon, ComputerIcon } from '@hugeicons/core-free-icons'
+import Moon02Icon from '@hugeicons/core-free-icons/Moon02Icon'
+import Sun03Icon from '@hugeicons/core-free-icons/Sun03Icon'
+import ComputerIcon from '@hugeicons/core-free-icons/ComputerIcon'
 import { Icon } from '@/components/ui/icon'
 import { Button } from '@/components/ui/button'
 import { useThemeStore } from '@/stores/theme-store'

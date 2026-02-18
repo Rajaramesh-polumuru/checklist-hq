@@ -26,7 +26,7 @@
   --color-popover-foreground: var(--color-foreground);
 
   /* Primary Brand Color (Red-Orange) */
-  --color-primary: hsl(9 85% 55%);
+  --color-primary: hsl(9 85% 45%);
   --color-primary-foreground: hsl(0 0% 100%);
 
   /* Secondary */

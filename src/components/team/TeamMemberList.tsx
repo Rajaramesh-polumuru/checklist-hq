@@ -2,14 +2,12 @@ import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
-import {
-  MoreVerticalCircle01Icon,
-  UserGroupIcon,
-  Delete02Icon,
-  ArrowUp01Icon,
-  ArrowDown01Icon,
-  User02Icon,
-} from '@hugeicons/core-free-icons'
+import MoreVerticalCircle01Icon from '@hugeicons/core-free-icons/MoreVerticalCircle01Icon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import ArrowUp01Icon from '@hugeicons/core-free-icons/ArrowUp01Icon'
+import ArrowDown01Icon from '@hugeicons/core-free-icons/ArrowDown01Icon'
+import User02Icon from '@hugeicons/core-free-icons/User02Icon'
 import {
   DropdownMenu,
   DropdownMenuContent,

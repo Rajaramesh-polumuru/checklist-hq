@@ -7,13 +7,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Icon } from '@/components/ui/icon'
-import {
-  LockKeyIcon,
-  Copy01Icon,
-  CheckmarkCircle01Icon,
-  AlertCircleIcon,
-} from '@hugeicons/core-free-icons'
-
+import LockKeyIcon from '@hugeicons/core-free-icons/LockKeyIcon'
+import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon'
+import CheckmarkCircle01Icon from '@hugeicons/core-free-icons/CheckmarkCircle01Icon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
 interface SSOConfigurationProps {
   organizationId: string
 }

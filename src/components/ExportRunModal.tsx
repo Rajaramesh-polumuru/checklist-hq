@@ -8,14 +8,12 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import {
-  Download01Icon,
-  DocumentCodeIcon,
-  File02Icon,
-  PrinterIcon,
-  CheckmarkCircle02Icon,
-  Loading02Icon,
-} from '@hugeicons/core-free-icons'
+import Download01Icon from '@hugeicons/core-free-icons/Download01Icon'
+import DocumentCodeIcon from '@hugeicons/core-free-icons/DocumentCodeIcon'
+import File02Icon from '@hugeicons/core-free-icons/File02Icon'
+import PrinterIcon from '@hugeicons/core-free-icons/PrinterIcon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
 import { Icon } from '@/components/ui/icon'
 import {
   prepareRunExport,

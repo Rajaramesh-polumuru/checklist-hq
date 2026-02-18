@@ -1,89 +1,97 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logos/logo-light.svg" />
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="/logos/logo-light.svg"
-      media="(prefers-color-scheme: light)"
-    />
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="/logos/logo-dark.svg"
-      media="(prefers-color-scheme: dark)"
-    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-    <!-- Primary SEO Meta Tags -->
-    <title>
-      Checklist HQ - The GitHub for Standard Operating Procedures | Version
-      Control for Checklists
-    </title>
-    <meta
-      name="title"
-      content="Checklist HQ - The GitHub for Standard Operating Procedures | Version Control for Checklists"
-    />
-    <meta
-      name="description"
-      content="Version control your SOPs, fork proven templates, and build operational excellence. Checklist HQ is where teams create, share, and improve their standard operating procedures with full version history."
-    />
-    <meta
-      name="keywords"
-      content="checklist software, SOP management, standard operating procedures, version control, process templates, team collaboration, operational excellence, workflow automation, checklist templates, business processes"
-    />
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/logos/logo-light.svg" />
+    <link rel="icon" type="image/svg+xml" href="/logos/logo-light.svg" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/svg+xml" href="/logos/logo-dark.svg" media="(prefers-color-scheme: dark)" />
+    <link rel="apple-touch-icon" href="/logos/logo-light.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Preload critical local font -->
+    <link rel="preload" href="/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!-- Preload brand font (self-hosted) -->
+    <link rel="preload" href="/fonts/Outfit-Latin.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!-- ========== Primary SEO Meta Tags ========== -->
+    <title>Checklist HQ - The GitHub for Standard Operating Procedures | Version Control for Checklists</title>
+    <meta name="title" content="Checklist HQ - The GitHub for Standard Operating Procedures | Version Control for Checklists" />
+    <meta name="description" content="Version control your SOPs, fork proven templates, and build operational excellence. Checklist HQ is where teams create, share, and improve their standard operating procedures with full version history. Free to get started." />
+    <meta name="keywords" content="checklist software, SOP management, standard operating procedures, version control, process templates, team collaboration, operational excellence, workflow automation, checklist templates, business processes, process management, SOP tool, checklist app, quality management, compliance checklists, onboarding checklist, DevOps runbooks, incident response" />
     <meta name="author" content="Checklist HQ" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="bingbot" content="index, follow" />
+    <meta name="rating" content="general" />
+    <meta name="distribution" content="global" />
+    <meta name="revisit-after" content="3 days" />
+    <meta name="language" content="English" />
+    <meta name="geo.region" content="US" />
+    <meta name="geo.placename" content="United States" />
+    <meta name="theme-color" content="#E84B2E" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#E84B2E" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="format-detection" content="telephone=no" />
 
-    <!-- Open Graph / Facebook -->
+    <!-- ========== Open Graph / Facebook ========== -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://checklisthq.com/" />
-    <meta
-      property="og:title"
-      content="Checklist HQ - The GitHub for Standard Operating Procedures"
-    />
-    <meta
-      property="og:description"
-      content="Version control your SOPs, fork proven templates, and build operational excellence. Create, share, and improve your team's processes with full version history."
-    />
+    <meta property="og:title" content="Checklist HQ - The GitHub for Standard Operating Procedures" />
+    <meta property="og:description" content="Version control your SOPs, fork proven templates, and build operational excellence. Create, share, and improve your team's processes with full version history." />
     <meta property="og:image" content="https://checklisthq.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Checklist HQ - Version control for your standard operating procedures" />
     <meta property="og:site_name" content="Checklist HQ" />
     <meta property="og:locale" content="en_US" />
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://checklisthq.com/" />
-    <meta
-      property="twitter:title"
-      content="Checklist HQ - The GitHub for Standard Operating Procedures"
-    />
-    <meta
-      property="twitter:description"
-      content="Version control your SOPs, fork proven templates, and build operational excellence. Create, share, and improve your team's processes."
-    />
-    <meta
-      property="twitter:image"
-      content="https://checklisthq.com/og-image.png"
-    />
+    <!-- ========== Twitter Card ========== -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://checklisthq.com/" />
+    <meta name="twitter:title" content="Checklist HQ - The GitHub for Standard Operating Procedures" />
+    <meta name="twitter:description" content="Version control your SOPs, fork proven templates, and build operational excellence. Create, share, and improve your team's processes." />
+    <meta name="twitter:image" content="https://checklisthq.com/og-image.png" />
+    <meta name="twitter:image:alt" content="Checklist HQ - Version control for your standard operating procedures" />
+    <meta name="twitter:creator" content="@checklisthq" />
+    <meta name="twitter:site" content="@checklisthq" />
 
-    <!-- Additional SEO -->
+    <!-- ========== Canonical & Alternate ========== -->
     <link rel="canonical" href="https://checklisthq.com/" />
-    <meta name="theme-color" content="#E84B2E" />
 
-    <!-- Structured Data -->
+    <!-- ========== Structured Data: Organization ========== -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Checklist HQ",
+        "url": "https://checklisthq.com",
+        "logo": "https://checklisthq.com/logos/logo-light.svg",
+        "description": "The GitHub for Standard Operating Procedures. Version control your processes, fork proven templates, and build operational excellence.",
+        "sameAs": [],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "url": "https://checklisthq.com"
+        }
+      }
+    </script>
+
+    <!-- ========== Structured Data: SoftwareApplication ========== -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Checklist HQ",
         "description": "The GitHub for Standard Operating Procedures. Version control your SOPs, fork proven templates, and build operational excellence.",
+        "url": "https://checklisthq.com",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
+        "browserRequirements": "Requires a modern web browser",
         "offers": {
           "@type": "Offer",
           "price": "0",
@@ -93,20 +101,136 @@
         "aggregateRating": {
           "@type": "AggregateRating",
           "ratingValue": "4.9",
-          "ratingCount": "2000"
+          "ratingCount": "2000",
+          "bestRating": "5",
+          "worstRating": "1"
         },
         "featureList": [
           "Version Control for Checklists",
           "Fork and Customize Templates",
           "Run Mode with Progress Tracking",
           "Community Template Library",
-          "Team Collaboration"
+          "Team Collaboration",
+          "Compliance & Audit Trails",
+          "DevOps Runbooks"
+        ],
+        "screenshot": "https://checklisthq.com/og-image.png"
+      }
+    </script>
+
+    <!-- ========== Structured Data: WebSite (Sitelinks Search Box) ========== -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Checklist HQ",
+        "url": "https://checklisthq.com",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://checklisthq.com/explore?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+
+    <!-- ========== Structured Data: FAQPage ========== -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is Checklist HQ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Checklist HQ is the GitHub for Standard Operating Procedures. It lets teams version control their SOPs, fork proven templates from a community library, and track every change with full commit history. Think of it as Git, but for your business processes."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does version control work for checklists?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Every change you make to a checklist is automatically saved as a commit. You can view the full history of changes, compare any two versions side by side, and roll back to a previous version at any time. This gives you a complete audit trail of how your processes evolve."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What does 'fork' mean in Checklist HQ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Forking lets you create your own copy of any public checklist template. You can then customize it to fit your team's needs while the original stays unchanged. It's the fastest way to get started — browse the community library, fork a template, and make it your own."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Checklist HQ free to use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, Checklist HQ offers a free tier that lets you create checklists, fork templates, use version control, and run checklists. You can explore the full template library without even creating an account."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What are the main use cases for Checklist HQ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Teams use Checklist HQ for employee and customer onboarding, compliance and audit checklists, QA testing procedures, DevOps runbooks and incident response, standard operating procedures (SOPs), and any repeatable business workflow."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is Checklist HQ different from other checklist tools?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Unlike basic checklist apps, Checklist HQ brings software engineering best practices to process management. You get version control with full commit history, forking and community templates, run mode with real-time progress tracking, and team collaboration — all inspired by how developers manage code on GitHub."
+            }
+          }
+        ]
+      }
+    </script>
+
+    <!-- ========== Structured Data: BreadcrumbList ========== -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://checklisthq.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Explore Templates",
+            "item": "https://checklisthq.com/explore"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Marketplace",
+            "item": "https://checklisthq.com/marketplace"
+          }
         ]
       }
     </script>
   </head>
 
   <body>
+    <noscript>
+      <div style="padding: 2rem; text-align: center; font-family: system-ui, sans-serif;">
+        <h1>Checklist HQ - The GitHub for Standard Operating Procedures</h1>
+        <p>Version control your SOPs, fork proven templates, and build operational excellence. Checklist HQ is where teams create, share, and improve their standard operating procedures with full version history.</p>
+        <p>Please enable JavaScript to use Checklist HQ.</p>
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

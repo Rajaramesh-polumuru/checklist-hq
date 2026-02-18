@@ -7,7 +7,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { searchPublicRepositories, getUserRepositories } from '@/services/repository';
 import type { Repository } from '@/types/database';
 import { Icon } from '@/components/ui/icon';
-import { Link01Icon, Loading02Icon, Search01Icon, Globe02Icon, LockKeyIcon } from '@hugeicons/core-free-icons';
+import Link01Icon from '@hugeicons/core-free-icons/Link01Icon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import Search01Icon from '@hugeicons/core-free-icons/Search01Icon'
+import Globe02Icon from '@hugeicons/core-free-icons/Globe02Icon'
+import LockKeyIcon from '@hugeicons/core-free-icons/LockKeyIcon'
 import { useAuthStore } from '@/stores/auth-store';
 import { useDebounce } from '@/hooks/useDebounce';
 

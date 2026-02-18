@@ -27,13 +27,11 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
-import {
-  SparklesIcon,
-  Loading02Icon,
-  CheckmarkCircle02Icon,
-  AlertCircleIcon,
-  FileEditIcon,
-} from '@hugeicons/core-free-icons';
+import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
+import FileEditIcon from '@hugeicons/core-free-icons/FileEditIcon'
 import { useAgentSettingsStore } from '@/stores/agent-settings-store';
 import { parseDocument, generatePreview } from '@/lib/agent/parse-document';
 import { supabase } from '@/lib/supabase';

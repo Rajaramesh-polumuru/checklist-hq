@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import { PaintBrush01Icon, Cancel01Icon, Tick01Icon } from '@hugeicons/core-free-icons'
+import PaintBrush01Icon from '@hugeicons/core-free-icons/PaintBrush01Icon'
+import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon'
+import Tick01Icon from '@hugeicons/core-free-icons/Tick01Icon'
 import { Icon } from '@/components/ui/icon'
 
 // Curated PASTEL color palettes - thinking like CDO/CMO

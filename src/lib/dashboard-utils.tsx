@@ -1,20 +1,17 @@
 import type { Repository } from '@/types/database'
 import { Icon } from '@/components/ui/icon'
-import {
-  FlashIcon,
-  AlertCircleIcon,
-  SparklesIcon,
-  StarIcon,
-  GitForkIcon,
-  ViewIcon,
-  TaskDaily01Icon,
-  Alert02Icon,
-  FireIcon,
-  Folder01Icon,
-  Globe02Icon,
-  LockKeyIcon
-} from '@hugeicons/core-free-icons'
-
+import FlashIcon from '@hugeicons/core-free-icons/FlashIcon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
+import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon'
+import StarIcon from '@hugeicons/core-free-icons/StarIcon'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import ViewIcon from '@hugeicons/core-free-icons/ViewIcon'
+import TaskDaily01Icon from '@hugeicons/core-free-icons/TaskDaily01Icon'
+import Alert02Icon from '@hugeicons/core-free-icons/Alert02Icon'
+import FireIcon from '@hugeicons/core-free-icons/FireIcon'
+import Folder01Icon from '@hugeicons/core-free-icons/Folder01Icon'
+import Globe02Icon from '@hugeicons/core-free-icons/Globe02Icon'
+import LockKeyIcon from '@hugeicons/core-free-icons/LockKeyIcon'
 // Color strategy types for meaningful visual communication
 export type ColorStatus = 'recently-used' | 'new' | 'popular' | 'forked' | 'public' | 'dormant' | 'default'
 

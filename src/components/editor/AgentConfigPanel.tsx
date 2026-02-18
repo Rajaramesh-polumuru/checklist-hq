@@ -17,13 +17,11 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
-import {
-  BrainIcon,
-  PlusSignIcon,
-  Delete02Icon,
-  ChevronDown,
-  ChevronUp,
-} from '@hugeicons/core-free-icons';
+import BrainIcon from '@hugeicons/core-free-icons/BrainIcon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import ChevronDown from '@hugeicons/core-free-icons/ChevronDown'
+import ChevronUp from '@hugeicons/core-free-icons/ChevronUp'
 
 interface AgentConfigPanelProps {
   value: any; // agent_config object

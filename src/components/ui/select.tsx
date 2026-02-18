@@ -1,6 +1,8 @@
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
-import { Tick01Icon, ArrowDown01Icon, ArrowUp01Icon } from "@hugeicons/core-free-icons"
+import Tick01Icon from '@hugeicons/core-free-icons/Tick01Icon'
+import ArrowDown01Icon from '@hugeicons/core-free-icons/ArrowDown01Icon'
+import ArrowUp01Icon from '@hugeicons/core-free-icons/ArrowUp01Icon'
 import { Icon } from "@/components/ui/icon"
 
 import { cn } from "@/lib/utils"

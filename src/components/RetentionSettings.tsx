@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Icon } from '@/components/ui/icon';
-import { Delete02Icon, Clock01Icon } from '@hugeicons/core-free-icons';
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
 
 export function RetentionSettings({ organizationId: _orgId }: { organizationId: string }) {
   const [runsRetention, setRunsRetention] = useState('365');

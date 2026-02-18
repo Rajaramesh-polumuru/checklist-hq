@@ -2,7 +2,8 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Icon } from "@/components/ui/icon"
-import { Shield01Icon, ArrowLeft01Icon } from "@hugeicons/core-free-icons"
+import Shield01Icon from '@hugeicons/core-free-icons/Shield01Icon'
+import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon'
 import { Link } from "react-router-dom"
 
 interface AccessDeniedProps {

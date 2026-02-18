@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { Loading02Icon, UserGroupIcon, PlusSignIcon, Delete02Icon, Shield01Icon } from '@hugeicons/core-free-icons'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import Shield01Icon from '@hugeicons/core-free-icons/Shield01Icon'
 import { Icon } from '@/components/ui/icon'
 import {
   getRepositoryTeams,

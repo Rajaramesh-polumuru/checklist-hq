@@ -2,16 +2,14 @@ import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Loading02Icon,
-  Download01Icon,
-  Delete02Icon,
-  Clock01Icon,
-  CheckmarkCircle01Icon,
-  AlertCircleIcon,
-  SecurityCheckIcon,
-  RefreshIcon,
-} from '@hugeicons/core-free-icons'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import Download01Icon from '@hugeicons/core-free-icons/Download01Icon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import CheckmarkCircle01Icon from '@hugeicons/core-free-icons/CheckmarkCircle01Icon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
+import SecurityCheckIcon from '@hugeicons/core-free-icons/SecurityCheckIcon'
+import RefreshIcon from '@hugeicons/core-free-icons/RefreshIcon'
 import { Icon } from '@/components/ui/icon'
 import {
   requestDataExport,

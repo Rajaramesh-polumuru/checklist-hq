@@ -4,23 +4,20 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { Badge } from '@/components/ui/badge'
-import {
-  Loading02Icon,
-  UserAdd01Icon,
-  UserRemove01Icon,
-  Settings02Icon,
-  GitForkIcon,
-  Delete02Icon,
-  RefreshIcon,
-  UserIcon,
-  Building02Icon,
-  PlayIcon,
-  CheckmarkCircle02Icon,
-  PlusSignIcon,
-  UserGroupIcon,
-  SecurityCheckIcon,
-} from '@hugeicons/core-free-icons'
-
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import UserAdd01Icon from '@hugeicons/core-free-icons/UserAdd01Icon'
+import UserRemove01Icon from '@hugeicons/core-free-icons/UserRemove01Icon'
+import Settings02Icon from '@hugeicons/core-free-icons/Settings02Icon'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import RefreshIcon from '@hugeicons/core-free-icons/RefreshIcon'
+import UserIcon from '@hugeicons/core-free-icons/UserIcon'
+import Building02Icon from '@hugeicons/core-free-icons/Building02Icon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import SecurityCheckIcon from '@hugeicons/core-free-icons/SecurityCheckIcon'
 interface OrgActivityFeedProps {
   organizationId: string
   limit?: number

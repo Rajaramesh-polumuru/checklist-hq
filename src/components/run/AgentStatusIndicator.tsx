@@ -6,15 +6,13 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
-import {
-  Loading02Icon,
-  CheckmarkCircle02Icon,
-  AlertCircleIcon,
-  BrainIcon,
-  RefreshIcon,
-  PlayIcon,
-  ThumbsUpIcon,
-} from '@hugeicons/core-free-icons';
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
+import BrainIcon from '@hugeicons/core-free-icons/BrainIcon'
+import RefreshIcon from '@hugeicons/core-free-icons/RefreshIcon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import ThumbsUpIcon from '@hugeicons/core-free-icons/ThumbsUpIcon'
 import { cn } from '@/lib/utils';
 import type { OrchestratorStatus } from '@/hooks/useRunOrchestrator';
 

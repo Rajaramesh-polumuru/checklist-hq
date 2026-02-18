@@ -21,35 +21,33 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { GDPRTools } from '@/components/GDPRTools'
-import {
-    Loading02Icon,
-    GitForkIcon,
-    Globe02Icon,
-    LockKeyIcon,
-    Calendar01Icon,
-    PlayIcon,
-    CheckmarkCircle02Icon,
-    PlusSignIcon,
-    CheckListIcon,
-    ArrowUpRight01Icon,
-    StarIcon,
-    FlashIcon,
-    Clock01Icon,
-    ArrowRight01Icon,
-    Settings02Icon,
-    Notification01Icon,
-    Download01Icon,
-    Shield01Icon,
-    MoreVerticalCircle01Icon,
-    PencilEdit02Icon,
-    Delete02Icon,
-    Activity01Icon,
-    SparklesIcon,
-    Target01Icon,
-    Analytics01Icon,
-    Mail01Icon,
-    Logout02Icon,
-} from '@hugeicons/core-free-icons'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import Globe02Icon from '@hugeicons/core-free-icons/Globe02Icon'
+import LockKeyIcon from '@hugeicons/core-free-icons/LockKeyIcon'
+import Calendar01Icon from '@hugeicons/core-free-icons/Calendar01Icon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon'
+import ArrowUpRight01Icon from '@hugeicons/core-free-icons/ArrowUpRight01Icon'
+import StarIcon from '@hugeicons/core-free-icons/StarIcon'
+import FlashIcon from '@hugeicons/core-free-icons/FlashIcon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
+import Settings02Icon from '@hugeicons/core-free-icons/Settings02Icon'
+import Notification01Icon from '@hugeicons/core-free-icons/Notification01Icon'
+import Download01Icon from '@hugeicons/core-free-icons/Download01Icon'
+import Shield01Icon from '@hugeicons/core-free-icons/Shield01Icon'
+import MoreVerticalCircle01Icon from '@hugeicons/core-free-icons/MoreVerticalCircle01Icon'
+import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import Activity01Icon from '@hugeicons/core-free-icons/Activity01Icon'
+import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon'
+import Target01Icon from '@hugeicons/core-free-icons/Target01Icon'
+import Analytics01Icon from '@hugeicons/core-free-icons/Analytics01Icon'
+import Mail01Icon from '@hugeicons/core-free-icons/Mail01Icon'
+import Logout02Icon from '@hugeicons/core-free-icons/Logout02Icon'
 import { Icon } from '@/components/ui/icon'
 import { ApiKeyManager } from '@/components/settings/ApiKeyManager'
 import { McpConnectionGuide } from '@/components/settings/McpConnectionGuide'

@@ -5,12 +5,10 @@ import { useOrgPermission } from '@/hooks/usePermissions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Icon } from '@/components/ui/icon'
-import {
-  Loading02Icon,
-  AiCloud02Icon,
-  PlusSignIcon,
-  ArrowLeft01Icon,
-} from '@hugeicons/core-free-icons'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import AiCloud02Icon from '@hugeicons/core-free-icons/AiCloud02Icon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon'
 import { CreateAgentModal } from '@/components/agent/CreateAgentModal'
 import { AgentCard } from '@/components/agent/AgentCard'
 

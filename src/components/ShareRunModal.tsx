@@ -10,16 +10,14 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import {
-  Share01Icon,
-  Link01Icon,
-  Copy01Icon,
-  CheckmarkCircle02Icon,
-  UserGroupIcon,
-  Loading02Icon,
-  Delete02Icon,
-  Shield01Icon,
-} from '@hugeicons/core-free-icons'
+import Share01Icon from '@hugeicons/core-free-icons/Share01Icon'
+import Link01Icon from '@hugeicons/core-free-icons/Link01Icon'
+import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import Shield01Icon from '@hugeicons/core-free-icons/Shield01Icon'
 import { Icon } from '@/components/ui/icon'
 import {
   generateShareToken,

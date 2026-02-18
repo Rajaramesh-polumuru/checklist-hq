@@ -1,13 +1,11 @@
 import { useMemo } from 'react'
 import { Button } from '@/components/ui/button'
-import {
-  Cancel01Icon,
-  GitForkIcon,
-  PlusSignIcon,
-  MinusSignIcon,
-  PencilEdit02Icon,
-  ArrowRight01Icon,
-} from '@hugeicons/core-free-icons'
+import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import MinusSignIcon from '@hugeicons/core-free-icons/MinusSignIcon'
+import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
 import { Icon } from '@/components/ui/icon'
 import type { Commit, ChecklistItem, ChecklistContent } from '@/types/database'
 import { cn } from '@/lib/utils'

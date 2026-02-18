@@ -7,18 +7,16 @@ import { StartRunModal } from '@/components/StartRunModal'
 import { ToastContainer } from '@/components/Toast'
 import { useToast } from '@/hooks/useToast'
 import { FormattedText } from '@/lib/rich-text'
-import {
-  ArrowLeft01Icon,
-  GitForkIcon,
-  Globe02Icon,
-  LockKeyIcon,
-  Loading02Icon,
-  Clock01Icon,
-  CheckListIcon,
-  ArrowRight01Icon,
-  PlayIcon,
-  PencilEdit02Icon,
-} from '@hugeicons/core-free-icons'
+import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import Globe02Icon from '@hugeicons/core-free-icons/Globe02Icon'
+import LockKeyIcon from '@hugeicons/core-free-icons/LockKeyIcon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon'
 import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
 import { getRepository, getLatestCommit } from '@/services/repository'

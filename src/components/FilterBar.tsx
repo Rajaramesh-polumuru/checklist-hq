@@ -5,7 +5,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Cancel01Icon, ArrowDown01Icon, Sorting05Icon } from '@hugeicons/core-free-icons'
+import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon'
+import ArrowDown01Icon from '@hugeicons/core-free-icons/ArrowDown01Icon'
+import Sorting05Icon from '@hugeicons/core-free-icons/Sorting05Icon'
 import { Icon } from '@/components/ui/icon'
 import { useMobile } from '@/hooks/useMobile'
 import type { FilterState, SortOption } from '@/lib/dashboard-utils'

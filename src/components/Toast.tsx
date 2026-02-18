@@ -1,4 +1,8 @@
-import { Cancel01Icon, CheckmarkCircle02Icon, AlertCircleIcon, InformationCircleIcon, Alert01Icon } from '@hugeicons/core-free-icons'
+import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
+import InformationCircleIcon from '@hugeicons/core-free-icons/InformationCircleIcon'
+import Alert01Icon from '@hugeicons/core-free-icons/Alert01Icon'
 import { Icon } from '@/components/ui/icon'
 import type { Toast as ToastType } from '@/hooks/useToast'
 

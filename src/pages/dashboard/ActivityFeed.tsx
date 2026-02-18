@@ -3,14 +3,12 @@ import { motion } from 'framer-motion'
 import type { ActivityItem } from '@/services/activity'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import {
-    Activity01Icon,
-    PlayIcon,
-    GitForkIcon,
-    GitCommitIcon,
-    CheckmarkCircle02Icon,
-    ArrowRight01Icon
-} from '@hugeicons/core-free-icons'
+import Activity01Icon from '@hugeicons/core-free-icons/Activity01Icon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import GitCommitIcon from '@hugeicons/core-free-icons/GitCommitIcon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
 import { Icon } from '@/components/ui/icon'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'

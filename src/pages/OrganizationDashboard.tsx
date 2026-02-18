@@ -10,19 +10,17 @@ import { useOrgPermission } from '@/hooks/usePermissions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  Building02Icon,
-  UserGroupIcon,
-  GitForkIcon,
-  Settings02Icon,
-  PlusSignIcon,
-  Search01Icon,
-  LayoutGridIcon,
-  Analytics01Icon,
-  MoreHorizontalIcon,
-  AiCloud02Icon,
-  Activity01Icon
-} from '@hugeicons/core-free-icons'
+import Building02Icon from '@hugeicons/core-free-icons/Building02Icon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import Settings02Icon from '@hugeicons/core-free-icons/Settings02Icon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import Search01Icon from '@hugeicons/core-free-icons/Search01Icon'
+import LayoutGridIcon from '@hugeicons/core-free-icons/LayoutGridIcon'
+import Analytics01Icon from '@hugeicons/core-free-icons/Analytics01Icon'
+import MoreHorizontalIcon from '@hugeicons/core-free-icons/MoreHorizontalIcon'
+import AiCloud02Icon from '@hugeicons/core-free-icons/AiCloud02Icon'
+import Activity01Icon from '@hugeicons/core-free-icons/Activity01Icon'
 import { Icon } from '@/components/ui/icon'
 import { RepositoryCard } from '@/pages/dashboard/RepositoryCard'
 import { Input } from '@/components/ui/input'

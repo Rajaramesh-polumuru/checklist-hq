@@ -6,7 +6,8 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Icon } from '@/components/ui/icon'
-import { InformationCircleIcon, ArrowDown01Icon } from '@hugeicons/core-free-icons'
+import InformationCircleIcon from '@hugeicons/core-free-icons/InformationCircleIcon'
+import ArrowDown01Icon from '@hugeicons/core-free-icons/ArrowDown01Icon'
 import { COLOR_LEGEND, type ColorStatus, type FilterState, type SortOption, getDefaultFilters } from '@/lib/dashboard-utils'
 import { cn } from '@/lib/utils'
 

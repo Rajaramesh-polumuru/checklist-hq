@@ -8,22 +8,20 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Icon } from '@/components/ui/icon'
 import { formatRelativeTime } from '@/lib/date-utils'
-import {
-  ArrowLeft01Icon,
-  CheckmarkCircle01Icon,
-  Loading02Icon,
-  ArrowTurnBackwardIcon,
-  ChampionIcon,
-  Clock01Icon,
-  SparklesIcon,
-  PlayIcon,
-  Target01Icon,
-  PauseIcon,
-  PencilEdit02Icon,
-  Tick01Icon,
-  Cancel01Icon,
-  AiCloud02Icon,
-} from '@hugeicons/core-free-icons'
+import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon'
+import CheckmarkCircle01Icon from '@hugeicons/core-free-icons/CheckmarkCircle01Icon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import ArrowTurnBackwardIcon from '@hugeicons/core-free-icons/ArrowTurnBackwardIcon'
+import ChampionIcon from '@hugeicons/core-free-icons/ChampionIcon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import Target01Icon from '@hugeicons/core-free-icons/Target01Icon'
+import PauseIcon from '@hugeicons/core-free-icons/PauseIcon'
+import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon'
+import Tick01Icon from '@hugeicons/core-free-icons/Tick01Icon'
+import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon'
+import AiCloud02Icon from '@hugeicons/core-free-icons/AiCloud02Icon'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAgentSettingsStore } from '@/stores/agent-settings-store'

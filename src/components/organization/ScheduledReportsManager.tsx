@@ -20,16 +20,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Icon } from '@/components/ui/icon'
-import {
-  Calendar03Icon,
-  Mail01Icon,
-  SlackIcon,
-  PlusSignIcon,
-  Delete02Icon,
-  Edit02Icon,
-  ChartBarLineIcon,
-} from '@hugeicons/core-free-icons'
-
+import Calendar03Icon from '@hugeicons/core-free-icons/Calendar03Icon'
+import Mail01Icon from '@hugeicons/core-free-icons/Mail01Icon'
+import SlackIcon from '@hugeicons/core-free-icons/SlackIcon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import Edit02Icon from '@hugeicons/core-free-icons/Edit02Icon'
+import ChartBarLineIcon from '@hugeicons/core-free-icons/ChartBarLineIcon'
 interface ReportSubscription {
   id: string
   frequency: 'daily' | 'weekly' | 'monthly'

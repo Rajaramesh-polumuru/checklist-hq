@@ -7,7 +7,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { GitCommitIcon, Loading02Icon } from '@hugeicons/core-free-icons'
+import GitCommitIcon from '@hugeicons/core-free-icons/GitCommitIcon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
 import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 

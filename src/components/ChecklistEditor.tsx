@@ -21,17 +21,15 @@ import { ChecklistItem, DragOverlayItem } from './ChecklistItem'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
-import {
-  PlusSignIcon,
-  ArrowTurnBackwardIcon,
-  ArrowTurnForwardIcon,
-  HandPointingDown02Icon,
-  MoreVerticalCircle01Icon,
-  SparklesIcon,
-  CheckmarkCircle01Icon,
-  ArrowRight01Icon,
-  BulbIcon
-} from '@hugeicons/core-free-icons'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import ArrowTurnBackwardIcon from '@hugeicons/core-free-icons/ArrowTurnBackwardIcon'
+import ArrowTurnForwardIcon from '@hugeicons/core-free-icons/ArrowTurnForwardIcon'
+import HandPointingDown02Icon from '@hugeicons/core-free-icons/HandPointingDown02Icon'
+import MoreVerticalCircle01Icon from '@hugeicons/core-free-icons/MoreVerticalCircle01Icon'
+import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon'
+import CheckmarkCircle01Icon from '@hugeicons/core-free-icons/CheckmarkCircle01Icon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
+import BulbIcon from '@hugeicons/core-free-icons/BulbIcon'
 import type { ChecklistItem as ChecklistItemType } from '@/types/database'
 import { cn } from '@/lib/utils'
 import { useIsMobile } from '@/hooks/useMobile'

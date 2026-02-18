@@ -1,17 +1,15 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Icon } from '@/components/ui/icon'
-import {
-    MoreVerticalCircle01Icon,
-    PencilEdit02Icon,
-    Share08Icon,
-    Copy01Icon,
-    Delete02Icon,
-    Clock01Icon,
-    PlayIcon,
-    GitBranchIcon,
-    CheckListIcon
-} from '@hugeicons/core-free-icons'
+import MoreVerticalCircle01Icon from '@hugeicons/core-free-icons/MoreVerticalCircle01Icon'
+import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon'
+import Share08Icon from '@hugeicons/core-free-icons/Share08Icon'
+import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import GitBranchIcon from '@hugeicons/core-free-icons/GitBranchIcon'
+import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

@@ -4,13 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Icon } from '@/components/ui/icon';
-import { 
-  AiCloud02Icon, 
-  CheckmarkCircle02Icon, 
-  ViewOffIcon, 
-  ViewIcon,
-  Delete02Icon
-} from '@hugeicons/core-free-icons';
+import AiCloud02Icon from '@hugeicons/core-free-icons/AiCloud02Icon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import ViewOffIcon from '@hugeicons/core-free-icons/ViewOffIcon'
+import ViewIcon from '@hugeicons/core-free-icons/ViewIcon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
 import { toast } from 'sonner';
 
 export function ProviderKeyManager() {

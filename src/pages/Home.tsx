@@ -3,23 +3,21 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import {
-  GitForkIcon,
-  CheckListIcon,
-  UserGroupIcon,
-  FlashIcon,
-  ArrowRight01Icon,
-  SparklesIcon,
-  CheckmarkCircle02Icon,
-  PlayIcon,
-  Shield01Icon,
-  StarIcon,
-  QuoteUpIcon,
-  Rocket01Icon,
-  Clock01Icon,
-  ChartBarLineIcon,
-  Globe02Icon,
-} from '@hugeicons/core-free-icons'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import FlashIcon from '@hugeicons/core-free-icons/FlashIcon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
+import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import Shield01Icon from '@hugeicons/core-free-icons/Shield01Icon'
+import StarIcon from '@hugeicons/core-free-icons/StarIcon'
+import QuoteUpIcon from '@hugeicons/core-free-icons/QuoteUpIcon'
+import Rocket01Icon from '@hugeicons/core-free-icons/Rocket01Icon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import ChartBarLineIcon from '@hugeicons/core-free-icons/ChartBarLineIcon'
+import Globe02Icon from '@hugeicons/core-free-icons/Globe02Icon'
 import { Icon } from '@/components/ui/icon'
 import { Logo } from '@/components/ui/logo'
 import { useAuthStore } from '@/stores/auth-store'
@@ -701,7 +699,7 @@ export function Home() {
 
             {/* Quick Links */}
             <div>
-              <h4 className="font-semibold mb-4">Product</h4>
+              <p className="font-semibold mb-4">Product</p>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link to="/explore" className="hover:text-foreground transition-colors">Explore Templates</Link></li>
                 <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
@@ -711,7 +709,7 @@ export function Home() {
 
             {/* Get Started */}
             <div>
-              <h4 className="font-semibold mb-4">Get Started</h4>
+              <p className="font-semibold mb-4">Get Started</p>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link to="/signup" className="hover:text-foreground transition-colors">Sign Up Free</Link></li>
                 <li><Link to="/login" className="hover:text-foreground transition-colors">Sign In</Link></li>

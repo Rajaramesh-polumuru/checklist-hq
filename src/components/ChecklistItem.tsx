@@ -2,16 +2,14 @@ import { memo, useRef, useState, useEffect } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { motion } from 'framer-motion'
-import {
-  DragDropVerticalIcon,
-  Delete02Icon,
-  ArrowRight01Icon,
-  Copy01Icon,
-  ArrowUp01Icon,
-  ArrowDown01Icon,
-  MoreVerticalIcon,
-  Link01Icon
-} from '@hugeicons/core-free-icons'
+import DragDropVerticalIcon from '@hugeicons/core-free-icons/DragDropVerticalIcon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
+import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon'
+import ArrowUp01Icon from '@hugeicons/core-free-icons/ArrowUp01Icon'
+import ArrowDown01Icon from '@hugeicons/core-free-icons/ArrowDown01Icon'
+import MoreVerticalIcon from '@hugeicons/core-free-icons/MoreVerticalIcon'
+import Link01Icon from '@hugeicons/core-free-icons/Link01Icon'
 import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 import type { ChecklistItem as ChecklistItemType } from '@/types/database'

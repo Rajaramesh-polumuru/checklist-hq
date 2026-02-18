@@ -9,17 +9,15 @@ import { SearchInput } from '@/components/SearchInput'
 import { ForkModal } from '@/components/ForkModal'
 import { ToastContainer } from '@/components/Toast'
 import { useToast } from '@/hooks/useToast'
-import {
-  GitForkIcon,
-  AnalyticsUpIcon,
-  Clock01Icon,
-  EyeIcon,
-  CheckListIcon,
-  PlusSignIcon,
-  Tag01Icon,
-  Cancel01Icon,
-  SparklesIcon,
-} from '@hugeicons/core-free-icons'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import AnalyticsUpIcon from '@hugeicons/core-free-icons/AnalyticsUpIcon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import EyeIcon from '@hugeicons/core-free-icons/EyeIcon'
+import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import Tag01Icon from '@hugeicons/core-free-icons/Tag01Icon'
+import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon'
+import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon'
 import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
 import {

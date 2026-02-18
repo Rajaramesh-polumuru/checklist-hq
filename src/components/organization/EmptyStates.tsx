@@ -2,14 +2,12 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Icon } from "@/components/ui/icon"
-import {
-  UserGroupIcon,
-  CheckListIcon,
-  ChartBarLineIcon,
-  PlusSignIcon,
-  Building01Icon,
-  Rocket01Icon,
-} from "@hugeicons/core-free-icons"
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon'
+import ChartBarLineIcon from '@hugeicons/core-free-icons/ChartBarLineIcon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import Building01Icon from '@hugeicons/core-free-icons/Building01Icon'
+import Rocket01Icon from '@hugeicons/core-free-icons/Rocket01Icon'
 import { cn } from "@/lib/utils"
 
 interface EmptyStateProps {

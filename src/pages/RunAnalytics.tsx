@@ -4,18 +4,16 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  ArrowLeft01Icon,
-  ChartColumnIcon,
-  Clock01Icon,
-  CheckmarkCircle02Icon,
-  AnalyticsUpIcon,
-  UserGroupIcon,
-  Calendar01Icon,
-  Timer01Icon,
-  Activity01Icon,
-  Target01Icon,
-} from '@hugeicons/core-free-icons'
+import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon'
+import ChartColumnIcon from '@hugeicons/core-free-icons/ChartColumnIcon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import AnalyticsUpIcon from '@hugeicons/core-free-icons/AnalyticsUpIcon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import Calendar01Icon from '@hugeicons/core-free-icons/Calendar01Icon'
+import Timer01Icon from '@hugeicons/core-free-icons/Timer01Icon'
+import Activity01Icon from '@hugeicons/core-free-icons/Activity01Icon'
+import Target01Icon from '@hugeicons/core-free-icons/Target01Icon'
 import { Icon } from '@/components/ui/icon'
 import {
   getUserRunStats,

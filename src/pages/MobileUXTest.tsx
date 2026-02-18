@@ -14,15 +14,12 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Icon } from '@/components/ui/icon'
 import { Badge } from '@/components/ui/badge'
-import {
-    CheckListIcon,
-    AlertCircleIcon,
-    Tick01Icon,
-    Globe02Icon,
-    PlayIcon,
-    Cancel01Icon,
-} from '@hugeicons/core-free-icons'
-
+import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
+import Tick01Icon from '@hugeicons/core-free-icons/Tick01Icon'
+import Globe02Icon from '@hugeicons/core-free-icons/Globe02Icon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon'
 export function MobileUXTest() {
     const [testInput, setTestInput] = useState('')
 

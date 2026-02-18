@@ -2,13 +2,11 @@ import { Link } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Icon } from '@/components/ui/icon'
-import {
-  StarIcon,
-  Download01Icon,
-  CheckmarkBadge01Icon,
-  Shield01Icon,
-  Clock01Icon
-} from '@hugeicons/core-free-icons'
+import StarIcon from '@hugeicons/core-free-icons/StarIcon'
+import Download01Icon from '@hugeicons/core-free-icons/Download01Icon'
+import CheckmarkBadge01Icon from '@hugeicons/core-free-icons/CheckmarkBadge01Icon'
+import Shield01Icon from '@hugeicons/core-free-icons/Shield01Icon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
 import { cn } from '@/lib/utils'
 import type { MarketplaceListing } from '@/types/database'
 

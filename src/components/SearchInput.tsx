@@ -1,8 +1,6 @@
-import {
-  Search01Icon,
-  Cancel01Icon,
-  Loading02Icon,
-} from '@hugeicons/core-free-icons'
+import Search01Icon from '@hugeicons/core-free-icons/Search01Icon'
+import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
 import { forwardRef, useEffect, useRef } from 'react'
 import { Icon } from '@/components/ui/icon'
 import { Input } from '@/components/ui/input'

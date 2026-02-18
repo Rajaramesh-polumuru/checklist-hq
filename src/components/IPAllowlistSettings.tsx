@@ -4,7 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Icon } from '@/components/ui/icon';
-import { PlusSignIcon, Delete02Icon, ComputerIcon } from '@hugeicons/core-free-icons';
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import ComputerIcon from '@hugeicons/core-free-icons/ComputerIcon'
 // Badge import removed
 
 // Mock data

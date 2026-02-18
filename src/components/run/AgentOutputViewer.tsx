@@ -8,12 +8,10 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Icon } from '@/components/ui/icon';
-import { 
-  AiCloud02Icon, 
-  CodeCircleIcon, 
-  File01Icon, 
-  CheckmarkCircle02Icon 
-} from '@hugeicons/core-free-icons';
+import AiCloud02Icon from '@hugeicons/core-free-icons/AiCloud02Icon'
+import CodeCircleIcon from '@hugeicons/core-free-icons/CodeCircleIcon'
+import File01Icon from '@hugeicons/core-free-icons/File01Icon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
 import type { ItemProgress, ChecklistItem } from '@/types/database';
 
 interface AgentOutputViewerProps {

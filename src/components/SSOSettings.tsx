@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Icon } from '@/components/ui/icon';
-import { Link01Icon, Copy01Icon } from '@hugeicons/core-free-icons';
+import Link01Icon from '@hugeicons/core-free-icons/Link01Icon'
+import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon'
 import { toast } from 'sonner';
 
 export function SSOSettings({ organizationId }: { organizationId: string }) {

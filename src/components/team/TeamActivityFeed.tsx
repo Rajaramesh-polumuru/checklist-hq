@@ -3,17 +3,14 @@ import { getTeamActivityLogs, type TeamAuditLog } from '@/services/audit'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
-import {
-  Loading02Icon,
-  UserAdd01Icon,
-  UserRemove01Icon,
-  Settings02Icon,
-  GitForkIcon,
-  Delete02Icon,
-  RefreshIcon,
-  UserIcon,
-} from '@hugeicons/core-free-icons'
-
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import UserAdd01Icon from '@hugeicons/core-free-icons/UserAdd01Icon'
+import UserRemove01Icon from '@hugeicons/core-free-icons/UserRemove01Icon'
+import Settings02Icon from '@hugeicons/core-free-icons/Settings02Icon'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import RefreshIcon from '@hugeicons/core-free-icons/RefreshIcon'
+import UserIcon from '@hugeicons/core-free-icons/UserIcon'
 interface TeamActivityFeedProps {
   teamId: string
   limit?: number

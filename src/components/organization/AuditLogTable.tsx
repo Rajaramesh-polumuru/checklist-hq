@@ -4,7 +4,9 @@ import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from '@
 import { formatRelativeTime } from '@/lib/date-utils';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
-import { Loading02Icon, File01Icon, AlertCircleIcon } from '@hugeicons/core-free-icons';
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import File01Icon from '@hugeicons/core-free-icons/File01Icon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
 
 export function AuditLogTable({ orgId }: { orgId: string }) {
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);

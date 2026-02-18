@@ -23,7 +23,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Icon } from '@/components/ui/icon'
-import { Loading02Icon, AlertCircleIcon } from '@hugeicons/core-free-icons'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
 import { updateTeam, deleteTeam } from '@/services/team'
 import type { Team } from '@/types/database'
 import { useToast } from '@/hooks/useToast'

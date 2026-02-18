@@ -2,17 +2,14 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { ListingCard } from '@/components/marketplace/ListingCard'
-import {
-  Search01Icon,
-  FilterHorizontalIcon,
-  StarIcon,
-  ShoppingBag02Icon,
-  Rocket01Icon,
-  Settings01Icon,
-  Megaphone01Icon,
-  Shield01Icon
-} from '@hugeicons/core-free-icons'
-
+import Search01Icon from '@hugeicons/core-free-icons/Search01Icon'
+import FilterHorizontalIcon from '@hugeicons/core-free-icons/FilterHorizontalIcon'
+import StarIcon from '@hugeicons/core-free-icons/StarIcon'
+import ShoppingBag02Icon from '@hugeicons/core-free-icons/ShoppingBag02Icon'
+import Rocket01Icon from '@hugeicons/core-free-icons/Rocket01Icon'
+import Settings01Icon from '@hugeicons/core-free-icons/Settings01Icon'
+import Megaphone01Icon from '@hugeicons/core-free-icons/Megaphone01Icon'
+import Shield01Icon from '@hugeicons/core-free-icons/Shield01Icon'
 // Mock Data for Prototype
 const FEATURED_SOPS = [
   {

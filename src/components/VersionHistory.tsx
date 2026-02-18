@@ -9,16 +9,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Cancel01Icon,
-  Clock01Icon,
-  ArrowLeft02Icon,
-  EyeIcon,
-  Loading02Icon,
-  ArrowRight01Icon,
-  Alert01Icon,
-  GitCommitIcon,
-} from '@hugeicons/core-free-icons'
+import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import ArrowLeft02Icon from '@hugeicons/core-free-icons/ArrowLeft02Icon'
+import EyeIcon from '@hugeicons/core-free-icons/EyeIcon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
+import Alert01Icon from '@hugeicons/core-free-icons/Alert01Icon'
+import GitCommitIcon from '@hugeicons/core-free-icons/GitCommitIcon'
 import { Icon } from '@/components/ui/icon'
 import { getCommitHistory } from '@/services/repository'
 import type { Commit } from '@/types/database'

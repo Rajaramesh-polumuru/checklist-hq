@@ -8,17 +8,15 @@ import { usePermissionStore } from '@/stores/permission-store'
 import { useTeamPermission } from '@/hooks/usePermissions'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  UserGroupIcon,
-  GitForkIcon,
-  Settings02Icon,
-  PlusSignIcon,
-  ArrowLeft01Icon,
-  PlayIcon,
-  Delete02Icon,
-  MoreHorizontalIcon,
-  Activity01Icon,
-} from '@hugeicons/core-free-icons'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import Settings02Icon from '@hugeicons/core-free-icons/Settings02Icon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import MoreHorizontalIcon from '@hugeicons/core-free-icons/MoreHorizontalIcon'
+import Activity01Icon from '@hugeicons/core-free-icons/Activity01Icon'
 import { Icon } from '@/components/ui/icon'
 import { TeamMemberList } from '@/components/team/TeamMemberList'
 import { AddTeamMemberModal } from '@/components/team/AddTeamMemberModal'

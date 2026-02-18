@@ -2,7 +2,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { motion, type HTMLMotionProps } from "framer-motion"
-import { Loading02Icon } from "@hugeicons/core-free-icons"
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
 import { Icon } from "@/components/ui/icon"
 import { useButtonInteraction } from "@/hooks/use-interaction"
 

@@ -8,17 +8,15 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 import { useDebounce } from '@/hooks/useDebounce'
-import {
-  Building02Icon,
-  ArrowLeft01Icon,
-  Tick01Icon,
-  Cancel01Icon,
-  Loading02Icon,
-  InformationCircleIcon,
-  UserGroupIcon,
-  Shield01Icon,
-  SparklesIcon,
-} from '@hugeicons/core-free-icons'
+import Building02Icon from '@hugeicons/core-free-icons/Building02Icon'
+import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon'
+import Tick01Icon from '@hugeicons/core-free-icons/Tick01Icon'
+import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import InformationCircleIcon from '@hugeicons/core-free-icons/InformationCircleIcon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import Shield01Icon from '@hugeicons/core-free-icons/Shield01Icon'
+import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon'
 import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 

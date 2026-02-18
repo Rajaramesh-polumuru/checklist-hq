@@ -11,7 +11,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Icon } from '@/components/ui/icon';
-import { BrainIcon, Copy01Icon, FileEditIcon } from '@hugeicons/core-free-icons';
+import BrainIcon from '@hugeicons/core-free-icons/BrainIcon'
+import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon'
+import FileEditIcon from '@hugeicons/core-free-icons/FileEditIcon'
 import { toast } from 'sonner';
 import type { Repository, Commit, Run } from '@/types/database';
 import { generateAgentContext, generateExecutionPrompt, type AgentContextOptions } from '@/lib/agent/prompt-transformer';

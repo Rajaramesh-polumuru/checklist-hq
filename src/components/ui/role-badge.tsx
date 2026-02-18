@@ -3,8 +3,11 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import type { OrgRole, TeamRole } from "@/stores/permission-store"
 import { Icon } from "@/components/ui/icon"
-import { CrownIcon, Settings01Icon, User02Icon, EyeIcon, Wrench01Icon } from "@hugeicons/core-free-icons"
-
+import CrownIcon from '@hugeicons/core-free-icons/CrownIcon'
+import Settings01Icon from '@hugeicons/core-free-icons/Settings01Icon'
+import User02Icon from '@hugeicons/core-free-icons/User02Icon'
+import EyeIcon from '@hugeicons/core-free-icons/EyeIcon'
+import Wrench01Icon from '@hugeicons/core-free-icons/Wrench01Icon'
 const roleBadgeVariants = cva(
   "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium transition-colors",
   {

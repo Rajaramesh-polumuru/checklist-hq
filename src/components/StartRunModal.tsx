@@ -12,15 +12,13 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import {
-  PlayIcon,
-  Loading02Icon,
-  CheckmarkCircle02Icon,
-  AlertCircleIcon,
-  CheckListIcon,
-  Clock01Icon,
-  SparklesIcon,
-} from '@hugeicons/core-free-icons'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
+import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon'
 import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
 import { startNamedRun } from '@/services/run'

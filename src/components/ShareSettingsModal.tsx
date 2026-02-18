@@ -12,20 +12,18 @@ import {
 } from '@/components/ui/dialog'
 import { Card, CardContent } from '@/components/ui/card'
 import { Icon } from '@/components/ui/icon'
-import {
-    Globe02Icon,
-    LockKeyIcon,
-    Link01Icon,
-    Tick01Icon,
-    Copy01Icon,
-    Delete02Icon,
-    Alert02Icon,
-    Share08Icon,
-    LinkSquare02Icon,
-    Loading02Icon,
-    Building03Icon,
-    ArrowRight01Icon
-} from '@hugeicons/core-free-icons'
+import Globe02Icon from '@hugeicons/core-free-icons/Globe02Icon'
+import LockKeyIcon from '@hugeicons/core-free-icons/LockKeyIcon'
+import Link01Icon from '@hugeicons/core-free-icons/Link01Icon'
+import Tick01Icon from '@hugeicons/core-free-icons/Tick01Icon'
+import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon'
+import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
+import Alert02Icon from '@hugeicons/core-free-icons/Alert02Icon'
+import Share08Icon from '@hugeicons/core-free-icons/Share08Icon'
+import LinkSquare02Icon from '@hugeicons/core-free-icons/LinkSquare02Icon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import Building03Icon from '@hugeicons/core-free-icons/Building03Icon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
 import { cn } from '@/lib/utils'
 import type { Repository } from '@/types/database'
 import { getMyOrganizations } from '@/services/organization'

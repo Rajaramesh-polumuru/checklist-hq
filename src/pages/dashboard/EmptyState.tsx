@@ -1,7 +1,13 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { TaskDaily01Icon, PlusSignIcon, FileSearchIcon, Search01Icon, Edit02Icon, PlayIcon, GitForkIcon } from '@hugeicons/core-free-icons'
+import TaskDaily01Icon from '@hugeicons/core-free-icons/TaskDaily01Icon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import FileSearchIcon from '@hugeicons/core-free-icons/FileSearchIcon'
+import Search01Icon from '@hugeicons/core-free-icons/Search01Icon'
+import Edit02Icon from '@hugeicons/core-free-icons/Edit02Icon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
 import { Icon } from '@/components/ui/icon'
 
 interface EmptyStateProps {

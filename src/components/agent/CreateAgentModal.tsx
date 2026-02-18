@@ -19,7 +19,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Icon } from '@/components/ui/icon'
-import { Loading02Icon, AiCloud02Icon, FlashIcon, WebhookIcon } from '@hugeicons/core-free-icons'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import AiCloud02Icon from '@hugeicons/core-free-icons/AiCloud02Icon'
+import FlashIcon from '@hugeicons/core-free-icons/FlashIcon'
+import WebhookIcon from '@hugeicons/core-free-icons/WebhookIcon'
 import { createAgent } from '@/services/agent'
 import type { AgentType } from '@/types/database'
 import { useToast } from '@/hooks/useToast'

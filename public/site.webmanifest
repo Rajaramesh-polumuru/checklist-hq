@@ -1,0 +1,19 @@
+{
+  "name": "Checklist HQ",
+  "short_name": "ChecklistHQ",
+  "description": "The GitHub for Standard Operating Procedures. Version control your SOPs, fork proven templates, and build operational excellence.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#E84B2E",
+  "orientation": "any",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/logos/logo-light.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

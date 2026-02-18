@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Icon } from '@/components/ui/icon'
-import { ArrowRight01Icon, Home01Icon } from '@hugeicons/core-free-icons'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
+import Home01Icon from '@hugeicons/core-free-icons/Home01Icon'
 import { cn } from '@/lib/utils'
 
 export interface BreadcrumbItem {

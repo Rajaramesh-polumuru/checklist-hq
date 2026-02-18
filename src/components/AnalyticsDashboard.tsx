@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loading02Icon, TradeUpIcon, ChartBarLineIcon, UserGroupIcon, CheckmarkCircle01Icon, PlayIcon, Activity01Icon } from '@hugeicons/core-free-icons'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import TradeUpIcon from '@hugeicons/core-free-icons/TradeUpIcon'
+import ChartBarLineIcon from '@hugeicons/core-free-icons/ChartBarLineIcon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import CheckmarkCircle01Icon from '@hugeicons/core-free-icons/CheckmarkCircle01Icon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import Activity01Icon from '@hugeicons/core-free-icons/Activity01Icon'
 import { Icon } from '@/components/ui/icon'
 import { getOrgAnalytics, type OrgAnalytics, type DayBucket, type ActionStat, type RepoStat } from '@/services/analytics'
 

@@ -11,12 +11,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Icon } from '@/components/ui/icon'
-import {
-  DatabaseIcon,
-  AlertCircleIcon,
-  Download01Icon,
-} from '@hugeicons/core-free-icons'
-
+import DatabaseIcon from '@hugeicons/core-free-icons/DatabaseIcon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
+import Download01Icon from '@hugeicons/core-free-icons/Download01Icon'
 interface RetentionPolicy {
   dataType: string
   label: string

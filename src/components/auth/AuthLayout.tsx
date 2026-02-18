@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion'
-import { CheckmarkCircle02Icon, SecurityCheckIcon, FlashIcon } from '@hugeicons/core-free-icons'
+import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
+import SecurityCheckIcon from '@hugeicons/core-free-icons/SecurityCheckIcon'
+import FlashIcon from '@hugeicons/core-free-icons/FlashIcon'
 import { Icon } from '@/components/ui/icon'
 import { Logo } from '@/components/ui/logo'
 

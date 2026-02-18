@@ -1,4 +1,4 @@
-import { Cancel01Icon } from '@hugeicons/core-free-icons'
+import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon'
 import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 

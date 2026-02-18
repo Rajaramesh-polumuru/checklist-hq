@@ -7,22 +7,20 @@ import { Icon } from '@/components/ui/icon'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useIsMobile } from '@/hooks/useMobile'
 import { useAuthStore } from '@/stores/auth-store'
-import {
-    DashboardSquare01Icon,
-    Search01Icon,
-    PlusSignIcon,
-    Logout02Icon,
-    ArrowLeftDoubleIcon,
-    ArrowRightDoubleIcon,
-    UserCircleIcon,
-    Sun03Icon,
-    Moon02Icon,
-    ComputerIcon,
-    Building02Icon,
-    ArrowDown01Icon,
-    ArrowUp01Icon,
-    UserGroupIcon,
-} from '@hugeicons/core-free-icons'
+import DashboardSquare01Icon from '@hugeicons/core-free-icons/DashboardSquare01Icon'
+import Search01Icon from '@hugeicons/core-free-icons/Search01Icon'
+import PlusSignIcon from '@hugeicons/core-free-icons/PlusSignIcon'
+import Logout02Icon from '@hugeicons/core-free-icons/Logout02Icon'
+import ArrowLeftDoubleIcon from '@hugeicons/core-free-icons/ArrowLeftDoubleIcon'
+import ArrowRightDoubleIcon from '@hugeicons/core-free-icons/ArrowRightDoubleIcon'
+import UserCircleIcon from '@hugeicons/core-free-icons/UserCircleIcon'
+import Sun03Icon from '@hugeicons/core-free-icons/Sun03Icon'
+import Moon02Icon from '@hugeicons/core-free-icons/Moon02Icon'
+import ComputerIcon from '@hugeicons/core-free-icons/ComputerIcon'
+import Building02Icon from '@hugeicons/core-free-icons/Building02Icon'
+import ArrowDown01Icon from '@hugeicons/core-free-icons/ArrowDown01Icon'
+import ArrowUp01Icon from '@hugeicons/core-free-icons/ArrowUp01Icon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
 import { Logo } from '@/components/ui/logo'
 import { useThemeStore } from '@/stores/theme-store'
 import { Dialog, DialogContent } from '@/components/ui/dialog'

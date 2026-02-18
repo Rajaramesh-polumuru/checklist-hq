@@ -17,23 +17,21 @@ import { useDebounce } from '@/hooks/useDebounce'
 import { useIsMobile } from '@/hooks/useMobile'
 import { useToast } from '@/hooks/useToast'
 import { AUTO_SAVE } from '@/lib/constants'
-import {
-  ArrowLeft01Icon,
-  FloppyDiskIcon,
-  PlayIcon,
-  Globe02Icon,
-  LockKeyIcon,
-  Loading02Icon,
-  Clock01Icon,
-  PencilEdit02Icon,
-  KeyboardIcon,
-  GitForkIcon,
-  CheckListIcon,
-  CloudIcon,
-  AlertCircleIcon,
-  Share08Icon,
-  MoreVerticalIcon
-} from '@hugeicons/core-free-icons'
+import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon'
+import FloppyDiskIcon from '@hugeicons/core-free-icons/FloppyDiskIcon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import Globe02Icon from '@hugeicons/core-free-icons/Globe02Icon'
+import LockKeyIcon from '@hugeicons/core-free-icons/LockKeyIcon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon'
+import KeyboardIcon from '@hugeicons/core-free-icons/KeyboardIcon'
+import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon'
+import CloudIcon from '@hugeicons/core-free-icons/CloudIcon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
+import Share08Icon from '@hugeicons/core-free-icons/Share08Icon'
+import MoreVerticalIcon from '@hugeicons/core-free-icons/MoreVerticalIcon'
 import { Icon } from '@/components/ui/icon'
 import type { ChecklistContent, Repository, Commit } from '@/types/database'
 import {

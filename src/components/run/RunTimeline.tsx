@@ -1,11 +1,9 @@
 import { useMemo, useState } from 'react';
-import { 
-  UserIcon, 
-  AiCloud02Icon, 
-  Clock01Icon,
-  File01Icon,
-  Search01Icon
-} from '@hugeicons/core-free-icons';
+import UserIcon from '@hugeicons/core-free-icons/UserIcon'
+import AiCloud02Icon from '@hugeicons/core-free-icons/AiCloud02Icon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import File01Icon from '@hugeicons/core-free-icons/File01Icon'
+import Search01Icon from '@hugeicons/core-free-icons/Search01Icon'
 import { Icon } from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

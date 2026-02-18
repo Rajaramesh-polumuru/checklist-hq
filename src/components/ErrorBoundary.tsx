@@ -1,7 +1,10 @@
 import { Component, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Alert01Icon, ReloadIcon, Home01Icon, Bug01Icon } from '@hugeicons/core-free-icons'
+import Alert01Icon from '@hugeicons/core-free-icons/Alert01Icon'
+import ReloadIcon from '@hugeicons/core-free-icons/ReloadIcon'
+import Home01Icon from '@hugeicons/core-free-icons/Home01Icon'
+import Bug01Icon from '@hugeicons/core-free-icons/Bug01Icon'
 import { Icon } from '@/components/ui/icon'
 
 interface ErrorBoundaryProps {

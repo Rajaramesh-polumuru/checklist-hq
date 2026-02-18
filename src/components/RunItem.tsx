@@ -1,16 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  CheckmarkCircle01Icon,
-  PlayIcon,
-  Comment01Icon,
-  Note01Icon,
-  Target01Icon,
-  ArrowRight01Icon,
-  Tick01Icon,
-  BrainIcon,
-  Link01Icon
-} from '@hugeicons/core-free-icons'
+import CheckmarkCircle01Icon from '@hugeicons/core-free-icons/CheckmarkCircle01Icon'
+import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
+import Comment01Icon from '@hugeicons/core-free-icons/Comment01Icon'
+import Note01Icon from '@hugeicons/core-free-icons/Note01Icon'
+import Target01Icon from '@hugeicons/core-free-icons/Target01Icon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
+import Tick01Icon from '@hugeicons/core-free-icons/Tick01Icon'
+import BrainIcon from '@hugeicons/core-free-icons/BrainIcon'
+import Link01Icon from '@hugeicons/core-free-icons/Link01Icon'
 import { Icon } from '@/components/ui/icon'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

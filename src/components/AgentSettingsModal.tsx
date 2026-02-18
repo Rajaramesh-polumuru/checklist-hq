@@ -24,7 +24,8 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useAgentSettingsStore } from '@/stores/agent-settings-store';
-import { BrainIcon, EyeIcon } from '@hugeicons/core-free-icons';
+import BrainIcon from '@hugeicons/core-free-icons/BrainIcon'
+import EyeIcon from '@hugeicons/core-free-icons/EyeIcon'
 import { Icon } from '@/components/ui/icon';
 
 interface AgentSettingsModalProps {

@@ -2,7 +2,9 @@
 
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
-import { Tick01Icon, ArrowRight01Icon, CircleIcon } from "@hugeicons/core-free-icons"
+import Tick01Icon from '@hugeicons/core-free-icons/Tick01Icon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
+import CircleIcon from '@hugeicons/core-free-icons/CircleIcon'
 import { Icon } from "@/components/ui/icon"
 
 import { cn } from "@/lib/utils"

@@ -2,8 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Icon } from "@/components/ui/icon"
-import { UnavailableIcon } from "@hugeicons/core-free-icons"
-
+import UnavailableIcon from '@hugeicons/core-free-icons/UnavailableIcon'
 export interface ListProps extends React.HTMLAttributes<HTMLDivElement> {
     loading?: boolean
     loadingCount?: number

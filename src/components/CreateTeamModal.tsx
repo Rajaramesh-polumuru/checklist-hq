@@ -3,7 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Loading02Icon, UserGroupIcon, Shield01Icon } from '@hugeicons/core-free-icons'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import Shield01Icon from '@hugeicons/core-free-icons/Shield01Icon'
 import { Icon } from '@/components/ui/icon'
 import { createTeam } from '@/services/organization' // We might need to implement team slug check
 

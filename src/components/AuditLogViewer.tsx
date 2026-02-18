@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
-import { FilterHorizontalIcon, Download01Icon } from '@hugeicons/core-free-icons';
+import FilterHorizontalIcon from '@hugeicons/core-free-icons/FilterHorizontalIcon'
+import Download01Icon from '@hugeicons/core-free-icons/Download01Icon'
 import { AuditLogTable } from '@/components/organization/AuditLogTable';
 
 export function AuditLogViewer({ organizationId }: { organizationId: string }) {

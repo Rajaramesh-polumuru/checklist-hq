@@ -3,16 +3,14 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormattedText } from '@/lib/rich-text'
-import {
-  ArrowLeft01Icon,
-  GitCommitIcon,
-  ArrowLeft02Icon,
-  Loading02Icon,
-  Clock01Icon,
-  CheckListIcon,
-  ArrowRight01Icon,
-  PencilEdit02Icon,
-} from '@hugeicons/core-free-icons'
+import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon'
+import GitCommitIcon from '@hugeicons/core-free-icons/GitCommitIcon'
+import ArrowLeft02Icon from '@hugeicons/core-free-icons/ArrowLeft02Icon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
+import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon'
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon'
+import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon'
 import { Icon } from '@/components/ui/icon'
 import { useAuthStore } from '@/stores/auth-store'
 import { getRepository, getCommit, restoreToCommit, getLatestCommit } from '@/services/repository'

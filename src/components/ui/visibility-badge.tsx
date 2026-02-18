@@ -2,8 +2,9 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { Icon } from "@/components/ui/icon"
-import { Globe02Icon, LockKeyIcon, ViewOffSlashIcon } from "@hugeicons/core-free-icons"
-
+import Globe02Icon from '@hugeicons/core-free-icons/Globe02Icon'
+import LockKeyIcon from '@hugeicons/core-free-icons/LockKeyIcon'
+import ViewOffSlashIcon from '@hugeicons/core-free-icons/ViewOffSlashIcon'
 const visibilityBadgeVariants = cva(
   "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium transition-colors",
   {

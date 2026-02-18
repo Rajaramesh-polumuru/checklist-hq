@@ -5,14 +5,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import {
-  CloudIcon,
-  AlertCircleIcon,
-  SmartPhone01Icon,
-  ComputerIcon,
-  Tablet01Icon,
-  Loading02Icon
-} from '@hugeicons/core-free-icons'
+import CloudIcon from '@hugeicons/core-free-icons/CloudIcon'
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
+import SmartPhone01Icon from '@hugeicons/core-free-icons/SmartPhone01Icon'
+import ComputerIcon from '@hugeicons/core-free-icons/ComputerIcon'
+import Tablet01Icon from '@hugeicons/core-free-icons/Tablet01Icon'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
 import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 import { formatRelativeTime } from '@/lib/date-utils'

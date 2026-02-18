@@ -11,12 +11,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Icon } from '@/components/ui/icon'
-import {
-  Loading02Icon,
-  FileSearchIcon,
-  Download01Icon,
-  Calendar03Icon,
-} from '@hugeicons/core-free-icons'
+import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
+import FileSearchIcon from '@hugeicons/core-free-icons/FileSearchIcon'
+import Download01Icon from '@hugeicons/core-free-icons/Download01Icon'
+import Calendar03Icon from '@hugeicons/core-free-icons/Calendar03Icon'
 import { getOrgAuditLogs, type AuditLog } from '@/services/audit'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'

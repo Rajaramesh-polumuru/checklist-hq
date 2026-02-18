@@ -7,7 +7,7 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { Logo } from '@/components/ui/logo'
-import { Menu01Icon } from '@hugeicons/core-free-icons'
+import Menu01Icon from '@hugeicons/core-free-icons/Menu01Icon'
 import { cn } from '@/lib/utils'
 
 // Routes that should not show the sidebar (public/marketing pages)
