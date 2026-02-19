@@ -32,87 +32,41 @@ import type { Repository, RepositoryWithTags } from '@/types/database'
 
 // ─── Status Dot System ───────────────────────────────────────────────────────
 
-type StatusDef = {
-    key: string
-    label: string
-    /** Tailwind bg color for the filled circle */
-    color: string
-    /** Tailwind ring/border color */
-    ring: string
-}
-
-const STATUS_DEFS: Record<string, StatusDef> = {
-    needs_attention: {
-        key: 'needs_attention',
-        label: 'Needs Attention',
-        color: 'bg-slate-400 dark:bg-slate-500',
-        ring: 'ring-slate-300 dark:ring-slate-600',
-    },
-    template: {
-        key: 'template',
-        label: 'Template',
-        color: 'bg-violet-500',
-        ring: 'ring-violet-300 dark:ring-violet-700',
-    },
-    new: {
-        key: 'new',
-        label: 'New',
-        color: 'bg-pink-400',
-        ring: 'ring-pink-200 dark:ring-pink-700',
-    },
-    shared: {
-        key: 'shared',
-        label: 'Shared',
-        color: 'bg-cyan-400',
-        ring: 'ring-cyan-200 dark:ring-cyan-700',
-    },
-    popular: {
-        key: 'popular',
-        label: 'Popular',
-        color: 'bg-amber-400',
-        ring: 'ring-amber-200 dark:ring-amber-600',
-    },
-    active: {
-        key: 'active',
-        label: 'Active',
-        color: 'bg-rose-400',
-        ring: 'ring-rose-200 dark:ring-rose-700',
-    },
-}
+import { COLOR_LEGEND, type ColorStatus } from '@/lib/dashboard-utils'
 
 /** Derive which statuses apply to a given repo */
-function deriveStatuses(repo: RepositoryWithTags): StatusDef[] {
+function deriveStatuses(repo: RepositoryWithTags): ColorStatus[] {
     const now = Date.now()
     const updatedAt = new Date(repo.updated_at).getTime()
     const createdAt = new Date(repo.created_at).getTime()
     const daysSinceUpdate = (now - updatedAt) / (1000 * 60 * 60 * 24)
     const daysSinceCreated = (now - createdAt) / (1000 * 60 * 60 * 24)
 
-    const statuses: StatusDef[] = []
+    const statuses: ColorStatus[] = []
 
     // Needs Attention — dormant for > 30 days
-    if (daysSinceUpdate > 30) statuses.push(STATUS_DEFS.needs_attention)
+    if (daysSinceUpdate > 30) statuses.push('dormant')
 
     // Template — it's the origin (no upstream parent) and others have forked it
     if (!repo.upstream_repo_id && repo.fork_count > 0)
-        statuses.push(STATUS_DEFS.template)
+        statuses.push('forked')
 
     // New — created within 7 days
-    if (daysSinceCreated <= 7) statuses.push(STATUS_DEFS.new)
+    if (daysSinceCreated <= 7) statuses.push('new')
 
     // Shared / Public
-    if (repo.is_public) statuses.push(STATUS_DEFS.shared)
+    if (repo.is_public) statuses.push('public')
 
     // Popular — 3+ forks
-    if (repo.fork_count >= 3) statuses.push(STATUS_DEFS.popular)
+    if (repo.fork_count >= 3) statuses.push('popular')
 
     // Active — updated in the last 7 days (but not brand-new)
     if (daysSinceUpdate <= 7 && daysSinceCreated > 7)
-        statuses.push(STATUS_DEFS.active)
+        statuses.push('recently-used')
 
     // Always show at least one dot so the cluster is never empty
     // If none matched, fall back to "Needs Attention" (dormant)
-    if (statuses.length === 0) statuses.push(STATUS_DEFS.needs_attention)
+    if (statuses.length === 0) statuses.push('dormant')
 
     // Cap at 4 visible dots for layout
     return statuses.slice(0, 4)
@@ -124,35 +78,23 @@ interface StatusDotClusterProps {
 
 function StatusDotCluster({ repo }: StatusDotClusterProps) {
     const statuses = deriveStatuses(repo)
-    const DOT = 12  // size-3 = 12px
-    const OVERLAP = 5 // px each successive dot overlaps
 
     return (
         <TooltipProvider delayDuration={200}>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <button
-                        aria-label={`Status: ${statuses.map(s => s.label).join(', ')}`}
-                        className="relative flex items-center cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
-                        style={{
-                            width: DOT + (statuses.length - 1) * (DOT - OVERLAP),
-                            height: DOT,
-                        }}
-                    >
+                    <div className="flex -space-x-1 cursor-help">
                         {statuses.map((status, i) => (
                             <span
-                                key={status.key}
+                                key={`${status}-${i}`}
                                 className={cn(
-                                    'absolute size-3 rounded-full ring-2 ring-card',
-                                    status.color,
+                                    "size-2.5 rounded-full border border-background ring-0",
+                                    COLOR_LEGEND[status].bg
                                 )}
-                                style={{
-                                    left: i * (DOT - OVERLAP),
-                                    zIndex: statuses.length - i,
-                                }}
+                                style={{ zIndex: statuses.length - i }}
                             />
                         ))}
-                    </button>
+                    </div>
                 </TooltipTrigger>
                 <TooltipContent
                     side="bottom"
@@ -162,16 +104,15 @@ function StatusDotCluster({ repo }: StatusDotClusterProps) {
                     <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">
                         Status Colors
                     </p>
-                    {statuses.map(status => (
-                        <div key={status.key} className="flex items-center gap-2">
+                    {statuses.map((status, i) => (
+                        <div key={`${status}-${i}`} className="flex items-center gap-2">
                             <span
                                 className={cn(
-                                    'size-3 rounded-full ring-2 shrink-0',
-                                    status.color,
-                                    status.ring,
+                                    'size-2.5 rounded-full shrink-0',
+                                    COLOR_LEGEND[status].bg
                                 )}
                             />
-                            <span className="text-xs text-foreground">{status.label}</span>
+                            <span className="text-xs text-foreground">{COLOR_LEGEND[status].label}</span>
                         </div>
                     ))}
                 </TooltipContent>
@@ -226,11 +167,7 @@ export function RepositoryCard({
                                 </Link>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                     <StatusDotCluster repo={repo} />
-                                    <span className="flex items-center gap-1.5">
-                                        <span className={cn(
-                                            "size-2.5 rounded-full",
-                                            isPublic ? "bg-green-500/80" : "bg-amber-500/80"
-                                        )} />
+                                    <span>
                                         {isPublic ? 'Public' : 'Private'}
                                     </span>
                                     {repo.fork_count > 0 && (
