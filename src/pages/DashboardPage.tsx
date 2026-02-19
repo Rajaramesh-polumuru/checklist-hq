@@ -239,7 +239,7 @@ export function Dashboard() {
         />
 
         {/* Hero Stats */}
-        <DashboardStats loading={loading} stats={stats} />
+        <DashboardStats loading={loading} stats={stats} filters={filters} onFiltersChange={setFilters} />
 
         {/* Main Content Areas */}
         <div className="flex flex-col lg:flex-row gap-8">
