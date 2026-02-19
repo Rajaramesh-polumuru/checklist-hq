@@ -1,4 +1,5 @@
 import type { ChecklistItem } from '@/types/database';
+import { useAgentSettingsStore } from '@/stores/agent-settings-store';
 
 export type Provider = 'openai' | 'anthropic';
 
@@ -18,11 +19,10 @@ export class AgentExecutionEngine {
   private anthropicKey: string | null = null;
 
   constructor() {
-    // Load keys from localStorage
-    if (typeof window !== 'undefined') {
-      this.openaiKey = localStorage.getItem('chq_openai_key');
-      this.anthropicKey = localStorage.getItem('chq_anthropic_key');
-    }
+    // Load keys from unified zustand store
+    const state = useAgentSettingsStore.getState();
+    this.openaiKey = state.openaiApiKey;
+    this.anthropicKey = state.anthropicApiKey;
   }
 
   /**

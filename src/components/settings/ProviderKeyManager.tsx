@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,16 +10,25 @@ import ViewOffIcon from '@hugeicons/core-free-icons/ViewOffIcon'
 import ViewIcon from '@hugeicons/core-free-icons/ViewIcon'
 import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon'
 import { toast } from 'sonner';
+import { useAgentSettingsStore } from '@/stores/agent-settings-store';
 
 export function ProviderKeyManager() {
-  const [keys, setKeys] = useState<{
+  const {
+    openaiApiKey,
+    anthropicApiKey,
+    setOpenAIKey,
+    setAnthropicKey,
+  } = useAgentSettingsStore();
+
+  // Local draft values for editing (initialise from store)
+  const [drafts, setDrafts] = useState<{
     openai: string;
     anthropic: string;
   }>({
-    openai: '',
-    anthropic: '',
+    openai: openaiApiKey ?? '',
+    anthropic: anthropicApiKey ?? '',
   });
-  
+
   const [showKeys, setShowKeys] = useState<{
     openai: boolean;
     anthropic: boolean;
@@ -28,22 +37,18 @@ export function ProviderKeyManager() {
     anthropic: false,
   });
 
-  // Load keys from localStorage on mount
-  useEffect(() => {
-    const openaiKey = localStorage.getItem('chq_openai_key') || '';
-    const anthropicKey = localStorage.getItem('chq_anthropic_key') || '';
-    setKeys({ openai: openaiKey, anthropic: anthropicKey });
-  }, []);
-
   const saveKey = (provider: 'openai' | 'anthropic', value: string) => {
+    const label = provider === 'openai' ? 'OpenAI' : 'Anthropic';
     if (value) {
-      localStorage.setItem(`chq_${provider}_key`, value);
-      toast.success(`${provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key saved`);
+      if (provider === 'openai') setOpenAIKey(value);
+      else setAnthropicKey(value);
+      toast.success(`${label} API key saved`);
     } else {
-      localStorage.removeItem(`chq_${provider}_key`);
-      toast.info(`${provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key removed`);
+      if (provider === 'openai') setOpenAIKey(null);
+      else setAnthropicKey(null);
+      toast.info(`${label} API key removed`);
     }
-    setKeys(prev => ({ ...prev, [provider]: value }));
+    setDrafts(prev => ({ ...prev, [provider]: value }));
   };
 
   const toggleShow = (provider: 'openai' | 'anthropic') => {
@@ -71,8 +76,8 @@ export function ProviderKeyManager() {
                 id="openai-key"
                 type={showKeys.openai ? 'text' : 'password'}
                 placeholder="sk-..."
-                value={keys.openai}
-                onChange={(e) => setKeys(prev => ({ ...prev, openai: e.target.value }))}
+                value={drafts.openai}
+                onChange={(e) => setDrafts(prev => ({ ...prev, openai: e.target.value }))}
                 className="pr-10"
               />
               <button
@@ -83,11 +88,11 @@ export function ProviderKeyManager() {
                 <Icon icon={showKeys.openai ? ViewOffIcon : ViewIcon} className="h-4 w-4" />
               </button>
             </div>
-            <Button onClick={() => saveKey('openai', keys.openai)} variant="outline">
+            <Button onClick={() => saveKey('openai', drafts.openai)} variant="outline">
               <Icon icon={CheckmarkCircle02Icon} className="mr-2 h-4 w-4" />
               Save
             </Button>
-            {keys.openai && (
+            {drafts.openai && (
               <Button 
                 onClick={() => saveKey('openai', '')} 
                 variant="ghost" 
@@ -112,8 +117,8 @@ export function ProviderKeyManager() {
                 id="anthropic-key"
                 type={showKeys.anthropic ? 'text' : 'password'}
                 placeholder="sk-ant-..."
-                value={keys.anthropic}
-                onChange={(e) => setKeys(prev => ({ ...prev, anthropic: e.target.value }))}
+                value={drafts.anthropic}
+                onChange={(e) => setDrafts(prev => ({ ...prev, anthropic: e.target.value }))}
                 className="pr-10"
               />
               <button
@@ -124,11 +129,11 @@ export function ProviderKeyManager() {
                 <Icon icon={showKeys.anthropic ? ViewOffIcon : ViewIcon} className="h-4 w-4" />
               </button>
             </div>
-            <Button onClick={() => saveKey('anthropic', keys.anthropic)} variant="outline">
+            <Button onClick={() => saveKey('anthropic', drafts.anthropic)} variant="outline">
               <Icon icon={CheckmarkCircle02Icon} className="mr-2 h-4 w-4" />
               Save
             </Button>
-            {keys.anthropic && (
+            {drafts.anthropic && (
               <Button 
                 onClick={() => saveKey('anthropic', '')} 
                 variant="ghost" 
