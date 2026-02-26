@@ -33,6 +33,7 @@ const RunAnalytics = lazy(() => import('@/pages/RunAnalytics')) // Default expor
 const ActiveRuns = lazy(() => import('@/pages/ActiveRuns').then(module => ({ default: module.ActiveRuns })))
 const AuthCallback = lazy(() => import('@/pages/AuthCallback').then(module => ({ default: module.AuthCallback })))
 const SlackCallback = lazy(() => import('@/pages/SlackCallback').then(module => ({ default: module.SlackCallback })))
+const TodosPage = lazy(() => import('@/pages/TodosPage').then(module => ({ default: module.TodosPage })))
 
 // Loading fallback component
 function PageLoader() {
@@ -118,6 +119,16 @@ function App() {
                   <ProtectedRoute>
                     <Suspense fallback={<PageLoader />}>
                       <RunHistory />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="app/todos"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<PageLoader />}>
+                      <TodosPage />
                     </Suspense>
                   </ProtectedRoute>
                 }

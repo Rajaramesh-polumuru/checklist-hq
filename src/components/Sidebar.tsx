@@ -21,6 +21,7 @@ import Building02Icon from '@hugeicons/core-free-icons/Building02Icon'
 import ArrowDown01Icon from '@hugeicons/core-free-icons/ArrowDown01Icon'
 import ArrowUp01Icon from '@hugeicons/core-free-icons/ArrowUp01Icon'
 import UserGroupIcon from '@hugeicons/core-free-icons/UserGroupIcon'
+import TaskDaily01Icon from '@hugeicons/core-free-icons/TaskDaily01Icon'
 import { Logo } from '@/components/ui/logo'
 import { useThemeStore } from '@/stores/theme-store'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
@@ -190,6 +191,7 @@ export function Sidebar({ collapsed, setCollapsed, openMobile, setOpenMobile }: 
 
     const links = [
         { to: '/app', icon: DashboardSquare01Icon, label: 'Dashboard' },
+        { to: '/app/todos', icon: TaskDaily01Icon, label: 'My Lists' },
         { to: '/explore', icon: Search01Icon, label: 'Explore' },
         { to: '/app/new', icon: PlusSignIcon, label: 'Create New' },
     ]
