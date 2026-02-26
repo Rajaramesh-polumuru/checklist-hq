@@ -36,6 +36,7 @@ const ActiveRuns = lazy(() => import('@/pages/ActiveRuns').then(module => ({ def
 const AuthCallback = lazy(() => import('@/pages/AuthCallback').then(module => ({ default: module.AuthCallback })))
 const SlackCallback = lazy(() => import('@/pages/SlackCallback').then(module => ({ default: module.SlackCallback })))
 const TodosPage = lazy(() => import('@/pages/TodosPage').then(module => ({ default: module.TodosPage })))
+const SimpleRunMode = lazy(() => import('@/pages/SimpleRunMode').then(module => ({ default: module.SimpleRunMode })))
 
 // Loading fallback component
 function PageLoader() {
@@ -131,6 +132,16 @@ function App() {
                   <ProtectedRoute>
                     <Suspense fallback={<PageLoader />}>
                       <TodosPage />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="app/todos/run/:runId"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<PageLoader />}>
+                      <SimpleRunMode />
                     </Suspense>
                   </ProtectedRoute>
                 }

@@ -163,7 +163,7 @@ export function TodosPage() {
         setStartingId(repoId)
         try {
             const run = await startRunFromLatestCommit(repoId, user?.id)
-            navigate(`/app/run/${run.id}`)
+            navigate(`/app/todos/run/${run.id}`)
         } catch {
             toast.error('Failed to start run. Please try again.')
         } finally {
