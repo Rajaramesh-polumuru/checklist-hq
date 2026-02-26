@@ -33,6 +33,12 @@ export default defineConfig({
             if (id.includes('@radix-ui')) {
               return 'radix-ui'
             }
+            if (id.includes('@huggingface/transformers')) {
+              return 'transformers'
+            }
+            if (id.includes('onnxruntime-web')) {
+              return 'onnx-runtime'
+            }
           }
         },
       },

@@ -7,9 +7,9 @@ export interface AuditLogEvent {
   resourceId: string;
   metadata?: Record<string, unknown>;
   // For compatibility with existing calls
-  newValues?: Record<string, unknown>;
-  oldValues?: Record<string, unknown>;
-  changes?: Record<string, unknown>;
+  newValues?: unknown;
+  oldValues?: unknown;
+  changes?: unknown;
 }
 
 export interface AuditLogEntry {
@@ -28,18 +28,37 @@ export interface AuditLogEntry {
   actor_email?: string;
 }
 
-// Aliases for compatibility
-export const getOrgAuditLogs = getOrganizationLogs;
-export type AuditLog = AuditLogEntry;
+export interface AuditLog {
+  id: string;
+  organization_id: string;
+  action: string;
+  resource_type: string;
+  resource_id: string;
+  user_id?: string;
+  status?: string;
+  created_at: string;
+  actor_email?: string;
+  new_values?: Record<string, unknown>;
+  changes?: Record<string, unknown>;
+  error_message?: string;
+}
+
+interface GetOrgAuditLogsParams {
+  organizationId: string;
+  limit?: number;
+  offset?: number;
+  action?: string;
+  userId?: string;
+}
 
 /**
  * Log an enterprise event
  */
 export async function logAuditEvent(event: AuditLogEvent) {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return; 
+  if (!user) return;
 
-  const metadata = event.metadata || {};
+  const metadata: Record<string, unknown> = { ...(event.metadata || {}) };
   if (event.newValues) metadata.newValues = event.newValues;
   if (event.changes) metadata.changes = event.changes;
 
@@ -59,11 +78,11 @@ export async function logAuditEvent(event: AuditLogEvent) {
 }
 
 /**
- * Fetch audit logs for an organization
+ * Fetch audit logs for an organization (legacy positional args)
  */
 export async function getOrganizationLogs(
-  orgId: string, 
-  limit = 50, 
+  orgId: string,
+  limit = 50,
   offset = 0
 ): Promise<AuditLogEntry[]> {
   const { data, error } = await supabase
@@ -77,12 +96,55 @@ export async function getOrganizationLogs(
     .range(offset, offset + limit - 1);
 
   if (error) throw error;
-  
+
   // Flatten actor email for easier consumption
   return (data || []).map((log: any) => ({
     ...log,
     actor_email: log.actor?.email
   }));
+}
+
+/**
+ * Fetch audit logs for an organization with filtering and pagination
+ */
+export async function getOrgAuditLogs(
+  params: GetOrgAuditLogsParams
+): Promise<{ logs: AuditLog[]; total: number }> {
+  const { organizationId, limit = 50, offset = 0, action, userId } = params;
+
+  let query = supabase
+    .from('audit_logs')
+    .select('*, actor:actor_id ( email )', { count: 'exact' })
+    .eq('organization_id', organizationId)
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (action) {
+    query = query.eq('event_type', action);
+  }
+  if (userId) {
+    query = query.eq('actor_id', userId);
+  }
+
+  const { data, error, count } = await query;
+  if (error) throw error;
+
+  const logs: AuditLog[] = (data || []).map((log: any) => ({
+    id: log.id,
+    organization_id: log.organization_id,
+    action: log.event_type,
+    resource_type: log.resource_type,
+    resource_id: log.resource_id,
+    user_id: log.actor_id,
+    status: log.metadata?.status as string | undefined,
+    created_at: log.created_at,
+    actor_email: log.actor?.email,
+    new_values: log.metadata?.newValues as Record<string, unknown> | undefined,
+    changes: log.metadata?.changes as Record<string, unknown> | undefined,
+    error_message: log.metadata?.errorMessage as string | undefined,
+  }));
+
+  return { logs, total: count || 0 };
 }
 
 export interface TeamAuditLog {

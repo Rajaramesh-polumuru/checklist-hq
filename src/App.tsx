@@ -2,6 +2,7 @@ import { useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Toaster } from "@/components/ui/sonner"
 import { SpeedInsights } from '@vercel/speed-insights/react'
+import { Analytics } from "@vercel/analytics/react"
 import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
 import { Icon } from '@/components/ui/icon'
 import { Layout } from '@/components/Layout'
@@ -34,6 +35,7 @@ const RunAnalytics = lazy(() => import('@/pages/RunAnalytics')) // Default expor
 const ActiveRuns = lazy(() => import('@/pages/ActiveRuns').then(module => ({ default: module.ActiveRuns })))
 const AuthCallback = lazy(() => import('@/pages/AuthCallback').then(module => ({ default: module.AuthCallback })))
 const SlackCallback = lazy(() => import('@/pages/SlackCallback').then(module => ({ default: module.SlackCallback })))
+const TodosPage = lazy(() => import('@/pages/TodosPage').then(module => ({ default: module.TodosPage })))
 
 // Loading fallback component
 function PageLoader() {
@@ -119,6 +121,16 @@ function App() {
                   <ProtectedRoute>
                     <Suspense fallback={<PageLoader />}>
                       <RunHistory />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="app/todos"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<PageLoader />}>
+                      <TodosPage />
                     </Suspense>
                   </ProtectedRoute>
                 }
@@ -284,6 +296,7 @@ function App() {
       </ErrorBoundary>
       <Toaster position="top-center" />
       <SpeedInsights />
+      <Analytics />
     </BrowserRouter>
   )
 }

@@ -18,6 +18,7 @@ import { useIsMobile } from '@/hooks/useMobile'
 import { DESIGN_TOKENS } from '@/lib/constants'
 import { useListItemInteraction } from '@/hooks/use-interaction'
 import { InsertRefModal } from '@/components/editor/InsertRefModal'
+import { RefPreviewPopover } from '@/components/editor/RefPreviewPopover'
 
 // Helper for item numbering
 const getNumbering = (order: number) => {
@@ -272,9 +273,18 @@ export const ChecklistItem = memo(function ChecklistItem({
           'font-medium shrink-0 w-6 text-right tabular-nums flex items-center justify-end',
           isMobile ? 'text-sm' : 'text-xs',
           item.text ? 'text-muted-foreground' : 'text-muted-foreground/40',
-          item.type === 'ref' && "text-blue-500"
         )}>
-          {item.type === 'ref' ? <Icon icon={Link01Icon} className="h-3.5 w-3.5" /> : getNumbering(item.order)}
+          {item.type === 'ref' && item.ref_config?.repo_id ? (
+            <RefPreviewPopover
+              repoId={item.ref_config.repo_id}
+              title={item.text || 'Linked checklist'}
+              executionMode={item.ref_config.execution_mode}
+            />
+          ) : item.type === 'ref' ? (
+            <Icon icon={Link01Icon} className="h-3.5 w-3.5 text-blue-500" />
+          ) : (
+            getNumbering(item.order)
+          )}
         </span>
 
         {/* Expand Toggle */}
@@ -296,9 +306,10 @@ export const ChecklistItem = memo(function ChecklistItem({
           placeholder={depth === 0 ? "Add a step..." : "Add a sub-step..."}
           aria-label={item.text || 'Checklist item'}
           className={cn(
-            'flex-1 bg-transparent border-none outline-none text-foreground min-w-0',
+            'flex-1 bg-transparent border-none text-foreground min-w-0 rounded-sm transition-all duration-200',
             'placeholder:text-muted-foreground/40 placeholder:italic',
-            isMobile ? 'text-base leading-relaxed' : 'text-sm leading-relaxed'
+            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+            isMobile ? 'text-base leading-relaxed px-1' : 'text-sm leading-relaxed px-1'
           )}
         />
 
@@ -322,7 +333,12 @@ export const ChecklistItem = memo(function ChecklistItem({
           ) : (
             <>
               <button
-                onClick={() => setShowContextMenu(!showContextMenu)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  setContextMenuPosition({ x: rect.left, y: rect.bottom + 4 })
+                  setShowContextMenu(!showContextMenu)
+                }}
                 className="text-muted-foreground/50 w-7 h-7 flex items-center justify-center rounded hover:bg-accent hover:text-foreground"
               >
                 <Icon icon={MoreVerticalIcon} className="h-4 w-4" />

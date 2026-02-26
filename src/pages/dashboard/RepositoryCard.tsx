@@ -20,9 +20,106 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 import type { Repository, RepositoryWithTags } from '@/types/database'
+
+// ─── Status Dot System ───────────────────────────────────────────────────────
+
+import { COLOR_LEGEND, type ColorStatus } from '@/lib/dashboard-utils'
+
+/** Derive which statuses apply to a given repo */
+function deriveStatuses(repo: RepositoryWithTags): ColorStatus[] {
+    const now = Date.now()
+    const updatedAt = new Date(repo.updated_at).getTime()
+    const createdAt = new Date(repo.created_at).getTime()
+    const daysSinceUpdate = (now - updatedAt) / (1000 * 60 * 60 * 24)
+    const daysSinceCreated = (now - createdAt) / (1000 * 60 * 60 * 24)
+
+    const statuses: ColorStatus[] = []
+
+    // Needs Attention — dormant for > 30 days
+    if (daysSinceUpdate > 30) statuses.push('dormant')
+
+    // Template — it's the origin (no upstream parent) and others have forked it
+    if (!repo.upstream_repo_id && repo.fork_count > 0)
+        statuses.push('forked')
+
+    // New — created within 7 days
+    if (daysSinceCreated <= 7) statuses.push('new')
+
+    // Shared / Public
+    if (repo.is_public) statuses.push('public')
+
+    // Popular — 3+ forks
+    if (repo.fork_count >= 3) statuses.push('popular')
+
+    // Active — updated in the last 7 days (but not brand-new)
+    if (daysSinceUpdate <= 7 && daysSinceCreated > 7)
+        statuses.push('recently-used')
+
+    // Always show at least one dot so the cluster is never empty
+    // If none matched, fall back to "Needs Attention" (dormant)
+    if (statuses.length === 0) statuses.push('dormant')
+
+    // Cap at 4 visible dots for layout
+    return statuses.slice(0, 4)
+}
+
+interface StatusDotClusterProps {
+    repo: RepositoryWithTags
+}
+
+function StatusDotCluster({ repo }: StatusDotClusterProps) {
+    const statuses = deriveStatuses(repo)
+
+    return (
+        <TooltipProvider delayDuration={200}>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <div className="flex -space-x-1 cursor-help">
+                        {statuses.map((status, i) => (
+                            <span
+                                key={`${status}-${i}`}
+                                className={cn(
+                                    "size-2.5 rounded-full border border-background ring-0",
+                                    COLOR_LEGEND[status].bg
+                                )}
+                                style={{ zIndex: statuses.length - i }}
+                            />
+                        ))}
+                    </div>
+                </TooltipTrigger>
+                <TooltipContent
+                    side="bottom"
+                    align="start"
+                    className="p-3 space-y-1.5"
+                >
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">
+                        Status Colors
+                    </p>
+                    {statuses.map((status, i) => (
+                        <div key={`${status}-${i}`} className="flex items-center gap-2">
+                            <span
+                                className={cn(
+                                    'size-2.5 rounded-full shrink-0',
+                                    COLOR_LEGEND[status].bg
+                                )}
+                            />
+                            <span className="text-xs text-foreground">{COLOR_LEGEND[status].label}</span>
+                        </div>
+                    ))}
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+    )
+}
 
 interface RepositoryCardProps {
     repo: RepositoryWithTags
@@ -69,11 +166,8 @@ export function RepositoryCard({
                                     </CardTitle>
                                 </Link>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span className="flex items-center gap-1.5">
-                                        <span className={cn(
-                                            "size-2.5 rounded-full",
-                                            isPublic ? "bg-green-500/80" : "bg-amber-500/80"
-                                        )} />
+                                    <StatusDotCluster repo={repo} />
+                                    <span>
                                         {isPublic ? 'Public' : 'Private'}
                                     </span>
                                     {repo.fork_count > 0 && (
@@ -89,41 +183,43 @@ export function RepositoryCard({
                             </div>
                         </div>
 
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 -mr-2 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 data-[state=open]:opacity-100"
-                                >
-                                    <Icon icon={MoreVerticalCircle01Icon} className="size-4" />
-                                    <span className="sr-only">Actions</span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem onClick={() => onRun(repo)}>
-                                    <Icon icon={PlayIcon} className="mr-2 size-4" /> Run Checklist
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link to={`/app/repo/${repo.id}`}>
-                                        <Icon icon={PencilEdit02Icon} className="mr-2 size-4" /> Edit
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => onShare(repo)}>
-                                    <Icon icon={Share08Icon} className="mr-2 size-4" /> Share
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => onDuplicate(repo)}>
-                                    <Icon icon={Copy01Icon} className="mr-2 size-4" /> Duplicate
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                                    onClick={() => onDelete(repo.id, repo.title)}
-                                >
-                                    <Icon icon={Delete02Icon} className="mr-2 size-4" /> Delete
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 -mr-2 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 data-[state=open]:opacity-100"
+                                    >
+                                        <Icon icon={MoreVerticalCircle01Icon} className="size-4" />
+                                        <span className="sr-only">Actions</span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                    <DropdownMenuItem onClick={() => onRun(repo)}>
+                                        <Icon icon={PlayIcon} className="mr-2 size-4" /> Run Checklist
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link to={`/app/repo/${repo.id}`}>
+                                            <Icon icon={PencilEdit02Icon} className="mr-2 size-4" /> Edit
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => onShare(repo)}>
+                                        <Icon icon={Share08Icon} className="mr-2 size-4" /> Share
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => onDuplicate(repo)}>
+                                        <Icon icon={Copy01Icon} className="mr-2 size-4" /> Duplicate
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                                        onClick={() => onDelete(repo.id, repo.title)}
+                                    >
+                                        <Icon icon={Delete02Icon} className="mr-2 size-4" /> Delete
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     </div>
                 </CardHeader>
 

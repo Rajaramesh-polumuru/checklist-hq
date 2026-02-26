@@ -70,6 +70,28 @@ export const useAgentSettingsStore = create<AgentSettingsStore>()(
     }),
     {
       name: 'agent-settings-storage',
+      onRehydrateStorage: () => {
+        return (state) => {
+          if (!state) return;
+          // ── Migrate legacy chq_* localStorage keys into zustand store ──
+          // ProviderKeyManager previously wrote to these keys directly.
+          // This one-time migration ensures a single source of truth.
+          if (typeof window === 'undefined') return;
+          const legacyOpenAI = localStorage.getItem('chq_openai_key');
+          const legacyAnthropic = localStorage.getItem('chq_anthropic_key');
+
+          if (legacyOpenAI && !state.openaiApiKey) {
+            state.setOpenAIKey(legacyOpenAI);
+          }
+          if (legacyAnthropic && !state.anthropicApiKey) {
+            state.setAnthropicKey(legacyAnthropic);
+          }
+
+          // Clean up legacy keys after migration
+          if (legacyOpenAI) localStorage.removeItem('chq_openai_key');
+          if (legacyAnthropic) localStorage.removeItem('chq_anthropic_key');
+        };
+      },
     }
   )
 );
