@@ -1,6 +1,8 @@
 import { useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Toaster } from "@/components/ui/sonner"
+import { SpeedInsights } from '@vercel/speed-insights/react'
+import { Analytics } from "@vercel/analytics/react"
 import Loading02Icon from '@hugeicons/core-free-icons/Loading02Icon'
 import { Icon } from '@/components/ui/icon'
 import { Layout } from '@/components/Layout'
@@ -293,6 +295,8 @@ function App() {
         </OnboardingProvider>
       </ErrorBoundary>
       <Toaster position="top-center" />
+      <SpeedInsights />
+      <Analytics />
     </BrowserRouter>
   )
 }
