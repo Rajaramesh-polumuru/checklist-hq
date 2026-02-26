@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import {
@@ -31,12 +30,13 @@ interface ListItem {
     text: string
 }
 
-interface QuickListModalProps {
+export interface QuickListModalProps {
     isOpen: boolean
     onClose: () => void
+    onCreated?: () => void
 }
 
-// ─── Default items factory ────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function createDefaultItems(): ListItem[] {
     return [
@@ -48,25 +48,22 @@ function createDefaultItems(): ListItem[] {
 
 // ─── QuickListModal ───────────────────────────────────────────────────────────
 
-export function QuickListModal({ isOpen, onClose }: QuickListModalProps) {
+export function QuickListModal({ isOpen, onClose, onCreated }: QuickListModalProps) {
     const { user } = useAuthStore()
-    const queryClient = useQueryClient()
 
     const [modalState, setModalState] = useState<ModalState>('idle')
     const [title, setTitle] = useState('')
     const [items, setItems] = useState<ListItem[]>(createDefaultItems)
 
-    // Refs for focus management
     const inputRefs = useRef<Record<string, HTMLInputElement | null>>({})
     const titleRef = useRef<HTMLInputElement | null>(null)
 
-    // Reset state when modal opens/closes
+    // Reset state when modal opens
     useEffect(() => {
         if (isOpen) {
             setModalState('idle')
             setTitle('')
             setItems(createDefaultItems())
-            // Focus title input after mount
             setTimeout(() => titleRef.current?.focus(), 50)
         }
     }, [isOpen])
@@ -76,7 +73,6 @@ export function QuickListModal({ isOpen, onClose }: QuickListModalProps) {
     const addItem = useCallback(() => {
         const newItem: ListItem = { id: crypto.randomUUID(), text: '' }
         setItems(prev => [...prev, newItem])
-        // Focus the new item after state updates
         setTimeout(() => inputRefs.current[newItem.id]?.focus(), 50)
     }, [])
 
@@ -89,10 +85,8 @@ export function QuickListModal({ isOpen, onClose }: QuickListModalProps) {
             if (prev.length <= 1) return prev
             const idx = prev.findIndex(i => i.id === id)
             const next = prev.filter(i => i.id !== id)
-            // Focus the item before the deleted one
-            const focusIdx = Math.max(0, idx - 1)
             setTimeout(() => {
-                const focusId = next[focusIdx]?.id
+                const focusId = next[Math.max(0, idx - 1)]?.id
                 if (focusId) inputRefs.current[focusId]?.focus()
             }, 50)
             return next
@@ -150,8 +144,8 @@ export function QuickListModal({ isOpen, onClose }: QuickListModalProps) {
                 content,
                 message: 'Initial commit',
             })
-            queryClient.invalidateQueries({ queryKey: ['user-repositories', user.id] })
             toast.success(`"${title.trim()}" created`)
+            onCreated?.()
             onClose()
         } catch {
             setModalState('error')
@@ -181,12 +175,8 @@ export function QuickListModal({ isOpen, onClose }: QuickListModalProps) {
                 {/* Idle / error state */}
                 {modalState !== 'creating' && (
                     <div className="space-y-4 py-2">
-                        {/* Title input */}
                         <div className="space-y-1.5">
-                            <label
-                                htmlFor="list-title"
-                                className="text-sm font-medium"
-                            >
+                            <label htmlFor="list-title" className="text-sm font-medium">
                                 List name <span className="text-destructive">*</span>
                             </label>
                             <Input
@@ -205,7 +195,6 @@ export function QuickListModal({ isOpen, onClose }: QuickListModalProps) {
                             />
                         </div>
 
-                        {/* Items */}
                         <div className="space-y-1.5">
                             <label className="text-sm font-medium">Items</label>
                             <div className="space-y-2">
@@ -221,7 +210,6 @@ export function QuickListModal({ isOpen, onClose }: QuickListModalProps) {
                                             className="overflow-hidden"
                                         >
                                             <div className="flex items-center gap-2">
-                                                {/* Drag handle (visual only) */}
                                                 <Icon
                                                     icon={DragDropVerticalIcon}
                                                     className="h-4 w-4 text-muted-foreground/40 shrink-0 cursor-default"
@@ -254,7 +242,6 @@ export function QuickListModal({ isOpen, onClose }: QuickListModalProps) {
                                 </AnimatePresence>
                             </div>
 
-                            {/* Add item */}
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -267,7 +254,6 @@ export function QuickListModal({ isOpen, onClose }: QuickListModalProps) {
                             </Button>
                         </div>
 
-                        {/* Error banner */}
                         {modalState === 'error' && (
                             <motion.div
                                 initial={{ opacity: 0, y: -4 }}
@@ -281,18 +267,10 @@ export function QuickListModal({ isOpen, onClose }: QuickListModalProps) {
                 )}
 
                 <DialogFooter className="gap-2 sm:gap-0">
-                    <Button
-                        variant="outline"
-                        onClick={onClose}
-                        disabled={modalState === 'creating'}
-                    >
+                    <Button variant="outline" onClick={onClose} disabled={modalState === 'creating'}>
                         Cancel
                     </Button>
-                    <Button
-                        onClick={handleCreate}
-                        disabled={!canCreate}
-                        loading={modalState === 'creating'}
-                    >
+                    <Button onClick={handleCreate} disabled={!canCreate} loading={modalState === 'creating'}>
                         Create List
                     </Button>
                 </DialogFooter>
