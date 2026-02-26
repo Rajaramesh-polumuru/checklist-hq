@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
@@ -56,7 +55,6 @@ function TodoCard({ repo, index, onStart, onDelete, isStarting }: TodoCardProps)
                 <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3 min-w-0">
-                            {/* Icon container */}
                             <div className={cn(
                                 'h-9 w-9 rounded-lg flex items-center justify-center shrink-0',
                                 'bg-primary/10 text-primary',
@@ -75,7 +73,6 @@ function TodoCard({ repo, index, onStart, onDelete, isStarting }: TodoCardProps)
                             </div>
                         </div>
 
-                        {/* 3-dot menu */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
@@ -107,17 +104,11 @@ function TodoCard({ repo, index, onStart, onDelete, isStarting }: TodoCardProps)
                 </CardHeader>
 
                 <CardContent className="pb-3 flex-1">
-                    {/* Placeholder progress bar — visual affordance that this is runnable */}
                     <Progress value={0} size="sm" className="mt-1 opacity-30" />
                 </CardContent>
 
                 <CardFooter className="pt-0 gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        asChild
-                    >
+                    <Button variant="outline" size="sm" className="flex-1" asChild>
                         <Link to={`/app/repo/${repo.id}`}>
                             <Icon icon={PencilEdit02Icon} className="h-3.5 w-3.5 mr-1.5" />
                             Edit
@@ -143,16 +134,30 @@ function TodoCard({ repo, index, onStart, onDelete, isStarting }: TodoCardProps)
 export function TodosPage() {
     const { user } = useAuthStore()
     const navigate = useNavigate()
-    const queryClient = useQueryClient()
 
+    const [lists, setLists] = useState<RepositoryWithTags[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
     const [showModal, setShowModal] = useState(false)
     const [startingId, setStartingId] = useState<string | null>(null)
 
-    const { data: lists = [], isLoading, error } = useQuery({
-        queryKey: ['user-repositories', user?.id],
-        queryFn: () => getUserRepositories(user!.id),
-        enabled: !!user,
-    })
+    const loadLists = useCallback(async () => {
+        if (!user) return
+        try {
+            setLoading(true)
+            setError(null)
+            const repos = await getUserRepositories(user.id)
+            setLists(repos)
+        } catch {
+            setError('Failed to load your lists.')
+        } finally {
+            setLoading(false)
+        }
+    }, [user])
+
+    useEffect(() => {
+        loadLists()
+    }, [loadLists])
 
     const handleStart = async (repoId: string) => {
         setStartingId(repoId)
@@ -169,7 +174,7 @@ export function TodosPage() {
     const handleDelete = async (repoId: string, title: string) => {
         try {
             await deleteRepository(repoId)
-            queryClient.invalidateQueries({ queryKey: ['user-repositories', user?.id] })
+            setLists(prev => prev.filter(r => r.id !== repoId))
             toast.success(`"${title}" deleted`)
         } catch {
             toast.error('Failed to delete. Please try again.')
@@ -198,7 +203,7 @@ export function TodosPage() {
             </motion.div>
 
             {/* Loading skeletons */}
-            {isLoading && (
+            {loading && (
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-6">
                     {[1, 2, 3].map((i) => (
                         <div key={i} className="h-44 rounded-xl bg-muted animate-pulse" />
@@ -207,14 +212,14 @@ export function TodosPage() {
             )}
 
             {/* Error state */}
-            {error && !isLoading && (
-                <div className="flex items-center gap-2 p-4 rounded-md bg-destructive/10 text-destructive text-sm">
-                    <span>Failed to load your lists. Please refresh the page.</span>
+            {error && !loading && (
+                <div className="p-4 rounded-md bg-destructive/10 text-destructive text-sm">
+                    {error}
                 </div>
             )}
 
             {/* Empty state */}
-            {!isLoading && !error && lists.length === 0 && (
+            {!loading && !error && lists.length === 0 && (
                 <EmptyState
                     icon={<Icon icon={TaskDaily01Icon} className="h-8 w-8" />}
                     title="No lists yet"
@@ -229,7 +234,7 @@ export function TodosPage() {
             )}
 
             {/* Card grid */}
-            {!isLoading && !error && lists.length > 0 && (
+            {!loading && !error && lists.length > 0 && (
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-6">
                     {lists.map((repo, i) => (
                         <TodoCard
@@ -244,10 +249,10 @@ export function TodosPage() {
                 </div>
             )}
 
-            {/* Quick list creation modal */}
             <QuickListModal
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
+                onCreated={loadLists}
             />
         </div>
     )
