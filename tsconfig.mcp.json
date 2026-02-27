@@ -33,5 +33,5 @@
     "src/lib/agent/schemas.ts",
     "src/types/database.ts"
   ],
-  "exclude": ["node_modules", "dist", "dist-mcp", "src/mcp/cli.ts"]
+  "exclude": ["node_modules", "dist", "dist-mcp"]
 }
