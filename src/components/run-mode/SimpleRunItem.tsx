@@ -8,6 +8,7 @@ import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 import { FormattedText } from '@/lib/rich-text'
 import { useLongPress } from '@/hooks/useLongPress'
+import { useIsMobile } from '@/hooks/useMobile'
 import type { ChecklistItem, ItemProgress } from '@/types/database'
 
 interface SimpleRunItemProps {
@@ -33,6 +34,7 @@ export const SimpleRunItem = memo(function SimpleRunItem({
   context = {},
 }: SimpleRunItemProps) {
   const isCompleted = progress?.completed ?? false
+  const isMobile = useIsMobile()
   const [isHovered, setIsHovered] = useState(false)
 
   const handleClick = useCallback(() => {
@@ -152,7 +154,7 @@ export const SimpleRunItem = memo(function SimpleRunItem({
         <button
           className={cn(
             'shrink-0 p-1 rounded-md transition-opacity duration-150 text-muted-foreground hover:text-foreground hover:bg-muted/60',
-            isHovered || progress?.note ? 'opacity-100' : 'opacity-0',
+            isMobile || isHovered || progress?.note ? 'opacity-100' : 'opacity-0',
           )}
           onClick={(e) => {
             e.stopPropagation()

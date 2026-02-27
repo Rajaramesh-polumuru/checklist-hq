@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/tooltip'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
+import { useIsMobile } from '@/hooks/useMobile'
 import type { Repository, RepositoryWithTags } from '@/types/database'
 
 // ─── Status Dot System ───────────────────────────────────────────────────────
@@ -139,6 +140,7 @@ export function RepositoryCard({
     onDelete
 }: RepositoryCardProps) {
     const isPublic = repo.is_public
+    const isMobile = useIsMobile()
     const [tag] = repo.tags || [] // Get first tag if available
 
     return (
@@ -189,7 +191,10 @@ export function RepositoryCard({
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-8 w-8 -mr-2 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 data-[state=open]:opacity-100"
+                                        className={cn(
+                                            "h-8 w-8 -mr-2 text-muted-foreground transition-opacity focus:opacity-100 data-[state=open]:opacity-100",
+                                            isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                                        )}
                                     >
                                         <Icon icon={MoreVerticalCircle01Icon} className="size-4" />
                                         <span className="sr-only">Actions</span>
@@ -246,7 +251,12 @@ export function RepositoryCard({
                     <Button
                         size="sm"
                         variant="secondary"
-                        className="h-7 text-xs font-medium opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 mt-3"
+                        className={cn(
+                            "h-7 text-xs font-medium transition-all duration-200 mt-3",
+                            isMobile
+                                ? "opacity-100 translate-y-0"
+                                : "opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0"
+                        )}
                         onClick={() => onRun(repo)}
                     >
                         <Icon icon={PlayIcon} className="mr-1.5 size-3.5" />
