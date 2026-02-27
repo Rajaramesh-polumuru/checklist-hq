@@ -12,8 +12,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useIsMobile } from '@/hooks/useMobile'
 import { formatRelativeTime } from '@/lib/date-utils'
 import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon'
 import CheckmarkCircle01Icon from '@hugeicons/core-free-icons/CheckmarkCircle01Icon'
@@ -386,6 +388,8 @@ export function RunMode() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const agentSettings = useAgentSettingsStore()
+
+  const isMobile = useIsMobile()
 
   // View mode
   const [viewMode, setViewMode] = useState<ViewMode>(getStoredViewMode)
@@ -1070,16 +1074,19 @@ export function RunMode() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Timer — hidden on mobile to save space */}
             {run && !isComplete && (
-              <RunTimer
-                run={run}
-                initialDurationMs={durationMs}
-                onPause={handlePause}
-                onResume={handleResume}
-                compact
-                showControls={false}
-              />
+              <div className="hidden sm:block">
+                <RunTimer
+                  run={run}
+                  initialDurationMs={durationMs}
+                  onPause={handlePause}
+                  onResume={handleResume}
+                  compact
+                  showControls={false}
+                />
+              </div>
             )}
 
             <div className="hidden sm:flex items-center gap-2 text-sm">
@@ -1088,8 +1095,9 @@ export function RunMode() {
               <span className="text-muted-foreground tabular-nums">{totalItems}</span>
             </div>
 
+            {/* Auto-pilot — hidden on mobile, shown in More menu instead */}
             {run && !isComplete && (
-              <div className="flex items-center gap-2 mr-2 border-r pr-4 h-6">
+              <div className="hidden sm:flex items-center gap-2 mr-2 border-r pr-4 h-6">
                 <Switch
                   id="auto-pilot"
                   checked={agentSettings.autoPilotEnabled}
@@ -1104,11 +1112,12 @@ export function RunMode() {
                   )}
                 >
                   <Icon icon={AiCloud02Icon} className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Auto-Pilot</span>
+                  <span>Auto-Pilot</span>
                 </Label>
               </div>
             )}
 
+            {/* Pause/Resume — hidden on mobile, shown in More menu instead */}
             {run && !isComplete &&
               (run.status === 'paused' ? (
                 <Button
@@ -1116,14 +1125,14 @@ export function RunMode() {
                   disabled={isPauseLoading}
                   variant="default"
                   size="sm"
-                  className="gap-2"
+                  className="hidden sm:flex gap-2"
                 >
                   {isPauseLoading ? (
                     <Icon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
                   ) : (
                     <Icon icon={PlayIcon} className="h-4 w-4" />
                   )}
-                  <span className="hidden sm:inline">Resume</span>
+                  Resume
                 </Button>
               ) : (
                 <Button
@@ -1131,27 +1140,30 @@ export function RunMode() {
                   disabled={isPauseLoading}
                   variant="outline"
                   size="sm"
-                  className="gap-2"
+                  className="hidden sm:flex gap-2"
                 >
                   {isPauseLoading ? (
                     <Icon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
                   ) : (
                     <Icon icon={PauseIcon} className="h-4 w-4" />
                   )}
-                  <span className="hidden sm:inline">Pause</span>
+                  Pause
                 </Button>
               ))}
 
+            {/* AgentExportButton — hidden on mobile */}
             {repository && commit && (
-              <AgentExportButton
-                repository={repository}
-                commit={commit}
-                run={run || undefined}
-              />
+              <div className="hidden sm:block">
+                <AgentExportButton
+                  repository={repository}
+                  commit={commit}
+                  run={run || undefined}
+                />
+              </div>
             )}
 
             {isComplete ? (
-              <Button onClick={handleRestart} variant="outline" size="sm" className="gap-2">
+              <Button onClick={handleRestart} variant="outline" size="sm" className="gap-2 shrink-0">
                 <Icon icon={ArrowTurnBackwardIcon} className="h-4 w-4" />
                 <span className="hidden sm:inline">Run Again</span>
               </Button>
@@ -1160,7 +1172,7 @@ export function RunMode() {
                 onClick={handleComplete}
                 disabled={completing || completedItems < totalItems}
                 size="sm"
-                className="gap-2"
+                className="gap-2 shrink-0"
               >
                 {completing ? (
                   <Icon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
@@ -1171,14 +1183,31 @@ export function RunMode() {
               </Button>
             )}
 
-            {/* More menu */}
+            {/* More menu — always visible; exposes mobile-only actions on small screens */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0">
                   <Icon icon={MoreVerticalIcon} className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-52">
+                {/* Pause/Resume — only shown in menu on mobile */}
+                {run && !isComplete && isMobile && (
+                  <>
+                    {run.status === 'paused' ? (
+                      <DropdownMenuItem onClick={handleResume} disabled={isPauseLoading}>
+                        <Icon icon={isPauseLoading ? Loading02Icon : PlayIcon} className={cn('h-4 w-4 mr-2', isPauseLoading && 'animate-spin')} />
+                        Resume
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem onClick={handlePause} disabled={isPauseLoading}>
+                        <Icon icon={isPauseLoading ? Loading02Icon : PauseIcon} className={cn('h-4 w-4 mr-2', isPauseLoading && 'animate-spin')} />
+                        Pause
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem onClick={switchViewMode}>
                   <Icon icon={DashboardBrowsingIcon} className="h-4 w-4 mr-2" />
                   Simple View
