@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "checklist-hq": {
-      "command": "npx",
-      "args": ["-y", "tsx", "src/mcp/index.ts"],
+      "command": "node",
+      "args": ["/home/user/checklist-hq/dist-mcp/src/mcp/index.js"],
       "env": {
         "CHQ_API_KEY": "chq_your_api_key_here",
         "CHQ_SUPABASE_URL": "your_supabase_url_here",
