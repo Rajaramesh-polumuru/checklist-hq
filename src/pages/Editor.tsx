@@ -199,6 +199,7 @@ export function Editor() {
 
         // Navigate to the new repository URL
         navigate(`/app/repo/${newRepo.id}`, { replace: true })
+        return newRepo
       } else if (repository) {
         // Update existing repository
         const updates: Promise<unknown>[] = []
@@ -251,8 +252,11 @@ export function Editor() {
 
   const handleStartRun = async () => {
     if (!repository) {
-      // Save first if new, then navigate to run
-      await handleSave()
+      // Save first if new, then navigate to run mode
+      const newRepo = await handleSave()
+      if (newRepo) {
+        navigate(`/app/run/start/${newRepo.id}`)
+      }
       return
     }
     // Navigate to run mode - it will create a new run automatically
