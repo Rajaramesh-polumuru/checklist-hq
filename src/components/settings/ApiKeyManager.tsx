@@ -92,6 +92,9 @@ export function ApiKeyManager({ onKeyGenerated }: ApiKeyManagerProps) {
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
+      // Derive a short prefix for display/identification (e.g. "chq_a1b2c3d4")
+      const key_prefix = fullKey.substring(0, 12);
+
       // Insert into DB
       const { data: newKeyRecord, error } = await supabase
         .from('api_keys')
@@ -99,6 +102,7 @@ export function ApiKeyManager({ onKeyGenerated }: ApiKeyManagerProps) {
           user_id: user.id,
           name: newKeyName,
           key_hash: hashHex,
+          key_prefix,
         })
         .select()
         .single();
