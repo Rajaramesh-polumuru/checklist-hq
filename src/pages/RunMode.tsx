@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Icon } from '@/components/ui/icon'
+import { Textarea } from '@/components/ui/textarea'
 import { formatRelativeTime } from '@/lib/date-utils'
 import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon'
 import CheckmarkCircle01Icon from '@hugeicons/core-free-icons/CheckmarkCircle01Icon'
@@ -46,12 +47,42 @@ import { AgentStatusIndicator } from '@/components/run/AgentStatusIndicator'
 import { RunTimeline } from '@/components/run/RunTimeline'
 import { AgentSettingsModal } from '@/components/AgentSettingsModal'
 import { useRunOrchestrator } from '@/hooks/useRunOrchestrator'
+import { RunModeHeader } from '@/components/run-mode/RunModeHeader'
+import { RunCompletionBanner } from '@/components/run-mode/RunCompletionBanner'
+import { SimpleRunList } from '@/components/run-mode/SimpleRunList'
 import type { Repository, Run, Commit, ChecklistItem, RunProgress } from '@/types/database'
 
-// Generate initial confetti pieces to avoid Math.random() during render
-const generateConfettiPieces = () => {
+// ============================================
+// View Mode Persistence
+// ============================================
+
+type ViewMode = 'simple' | 'detailed'
+
+function getStoredViewMode(): ViewMode {
+  try {
+    const stored = localStorage.getItem('checklist-run-view-mode')
+    if (stored === 'simple' || stored === 'detailed') return stored
+  } catch {
+    // ignore
+  }
+  return 'simple'
+}
+
+function setStoredViewMode(mode: ViewMode) {
+  try {
+    localStorage.setItem('checklist-run-view-mode', mode)
+  } catch {
+    // ignore
+  }
+}
+
+// ============================================
+// Confetti (shared by both modes)
+// ============================================
+
+const generateConfettiPieces = (count = 25) => {
   const colors = ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444']
-  return [...Array(50)].map((_, i) => ({
+  return [...Array(count)].map((_, i) => ({
     id: i,
     left: Math.random() * 100,
     animationDelay: Math.random() * 2,
@@ -61,7 +92,6 @@ const generateConfettiPieces = () => {
   }))
 }
 
-// Confetti effect component
 function Confetti({ active }: { active: boolean }) {
   const [confettiPieces] = useState(() => generateConfettiPieces())
 
@@ -93,12 +123,15 @@ function Confetti({ active }: { active: boolean }) {
   )
 }
 
-// Circular progress ring component
+// ============================================
+// Progress Ring (Detailed mode only)
+// ============================================
+
 function ProgressRing({
   progress,
   completed,
   total,
-  size = 120
+  size = 120,
 }: {
   progress: number
   completed: number
@@ -113,7 +146,6 @@ function ProgressRing({
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg className="transform -rotate-90" width={size} height={size}>
-        {/* Background circle */}
         <circle
           className="text-muted/30"
           strokeWidth={strokeWidth}
@@ -123,7 +155,6 @@ function ProgressRing({
           cx={size / 2}
           cy={size / 2}
         />
-        {/* Progress circle */}
         <circle
           className="text-primary transition-all duration-500 ease-out"
           strokeWidth={strokeWidth}
@@ -137,7 +168,6 @@ function ProgressRing({
           cy={size / 2}
         />
       </svg>
-      {/* Center content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-3xl font-bold tabular-nums">{completed}</span>
         <span className="text-sm text-muted-foreground">of {total}</span>
@@ -146,9 +176,10 @@ function ProgressRing({
   )
 }
 
+// ============================================
+// Recursive Run Items (Detailed mode only)
+// ============================================
 
-
-// Recursive component to render items with their children
 function RecursiveRunItems({
   items,
   allItems,
@@ -170,44 +201,39 @@ function RecursiveRunItems({
   focusedItemId: string | null
   context?: Record<string, unknown>
 }) {
-  // Get children for a given parent
   const getChildren = (parentId: string): ChecklistItem[] => {
     return Object.values(allItems)
-      .filter(item => item.parent === parentId)
+      .filter((item) => item.parent === parentId)
       .sort((a, b) => a.order - b.order)
   }
 
-  // Count completed children for a header
   const getCompletedChildCount = (parentId: string): number => {
     const children = getChildren(parentId)
-    return children.filter(child => {
+    return children.filter((child) => {
       if (child.type === 'header') {
-        // For nested headers, recursively count
         return getCompletedChildCount(child.id) === getChildren(child.id).length
       }
       return progress[child.id]?.completed
     }).length
   }
 
-  // Get step number for an item
   const getStepNumber = (itemId: string): number => {
-    return checkableItems.findIndex(item => item.id === itemId) + 1
+    return checkableItems.findIndex((item) => item.id === itemId) + 1
   }
 
   return (
     <>
-      {items.map(item => {
+      {items.map((item) => {
         const children = getChildren(item.id)
         const isHeader = item.type === 'header'
         const isNext = item.id === nextItemId
 
         if (isHeader && children.length > 0) {
-          // Render as section header with children
           return (
             <div key={item.id} className={cn('space-y-2', depth > 0 && 'ml-6')}>
               <SectionHeader
                 item={item}
-                childCount={children.filter(c => c.type !== 'header').length}
+                childCount={children.filter((c) => c.type !== 'header').length}
                 completedChildCount={getCompletedChildCount(item.id)}
               />
               <div className="ml-4 space-y-2 border-l-2 border-muted/50 pl-4">
@@ -227,7 +253,6 @@ function RecursiveRunItems({
           )
         }
 
-        // Render as checkable item
         return (
           <div key={item.id} className={cn(depth > 0 && 'ml-2')}>
             <RunItem
@@ -242,7 +267,6 @@ function RecursiveRunItems({
               showStepNumber={depth === 0}
               context={context}
             />
-            {/* Render children if this item has any */}
             {children.length > 0 && (
               <div className="ml-6 mt-2 space-y-2 border-l-2 border-muted/30 pl-3">
                 <RecursiveRunItems
@@ -265,11 +289,106 @@ function RecursiveRunItems({
   )
 }
 
+// ============================================
+// Note Popover (Simple mode)
+// ============================================
+
+function NotePopover({
+  itemId,
+  anchorEl,
+  onSubmit,
+  onClose,
+}: {
+  itemId: string | null
+  anchorEl: HTMLElement | null
+  onSubmit: (itemId: string, note: string) => void
+  onClose: () => void
+}) {
+  const [note, setNote] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (itemId) {
+      // Reset note and focus on next tick to avoid synchronous setState warning
+      const timer = setTimeout(() => {
+        setNote('')
+        textareaRef.current?.focus()
+      }, 50)
+      return () => clearTimeout(timer)
+    }
+  }, [itemId])
+
+  const handleSubmit = () => {
+    if (itemId && note.trim()) {
+      onSubmit(itemId, note.trim())
+    }
+    onClose()
+  }
+
+  if (!itemId || !anchorEl) return null
+
+  const rect = anchorEl.getBoundingClientRect()
+
+  return (
+    <div
+      className="fixed z-50"
+      style={{ top: rect.bottom + 4, left: rect.left, width: Math.min(rect.width, 400) }}
+    >
+      <div className="bg-popover border rounded-md shadow-md p-3 animate-in fade-in zoom-in-95 duration-200">
+        <Textarea
+          ref={textareaRef}
+          value={note}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
+          placeholder="Add a note..."
+          className="min-h-[60px] resize-none text-sm"
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+              e.preventDefault()
+              handleSubmit()
+            }
+            if (e.key === 'Escape') {
+              onClose()
+            }
+          }}
+        />
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-[10px] text-muted-foreground">
+            <kbd className="px-1 py-0.5 bg-muted rounded font-mono">Cmd+Enter</kbd> to save
+          </p>
+          <div className="flex gap-1.5">
+            <Button variant="ghost" size="sm" onClick={onClose} className="h-7 text-xs">
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleSubmit} className="h-7 text-xs">
+              Save
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// Main RunMode Component
+// ============================================
+
 export function RunMode() {
   const { runId, repoId } = useParams()
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const agentSettings = useAgentSettingsStore()
+
+  // View mode
+  const [viewMode, setViewMode] = useState<ViewMode>(getStoredViewMode)
+
+  const switchViewMode = useCallback(() => {
+    setViewMode((prev) => {
+      const next = prev === 'simple' ? 'detailed' : 'simple'
+      setStoredViewMode(next)
+      return next
+    })
+  }, [])
 
   // Data state
   const [repository, setRepository] = useState<Repository | null>(null)
@@ -287,12 +406,16 @@ export function RunMode() {
   const [isPauseLoading, setIsPauseLoading] = useState(false)
   const [focusedItemIndex, setFocusedItemIndex] = useState<number | null>(null)
 
-  // Renaming state
+  // Renaming state (detailed mode)
   const [isEditingName, setIsEditingName] = useState(false)
   const [editName, setEditName] = useState('')
 
   // Agent settings modal
   const [showAgentSettings, setShowAgentSettings] = useState(false)
+
+  // Note popover state (simple mode)
+  const [notePopoverItemId, setNotePopoverItemId] = useState<string | null>(null)
+  const [notePopoverAnchor, setNotePopoverAnchor] = useState<HTMLElement | null>(null)
 
   // Real-time sync
   const {
@@ -305,12 +428,10 @@ export function RunMode() {
     userId: user?.id || '',
     enabled: !!run && !!user && run.status !== 'completed',
     onProgressUpdate: (newProgress) => {
-      // Update progress from other devices
       setProgress(newProgress)
     },
     onStatusChange: (newStatus) => {
-      // Update status from other devices
-      setRun((prev) => prev ? { ...prev, status: newStatus } : null)
+      setRun((prev) => (prev ? { ...prev, status: newStatus } : null))
     },
   })
 
@@ -332,7 +453,6 @@ export function RunMode() {
           setCommit(runData.commit)
           setProgress(runData.run.progress)
 
-          // Load duration from time segments
           const duration = await calculateRunDuration(runId)
           setDurationMs(duration)
 
@@ -352,7 +472,7 @@ export function RunMode() {
             setRun(runData.run)
             setCommit(runData.commit)
             setProgress(runData.run.progress)
-            setDurationMs(0) // New run starts at 0
+            setDurationMs(0)
           }
 
           navigate(`/app/run/${newRun.id}`, { replace: true })
@@ -376,7 +496,6 @@ export function RunMode() {
     try {
       const updatedRun = await pauseRun(run.id)
       setRun(updatedRun)
-      // Update duration when pausing
       const duration = await calculateRunDuration(run.id)
       setDurationMs(duration)
     } catch (err) {
@@ -426,63 +545,100 @@ export function RunMode() {
   }, [])
 
   // Toggle item completion
-  const handleToggle = useCallback(async (itemId: string, completed: boolean, note?: string) => {
-    if (!run || !user) return
+  const handleToggle = useCallback(
+    async (itemId: string, completed: boolean, note?: string) => {
+      if (!run || !user) return
 
-    // Handle Ref Items (Sub-Runs)
-    const item = commit?.content?.items[itemId]
-    if (item?.type === 'ref' && item.ref_config) {
-      if (item.ref_config.execution_mode === 'spawn') {
-        try {
-          // Check if sub-run exists
-          const link = await getSubRunForItem(run.id, itemId)
-          if (link) {
-            navigate(`/app/run/${link.child_run_id}`)
+      // Handle Ref Items (Sub-Runs)
+      const item = commit?.content?.items[itemId]
+      if (item?.type === 'ref' && item.ref_config) {
+        if (item.ref_config.execution_mode === 'spawn') {
+          try {
+            const link = await getSubRunForItem(run.id, itemId)
+            if (link) {
+              navigate(`/app/run/${link.child_run_id}`)
+              return
+            }
+
+            const subRun = await spawnSubRun(
+              run.id,
+              itemId,
+              item.ref_config.repo_id,
+              user.id,
+              item.ref_config.commit_id,
+            )
+            navigate(`/app/run/${subRun.id}`)
+            return
+          } catch (err) {
+            console.error('Error handling sub-run:', err)
+            setError('Failed to open sub-checklist')
             return
           }
-          
-          // Spawn new sub-run
-          // We don't mark as complete yet. The sub-run completion will trigger that (eventually)
-          // For now, navigating starts the process.
-          const subRun = await spawnSubRun(
-            run.id, 
-            itemId, 
-            item.ref_config.repo_id, 
-            user.id,
-            item.ref_config.commit_id
-          )
-          navigate(`/app/run/${subRun.id}`)
-          return
-        } catch (err) {
-          console.error('Error handling sub-run:', err)
-          setError('Failed to open sub-checklist')
-          return
         }
       }
-    }
 
-    // Optimistic update
-    setProgress((prev) => ({
-      ...prev,
-      [itemId]: {
-        completed,
-        timestamp: new Date().toISOString(),
-        user_id: user.id,
-        ...(note && { note }),
-      },
-    }))
+      // Optimistic update
+      setProgress((prev) => ({
+        ...prev,
+        [itemId]: {
+          completed,
+          timestamp: new Date().toISOString(),
+          user_id: user.id,
+          ...(note && { note }),
+        },
+      }))
 
-    try {
-      await updateRunProgress(run.id, itemId, completed, user.id, note)
-    } catch (err) {
-      console.error('Error updating progress:', err)
-      setProgress((prev) => {
-        const newProgress = { ...prev }
-        delete newProgress[itemId]
-        return newProgress
-      })
-    }
-  }, [run, user, commit, navigate])
+      try {
+        await updateRunProgress(run.id, itemId, completed, user.id, note)
+      } catch (err) {
+        console.error('Error updating progress:', err)
+        setProgress((prev) => {
+          const newProgress = { ...prev }
+          delete newProgress[itemId]
+          return newProgress
+        })
+      }
+    },
+    [run, user, commit, navigate],
+  )
+
+  // Simple mode: handle adding a note to an item
+  const handleRequestNote = useCallback((itemId: string) => {
+    const el = document.querySelector(`[data-item-id="${itemId}"]`) as HTMLElement | null
+    setNotePopoverItemId(itemId)
+    setNotePopoverAnchor(el)
+  }, [])
+
+  const handleSubmitNote = useCallback(
+    async (itemId: string, note: string) => {
+      if (!run || !user) return
+      // Update progress with the note
+      const currentProgress = progress[itemId]
+      setProgress((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...prev[itemId],
+          completed: currentProgress?.completed ?? false,
+          timestamp: currentProgress?.timestamp || new Date().toISOString(),
+          user_id: user.id,
+          note,
+        },
+      }))
+
+      try {
+        await updateRunProgress(
+          run.id,
+          itemId,
+          currentProgress?.completed ?? false,
+          user.id,
+          note,
+        )
+      } catch (err) {
+        console.error('Error updating note:', err)
+      }
+    },
+    [run, user, progress],
+  )
 
   // Complete the run
   const handleComplete = useCallback(async () => {
@@ -491,10 +647,10 @@ export function RunMode() {
     setCompleting(true)
     try {
       await completeRun(run.id)
-      setRun((prev) => prev ? { ...prev, status: 'completed' } : null)
+      setRun((prev) => (prev ? { ...prev, status: 'completed' } : null))
       setJustCompleted(true)
       setShowConfetti(true)
-      setTimeout(() => setShowConfetti(false), 4000)
+      setTimeout(() => setShowConfetti(false), 3000)
     } catch (err) {
       console.error('Error completing run:', err)
       setError('Failed to complete run')
@@ -521,45 +677,37 @@ export function RunMode() {
     }
   }
 
-  // Get sorted items (flat list for simple runs)
+  // Get sorted items
   const getSortedItems = (): ChecklistItem[] => {
     if (!commit?.content?.items) return []
     return Object.values(commit.content.items).sort((a, b) => a.order - b.order)
   }
 
-  // Get root level items only for main display
   const getRootItems = (): ChecklistItem[] => {
     return getSortedItems().filter((item) => !item.parent)
   }
 
-
-
-  // Get all checkable items (tasks and notes, not headers with children)
+  // Get all checkable items
   const checkableItems = useMemo(() => {
     if (!commit?.content?.items) return []
     const allItems = commit.content.items
     const checkable: ChecklistItem[] = []
 
-    // Helper to get children locally to avoid closure staleness issues
     const getChildrenLocal = (parentId: string): ChecklistItem[] => {
       return Object.values(allItems)
-        .filter(item => item.parent === parentId)
+        .filter((item) => item.parent === parentId)
         .sort((a, b) => a.order - b.order)
     }
 
-    // Recursive function to collect checkable items in order
     const collectCheckable = (items: ChecklistItem[]) => {
       for (const item of items) {
         const children = getChildrenLocal(item.id)
         const isHeader = item.type === 'header'
 
-        // A header with children is not checkable itself, but its children might be
         if (isHeader && children.length > 0) {
           collectCheckable(children)
         } else {
-          // This is a checkable item (task, note, or empty header)
           checkable.push(item)
-          // Also collect any children of this checkable item
           if (children.length > 0) {
             collectCheckable(children)
           }
@@ -567,18 +715,17 @@ export function RunMode() {
       }
     }
 
-    // Start from root items
     const rootItems = Object.values(allItems)
-      .filter(item => !item.parent)
+      .filter((item) => !item.parent)
       .sort((a, b) => a.order - b.order)
 
     collectCheckable(rootItems)
     return checkable
   }, [commit])
 
-  // Find the next incomplete item (can be at any depth)
+  // Find the next incomplete item
   const nextItemId = useMemo(() => {
-    const nextItem = checkableItems.find(item => !progress[item.id]?.completed)
+    const nextItem = checkableItems.find((item) => !progress[item.id]?.completed)
     return nextItem?.id || null
   }, [checkableItems, progress])
 
@@ -590,27 +737,23 @@ export function RunMode() {
 
   const rootItems = getRootItems()
   const totalItems = checkableItems.length
-  const completedItems = checkableItems.filter(item => progress[item.id]?.completed).length
+  const completedItems = checkableItems.filter((item) => progress[item.id]?.completed).length
   const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0
   const isComplete = run?.status === 'completed' || progressPercent === 100
   const runContext = (run?.metadata?.context as Record<string, unknown>) || {}
 
-  // Agent orchestrator for auto-pilot
+  // Agent orchestrator
   const orchestrator = useRunOrchestrator({
     enabled: !isComplete && run?.status === 'active',
     currentItem,
     progress,
-    onComplete: (itemId, _output, _durationMs) => {
-      // Optimistic update handled by hook, but we need to ensure DB update has metadata
-      // The current handleToggle function doesn't support rich metadata well enough
-      // For now, passing output stringified in note is a fallback, but we should upgrade handleToggle
-      handleToggle(itemId, true, `Completed by AI`); 
-      // In a real implementation, we'd pass durationMs and output object directly to updateRunProgress
+    onComplete: (itemId) => {
+      handleToggle(itemId, true, `Completed by AI`)
     },
     onError: (itemId, error) => {
-      console.error(`Agent failed for item ${itemId}:`, error);
+      console.error(`Agent failed for item ${itemId}:`, error)
     },
-  });
+  })
 
   // Auto-complete when all items done
   useEffect(() => {
@@ -624,7 +767,6 @@ export function RunMode() {
     if (loading || isComplete || totalItems === 0) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user is typing in an input or textarea
       const target = e.target as HTMLElement
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
 
@@ -632,18 +774,15 @@ export function RunMode() {
         e.preventDefault()
         setFocusedItemIndex((prev) => {
           if (prev === null) return 0
-          // Move to next item, loop to beginning if at end
           return (prev + 1) % totalItems
         })
       } else if (e.key === 'k' || e.key === 'K') {
         e.preventDefault()
         setFocusedItemIndex((prev) => {
           if (prev === null) return totalItems - 1
-          // Move to previous item, loop to end if at beginning
           return prev === 0 ? totalItems - 1 : prev - 1
         })
       } else if ((e.key === 'Enter' || e.key === ' ') && focusedItemIndex !== null) {
-        // Toggle the focused item on Enter or Space
         e.preventDefault()
         const item = checkableItems[focusedItemIndex]
         if (item) {
@@ -661,8 +800,6 @@ export function RunMode() {
   useEffect(() => {
     if (focusedItemIndex !== null && checkableItems[focusedItemIndex]) {
       const itemId = checkableItems[focusedItemIndex].id
-
-      // Use requestAnimationFrame to ensure the scroll happens after render/paint
       requestAnimationFrame(() => {
         const element = document.querySelector(`[data-item-id="${itemId}"]`)
         if (element) {
@@ -672,17 +809,21 @@ export function RunMode() {
     }
   }, [focusedItemIndex, checkableItems])
 
-  // Get the focused item ID for passing to components
   const focusedItemId = focusedItemIndex !== null ? checkableItems[focusedItemIndex]?.id : null
 
+  // ============================================
   // Loading state
+  // ============================================
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center">
         <div className="text-center">
           <div className="relative">
             <div className="h-16 w-16 rounded-full border-4 border-muted animate-pulse mx-auto" />
-            <Icon icon={Loading02Icon} className="h-8 w-8 animate-spin text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            <Icon
+              icon={Loading02Icon}
+              className="h-8 w-8 animate-spin text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            />
           </div>
           <p className="text-muted-foreground mt-4">Loading checklist...</p>
         </div>
@@ -690,7 +831,9 @@ export function RunMode() {
     )
   }
 
+  // ============================================
   // Error state
+  // ============================================
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center">
@@ -705,6 +848,123 @@ export function RunMode() {
     )
   }
 
+  // ============================================
+  // Simple Mode Render
+  // ============================================
+  if (viewMode === 'simple') {
+    return (
+      <div className="min-h-screen bg-background">
+        <Confetti active={showConfetti} />
+
+        <RunModeHeader
+          repository={repository}
+          run={run}
+          completedItems={completedItems}
+          totalItems={totalItems}
+          progressPercent={progressPercent}
+          isComplete={isComplete}
+          completing={completing}
+          isPauseLoading={isPauseLoading}
+          onPause={handlePause}
+          onResume={handleResume}
+          onComplete={handleComplete}
+          onRestart={handleRestart}
+          onSwitchView={switchViewMode}
+          syncConnected={syncConnected}
+          otherDevices={otherDevices}
+          lastSyncedAt={lastSyncedAt}
+          syncError={syncError}
+        />
+
+        <main className="mx-auto max-w-2xl px-4 py-6 md:py-8">
+          {/* Keyboard hint */}
+          {!isComplete && completedItems === 0 && (
+            <p className="text-xs text-muted-foreground/50 text-center mb-6">
+              Press{' '}
+              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">J</kbd> /{' '}
+              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">K</kbd> to
+              navigate,{' '}
+              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Enter</kbd> to
+              toggle
+            </p>
+          )}
+
+          {/* Completion */}
+          {isComplete && justCompleted && (
+            <RunCompletionBanner totalItems={totalItems} onRestart={handleRestart} />
+          )}
+
+          {/* Items */}
+          {totalItems === 0 ? (
+            <div className="py-16 text-center">
+              <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <Icon icon={Target01Icon} className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground">This checklist has no items.</p>
+            </div>
+          ) : (
+            <SimpleRunList
+              items={rootItems}
+              allItems={commit?.content?.items || {}}
+              progress={progress}
+              onToggle={handleToggle}
+              onRequestNote={handleRequestNote}
+              depth={0}
+              checkableItems={checkableItems}
+              nextItemId={nextItemId}
+              focusedItemId={focusedItemId}
+              context={runContext}
+            />
+          )}
+
+          {/* Collapsible timeline */}
+          {run && (
+            <details className="mt-10 border-t pt-4">
+              <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors select-none">
+                Activity Timeline
+              </summary>
+              <div className="mt-4">
+                <RunTimeline run={run} items={commit?.content?.items || {}} />
+              </div>
+            </details>
+          )}
+        </main>
+
+        {/* Agent status floating */}
+        {currentItem?.agent_config?.enabled && !isComplete && (
+          <div className="fixed bottom-4 right-4 z-20">
+            <AgentStatusIndicator
+              status={orchestrator.status}
+              onExecute={orchestrator.executeManual}
+              onRetry={orchestrator.executeManual}
+              onApprove={orchestrator.approveResult}
+            />
+          </div>
+        )}
+
+        {/* Note popover */}
+        <NotePopover
+          itemId={notePopoverItemId}
+          anchorEl={notePopoverAnchor}
+          onSubmit={handleSubmitNote}
+          onClose={() => {
+            setNotePopoverItemId(null)
+            setNotePopoverAnchor(null)
+          }}
+        />
+
+        {/* Agent Settings Modal */}
+        <AgentSettingsModal
+          open={showAgentSettings}
+          onClose={() => setShowAgentSettings(false)}
+        />
+      </div>
+    )
+  }
+
+  // ============================================
+  // Detailed Mode Render (original)
+  // ============================================
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30">
       <Confetti active={showConfetti} />
@@ -732,10 +992,20 @@ export function RunMode() {
                     }}
                     onClick={(e) => e.stopPropagation()}
                   />
-                  <Button size="icon" variant="ghost" className="h-8 w-8 text-success hover:text-success hover:bg-success/10" onClick={handleSaveName}>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-success hover:text-success hover:bg-success/10"
+                    onClick={handleSaveName}
+                  >
                     <Icon icon={Tick01Icon} className="h-4 w-4" />
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleCancelRenaming}>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={handleCancelRenaming}
+                  >
                     <Icon icon={Cancel01Icon} className="h-4 w-4" />
                   </Button>
                 </div>
@@ -760,7 +1030,7 @@ export function RunMode() {
               <div className="flex items-center gap-2">
                 <Badge
                   variant={isComplete ? 'success' : run?.status === 'paused' ? 'warning' : 'default'}
-                  className={cn("text-xs gap-1.5", isComplete && "animate-pulse")}
+                  className={cn('text-xs gap-1.5', isComplete && 'animate-pulse')}
                 >
                   {isComplete ? (
                     <>
@@ -779,7 +1049,6 @@ export function RunMode() {
                     </>
                   )}
                 </Badge>
-                {/* Sync indicator */}
                 {!isComplete && (
                   <SyncIndicator
                     isConnected={syncConnected}
@@ -794,7 +1063,6 @@ export function RunMode() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Timer */}
             {run && !isComplete && (
               <RunTimer
                 run={run}
@@ -806,14 +1074,12 @@ export function RunMode() {
               />
             )}
 
-            {/* Compact progress */}
             <div className="hidden sm:flex items-center gap-2 text-sm">
               <span className="font-bold text-primary tabular-nums">{completedItems}</span>
               <span className="text-muted-foreground">/</span>
               <span className="text-muted-foreground tabular-nums">{totalItems}</span>
             </div>
 
-            {/* Auto-Pilot Toggle */}
             {run && !isComplete && (
               <div className="flex items-center gap-2 mr-2 border-r pr-4 h-6">
                 <Switch
@@ -822,11 +1088,11 @@ export function RunMode() {
                   onCheckedChange={agentSettings.setAutoPilotEnabled}
                   className="scale-75 data-[state=checked]:bg-purple-600"
                 />
-                <Label 
-                  htmlFor="auto-pilot" 
+                <Label
+                  htmlFor="auto-pilot"
                   className={cn(
-                    "text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors",
-                    agentSettings.autoPilotEnabled ? "text-purple-600" : "text-muted-foreground"
+                    'text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors',
+                    agentSettings.autoPilotEnabled ? 'text-purple-600' : 'text-muted-foreground',
                   )}
                 >
                   <Icon icon={AiCloud02Icon} className="h-3.5 w-3.5" />
@@ -835,9 +1101,8 @@ export function RunMode() {
               </div>
             )}
 
-            {/* Pause/Resume button */}
-            {run && !isComplete && (
-              run.status === 'paused' ? (
+            {run && !isComplete &&
+              (run.status === 'paused' ? (
                 <Button
                   onClick={handleResume}
                   disabled={isPauseLoading}
@@ -867,17 +1132,20 @@ export function RunMode() {
                   )}
                   <span className="hidden sm:inline">Pause</span>
                 </Button>
-              )
-            )}
+              ))}
 
-            {/* Agent Export Button */}
             {repository && commit && (
-              <AgentExportButton 
-                repository={repository} 
-                commit={commit} 
-                run={run || undefined} 
+              <AgentExportButton
+                repository={repository}
+                commit={commit}
+                run={run || undefined}
               />
             )}
+
+            {/* Switch to simple view */}
+            <Button onClick={switchViewMode} variant="ghost" size="sm" className="text-xs">
+              Simple View
+            </Button>
 
             {isComplete ? (
               <Button onClick={handleRestart} variant="outline" size="sm" className="gap-2">
@@ -915,14 +1183,8 @@ export function RunMode() {
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Progress ring section */}
         <div className="flex flex-col items-center justify-center mb-10">
-          <ProgressRing
-            progress={progressPercent}
-            completed={completedItems}
-            total={totalItems}
-            size={140}
-          />
+          <ProgressRing progress={progressPercent} completed={completedItems} total={totalItems} size={140} />
 
-          {/* Progress text */}
           <div className="mt-4 text-center">
             {isComplete ? (
               <div className="flex items-center gap-2 text-success">
@@ -934,17 +1196,20 @@ export function RunMode() {
                 <p className="text-muted-foreground">
                   {completedItems === 0
                     ? "Let's get started!"
-                    : `${totalItems - completedItems} step${totalItems - completedItems > 1 ? 's' : ''} remaining`
-                  }
+                    : `${totalItems - completedItems} step${totalItems - completedItems > 1 ? 's' : ''} remaining`}
                 </p>
                 <p className="text-xs text-muted-foreground/60 mt-1">
-                  Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">J</kbd> / <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">K</kbd> to navigate, <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Enter</kbd> to toggle
+                  Press{' '}
+                  <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">J</kbd> /{' '}
+                  <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">K</kbd> to
+                  navigate,{' '}
+                  <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Enter</kbd>{' '}
+                  to toggle
                 </p>
               </>
             )}
           </div>
 
-          {/* Agent status indicator */}
           {currentItem?.agent_config?.enabled && !isComplete && (
             <div className="mt-4">
               <AgentStatusIndicator
@@ -966,7 +1231,10 @@ export function RunMode() {
                 <div className="relative inline-block mb-4">
                   <div className="absolute inset-0 bg-success/20 rounded-full blur-xl animate-pulse" />
                   <Icon icon={ChampionIcon} className="h-16 w-16 text-success relative" />
-                  <Icon icon={SparklesIcon} className="h-8 w-8 text-warning absolute -top-2 -right-2 animate-bounce" />
+                  <Icon
+                    icon={SparklesIcon}
+                    className="h-8 w-8 text-warning absolute -top-2 -right-2 animate-bounce"
+                  />
                 </div>
                 <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-success to-primary bg-clip-text text-transparent">
                   Congratulations!
@@ -1006,9 +1274,7 @@ export function RunMode() {
                 <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
                   <Icon icon={Target01Icon} className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <p className="text-muted-foreground">
-                  This checklist has no items.
-                </p>
+                <p className="text-muted-foreground">This checklist has no items.</p>
               </CardContent>
             </Card>
           ) : (
@@ -1029,19 +1295,13 @@ export function RunMode() {
         {/* Timeline */}
         {run && (
           <div className="mt-12 border-t pt-8">
-            <RunTimeline 
-              run={run} 
-              items={commit?.content?.items || {}} 
-            />
+            <RunTimeline run={run} items={commit?.content?.items || {}} />
           </div>
         )}
       </main>
 
       {/* Agent Settings Modal */}
-      <AgentSettingsModal
-        open={showAgentSettings}
-        onClose={() => setShowAgentSettings(false)}
-      />
+      <AgentSettingsModal open={showAgentSettings} onClose={() => setShowAgentSettings(false)} />
     </div>
   )
 }
