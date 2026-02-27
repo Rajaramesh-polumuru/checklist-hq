@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "checklist-hq": {
+      "command": "node",
+      "args": ["dist-mcp/src/mcp/index.js"],
+      "env": {
+        "CHQ_API_KEY": "chq_your_api_key_here",
+        "CHQ_SUPABASE_URL": "your_supabase_url_here",
+        "CHQ_SUPABASE_ANON_KEY": "your_supabase_anon_key_here"
+      }
+    }
+  }
+}

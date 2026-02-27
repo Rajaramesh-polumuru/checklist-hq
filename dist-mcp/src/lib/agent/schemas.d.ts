@@ -58,9 +58,9 @@ export declare const agentConfigSchema: z.ZodObject<{
             assertion: "assertion";
         }>;
         artifact_type: z.ZodOptional<z.ZodEnum<{
-            file: "file";
             screenshot: "screenshot";
             log: "log";
+            file: "file";
         }>>;
         assertion: z.ZodOptional<z.ZodString>;
     }, z.core.$strip>>;
@@ -91,9 +91,9 @@ export declare const itemProgressSchema: z.ZodObject<{
     artifacts: z.ZodOptional<z.ZodArray<z.ZodObject<{
         type: z.ZodEnum<{
             url: "url";
-            file: "file";
             screenshot: "screenshot";
             log: "log";
+            file: "file";
         }>;
         url: z.ZodString;
         description: z.ZodString;
@@ -108,9 +108,9 @@ export declare const checklistItemSchema: z.ZodObject<{
     parent: z.ZodNullable<z.ZodString>;
     order: z.ZodNumber;
     type: z.ZodOptional<z.ZodEnum<{
-        note: "note";
         task: "task";
         header: "header";
+        note: "note";
     }>>;
     details: z.ZodOptional<z.ZodString>;
     agent_config: z.ZodOptional<z.ZodObject<{
@@ -165,9 +165,9 @@ export declare const checklistItemSchema: z.ZodObject<{
                 assertion: "assertion";
             }>;
             artifact_type: z.ZodOptional<z.ZodEnum<{
-                file: "file";
                 screenshot: "screenshot";
                 log: "log";
+                file: "file";
             }>>;
             assertion: z.ZodOptional<z.ZodString>;
         }, z.core.$strip>>;
@@ -184,9 +184,9 @@ export declare const checklistContentSchema: z.ZodObject<{
         parent: z.ZodNullable<z.ZodString>;
         order: z.ZodNumber;
         type: z.ZodOptional<z.ZodEnum<{
-            note: "note";
             task: "task";
             header: "header";
+            note: "note";
         }>>;
         details: z.ZodOptional<z.ZodString>;
         agent_config: z.ZodOptional<z.ZodObject<{
@@ -241,9 +241,9 @@ export declare const checklistContentSchema: z.ZodObject<{
                     assertion: "assertion";
                 }>;
                 artifact_type: z.ZodOptional<z.ZodEnum<{
-                    file: "file";
                     screenshot: "screenshot";
                     log: "log";
+                    file: "file";
                 }>>;
                 assertion: z.ZodOptional<z.ZodString>;
             }, z.core.$strip>>;
