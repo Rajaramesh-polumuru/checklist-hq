@@ -8,6 +8,12 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Icon } from '@/components/ui/icon'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { formatRelativeTime } from '@/lib/date-utils'
 import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon'
 import CheckmarkCircle01Icon from '@hugeicons/core-free-icons/CheckmarkCircle01Icon'
@@ -23,6 +29,8 @@ import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon'
 import Tick01Icon from '@hugeicons/core-free-icons/Tick01Icon'
 import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon'
 import AiCloud02Icon from '@hugeicons/core-free-icons/AiCloud02Icon'
+import MoreVerticalIcon from '@hugeicons/core-free-icons/MoreVerticalIcon'
+import DashboardBrowsingIcon from '@hugeicons/core-free-icons/DashboardBrowsingIcon'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAgentSettingsStore } from '@/stores/agent-settings-store'
@@ -1142,11 +1150,6 @@ export function RunMode() {
               />
             )}
 
-            {/* Switch to simple view */}
-            <Button onClick={switchViewMode} variant="ghost" size="sm" className="text-xs">
-              Simple View
-            </Button>
-
             {isComplete ? (
               <Button onClick={handleRestart} variant="outline" size="sm" className="gap-2">
                 <Icon icon={ArrowTurnBackwardIcon} className="h-4 w-4" />
@@ -1167,6 +1170,21 @@ export function RunMode() {
                 <span className="hidden sm:inline">Complete</span>
               </Button>
             )}
+
+            {/* More menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0">
+                  <Icon icon={MoreVerticalIcon} className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={switchViewMode}>
+                  <Icon icon={DashboardBrowsingIcon} className="h-4 w-4 mr-2" />
+                  Simple View
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
