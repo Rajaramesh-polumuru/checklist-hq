@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ChecklistEditor } from '@/components/ChecklistEditor'
+import { MarkdownEditor } from '@/components/MarkdownEditor'
 import { VersionHistory } from '@/components/VersionHistory'
 import { DiffView } from '@/components/DiffView'
 import { KeyboardShortcuts } from '@/components/KeyboardShortcuts'
@@ -27,6 +28,8 @@ import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
 import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon'
 import KeyboardIcon from '@hugeicons/core-free-icons/KeyboardIcon'
 import GitForkIcon from '@hugeicons/core-free-icons/GitForkIcon'
+import CodeIcon from '@hugeicons/core-free-icons/CodeIcon'
+import ListViewIcon from '@hugeicons/core-free-icons/ListViewIcon'
 import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon'
 import CloudIcon from '@hugeicons/core-free-icons/CloudIcon'
 import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon'
@@ -51,7 +54,7 @@ export function Editor() {
   const { repoId } = useParams()
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { content, setContent, isDirty, resetDirty } = useChecklistStore()
+  const { content, setContent, isDirty, resetDirty, editorMode, setEditorMode } = useChecklistStore()
   const isMobile = useIsMobile()
   const { toasts, dismissToast, success: showSuccessToast } = useToast()
 
@@ -343,6 +346,12 @@ export function Editor() {
         e.preventDefault()
         handleManualSaveRequest()
       }
+
+      // Toggle markdown mode on Cmd/Ctrl + M
+      if ((e.metaKey || e.ctrlKey) && e.key === 'm') {
+        e.preventDefault()
+        setEditorMode(editorMode === 'visual' ? 'markdown' : 'visual')
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -489,6 +498,30 @@ export function Editor() {
                   )}
                 </Button>
 
+                {/* Editor mode toggle */}
+                <div className="flex items-center rounded-lg border border-border p-0.5 gap-0.5 mr-1">
+                  <Button
+                    variant={editorMode === 'visual' ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setEditorMode('visual')}
+                    className="h-6 px-2 text-xs gap-1"
+                    title="Visual mode"
+                  >
+                    <Icon icon={ListViewIcon} className="h-3 w-3" />
+                    <span className="hidden lg:inline">Visual</span>
+                  </Button>
+                  <Button
+                    variant={editorMode === 'markdown' ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setEditorMode('markdown')}
+                    className="h-6 px-2 text-xs gap-1"
+                    title="Markdown mode (⌘M)"
+                  >
+                    <Icon icon={CodeIcon} className="h-3 w-3" />
+                    <span className="hidden lg:inline">Markdown</span>
+                  </Button>
+                </div>
+
                 {/* Keyboard Shortcuts */}
                 <Button
                   variant="ghost"
@@ -537,6 +570,13 @@ export function Editor() {
                       onClick={() => setMobileMenuOpen(false)}
                     />
                     <div className="absolute right-0 top-full mt-1 z-50 bg-popover border rounded-xl shadow-lg py-2 min-w-[180px] animate-fade-in">
+                      <button
+                        onClick={() => { setEditorMode(editorMode === 'visual' ? 'markdown' : 'visual'); setMobileMenuOpen(false) }}
+                        className="w-full px-4 py-3 text-left text-base hover:bg-accent flex items-center gap-3"
+                      >
+                        <Icon icon={editorMode === 'visual' ? CodeIcon : ListViewIcon} className="h-5 w-5" />
+                        {editorMode === 'visual' ? 'Markdown Mode' : 'Visual Mode'}
+                      </button>
                       <button
                         onClick={() => { setIsPublic(!isPublic); setMobileMenuOpen(false) }}
                         className="w-full px-4 py-3 text-left text-base hover:bg-accent flex items-center gap-3"
@@ -608,7 +648,11 @@ export function Editor() {
         <div className="flex flex-col-reverse lg:flex-row gap-4 md:gap-6 lg:gap-8">
           {/* Main Editor Column */}
           <div className="flex-1 min-w-0">
-            <ChecklistEditor loading={loading} />
+            {editorMode === 'markdown' ? (
+              <MarkdownEditor loading={loading} />
+            ) : (
+              <ChecklistEditor loading={loading} />
+            )}
           </div>
 
           {/* Sidebar */}

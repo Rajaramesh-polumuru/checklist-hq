@@ -12,12 +12,18 @@ interface ChecklistStore {
   isDirty: boolean;
   focusedItemId: string | null;
 
+  // Editor mode
+  editorMode: 'visual' | 'markdown';
+  setEditorMode: (mode: 'visual' | 'markdown') => void;
+
   // Undo/Redo
   undoStack: HistoryEntry[];
   redoStack: HistoryEntry[];
 
   // Actions
   setContent: (content: ChecklistContent) => void;
+  /** Update content from markdown mode — marks isDirty without clearing undo stack */
+  setContentFromMarkdown: (content: ChecklistContent) => void;
   resetDirty: () => void;
   setFocusedItem: (id: string | null) => void;
 
@@ -61,6 +67,14 @@ const saveToHistory = (state: ChecklistStore): Partial<ChecklistStore> => {
   };
 };
 
+function getInitialEditorMode(): 'visual' | 'markdown' {
+  try {
+    return localStorage.getItem('checklist-hq-editor-mode') === 'markdown' ? 'markdown' : 'visual'
+  } catch {
+    return 'visual'
+  }
+}
+
 export const useChecklistStore = create<ChecklistStore>((set, get) => ({
   content: {
     version: '1.0',
@@ -68,10 +82,22 @@ export const useChecklistStore = create<ChecklistStore>((set, get) => ({
   },
   isDirty: false,
   focusedItemId: null,
+  editorMode: getInitialEditorMode(),
   undoStack: [],
   redoStack: [],
 
+  setEditorMode: (mode) => {
+    try { localStorage.setItem('checklist-hq-editor-mode', mode) } catch { /* ignore */ }
+    if (mode === 'visual') {
+      // Save one history entry so Ctrl+Z can undo the entire markdown session
+      set((state) => ({ ...saveToHistory(state), editorMode: mode }))
+    } else {
+      set({ editorMode: mode })
+    }
+  },
+
   setContent: (content) => set({ content, isDirty: false, undoStack: [], redoStack: [] }),
+  setContentFromMarkdown: (content) => set({ content, isDirty: true }),
   resetDirty: () => set({ isDirty: false }),
   setFocusedItem: (id) => set({ focusedItemId: id }),
 
