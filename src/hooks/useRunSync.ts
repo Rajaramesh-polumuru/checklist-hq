@@ -50,6 +50,17 @@ export function useRunSync({
   const deviceId = getDeviceId()
   const deviceName = getDeviceName()
 
+  // Store callbacks in refs so they never destabilize effect dependencies.
+  // This is the standard pattern for stable event-handler props in hooks.
+  const onProgressUpdateRef = useRef(onProgressUpdate)
+  const onStatusChangeRef = useRef(onStatusChange)
+  const onOtherDeviceActiveRef = useRef(onOtherDeviceActive)
+  useEffect(() => {
+    onProgressUpdateRef.current = onProgressUpdate
+    onStatusChangeRef.current = onStatusChange
+    onOtherDeviceActiveRef.current = onOtherDeviceActive
+  })
+
   // Update presence (heartbeat)
   const updatePresence = useCallback(async () => {
     if (!enabled) return
@@ -89,11 +100,11 @@ export function useRunSync({
       // Filter out current device for "other devices"
       const others = devices.filter((d) => !d.isCurrentDevice)
       setOtherDevices(others)
-      onOtherDeviceActive?.(others)
+      onOtherDeviceActiveRef.current?.(others)
     } catch (err) {
       console.error('Error fetching active devices:', err)
     }
-  }, [runId, deviceId, enabled, onOtherDeviceActive])
+  }, [runId, deviceId, enabled]) // onOtherDeviceActive accessed via ref — not a dep
 
   // Deactivate presence when leaving
   const deactivatePresence = useCallback(async () => {
@@ -133,10 +144,10 @@ export function useRunSync({
           // (check by comparing device_id or use sync_version)
           if (newRun.device_id !== deviceId) {
             if (newRun.progress !== oldRun.progress) {
-              onProgressUpdate?.(newRun.progress)
+              onProgressUpdateRef.current?.(newRun.progress)
             }
             if (newRun.status !== oldRun.status) {
-              onStatusChange?.(newRun.status)
+              onStatusChangeRef.current?.(newRun.status)
             }
           }
         }
@@ -167,7 +178,6 @@ export function useRunSync({
           // Start heartbeat
           heartbeatRef.current = setInterval(() => {
             updatePresence()
-            fetchActiveDevices()
           }, PRESENCE_HEARTBEAT_MS)
         } else if (status === 'CHANNEL_ERROR') {
           setIsConnected(false)
@@ -196,17 +206,8 @@ export function useRunSync({
 
       setIsConnected(false)
     }
-  }, [
-    runId,
-    userId,
-    enabled,
-    deviceId,
-    updatePresence,
-    fetchActiveDevices,
-    deactivatePresence,
-    onProgressUpdate,
-    onStatusChange,
-  ])
+  }, [runId, userId, enabled, deviceId, updatePresence, fetchActiveDevices, deactivatePresence])
+  // onProgressUpdate / onStatusChange intentionally omitted — accessed via refs above
 
   // Handle page visibility changes
   useEffect(() => {
@@ -225,7 +226,6 @@ export function useRunSync({
         fetchActiveDevices()
         heartbeatRef.current = setInterval(() => {
           updatePresence()
-          fetchActiveDevices()
         }, PRESENCE_HEARTBEAT_MS)
       }
     }
