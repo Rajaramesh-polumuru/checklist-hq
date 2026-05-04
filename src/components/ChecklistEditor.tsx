@@ -417,7 +417,7 @@ export function ChecklistEditor({ loading = false }: { loading?: boolean }) {
                         placeholder={PLACEHOLDERS[placeholderIndex]}
                         className={cn(
                           "flex-1 bg-transparent border-none text-foreground placeholder:text-muted-foreground/50 rounded-sm transition-all duration-200",
-                          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                          "outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:shadow-none",
                           isMobile ? "text-base" : "text-base"
                         )}
                       />
@@ -529,7 +529,7 @@ export function ChecklistEditor({ loading = false }: { loading?: boolean }) {
               placeholder={PLACEHOLDERS[placeholderIndex]}
                 className={cn(
                   "flex-1 bg-transparent border-none text-foreground placeholder:text-muted-foreground/40 rounded-sm transition-all duration-200",
-                  "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                  "outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:shadow-none",
                   isMobile ? "text-base" : "text-sm"
                 )}
             />
