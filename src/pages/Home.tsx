@@ -12,8 +12,7 @@ import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon'
 import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon'
 import PlayIcon from '@hugeicons/core-free-icons/PlayIcon'
 import Shield01Icon from '@hugeicons/core-free-icons/Shield01Icon'
-import StarIcon from '@hugeicons/core-free-icons/StarIcon'
-import QuoteUpIcon from '@hugeicons/core-free-icons/QuoteUpIcon'
+import BotIcon from '@hugeicons/core-free-icons/BotIcon'
 import Rocket01Icon from '@hugeicons/core-free-icons/Rocket01Icon'
 import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon'
 import ChartBarLineIcon from '@hugeicons/core-free-icons/ChartBarLineIcon'
@@ -38,67 +37,99 @@ export function clearDemoMode() {
   sessionStorage.removeItem(DEMO_MODE_KEY)
 }
 
-// Testimonial data
-const testimonials = [
+// MCP integration highlights — replaces fabricated testimonials with real capability cards
+const mcpHighlights = [
   {
-    quote: "Checklist HQ transformed how we onboard new team members. We went from scattered docs to a single source of truth.",
-    author: "Sarah Chen",
-    role: "Head of Operations",
-    company: "TechFlow",
-    avatar: "SC",
-    rating: 5,
+    title: "Read your checklists",
+    description:
+      "AI clients pull repositories, latest commits, version history, and live run status as MCP resources.",
+    icon: CheckListIcon,
+    accent: "bg-sky-500/10 text-sky-500",
   },
   {
-    quote: "The version control for checklists is brilliant. We can finally track why our processes changed and roll back when needed.",
-    author: "Marcus Rodriguez",
-    role: "DevOps Lead",
-    company: "CloudScale",
-    avatar: "MR",
-    rating: 5,
+    title: "Run them programmatically",
+    description:
+      "MCP tools let an agent create repos, commit edits, start runs, and tick items off — same actions as a human user.",
+    icon: PlayIcon,
+    accent: "bg-emerald-500/10 text-emerald-500",
   },
   {
-    quote: "Fork and customize has saved us countless hours. We start with community templates and make them our own.",
-    author: "Emily Watson",
-    role: "Quality Manager",
-    company: "MedTech Solutions",
-    avatar: "EW",
-    rating: 5,
+    title: "Mix humans and agents",
+    description:
+      "Each checklist item can be assigned to a human, an agent, or either. Hand off mid-run without losing context.",
+    icon: UserGroupIcon,
+    accent: "bg-violet-500/10 text-violet-500",
+  },
+]
+
+// Hero principles — replaces the fabricated stats row
+const heroPrinciples = [
+  {
+    icon: Clock01Icon,
+    title: "Versioned by default",
+    description: "Every edit is an immutable commit",
+  },
+  {
+    icon: GitForkIcon,
+    title: "Fork-based",
+    description: "Personal or team forks in one click",
+  },
+  {
+    icon: BotIcon,
+    title: "AI-ready via MCP",
+    description: "Claude, Cursor, and Windsurf compatible",
   },
 ]
 
 // Feature showcase data
 const features = [
   {
-    icon: GitForkIcon,
-    title: "Fork & Customize",
-    description: "Start with battle-tested templates from the community. Fork, customize, and make them yours in seconds.",
-    color: "from-primary to-orange-400",
-    bgColor: "bg-primary/10",
-    textColor: "text-primary",
-  },
-  {
     icon: Clock01Icon,
     title: "Version Control",
-    description: "Every change is tracked automatically. View history, compare versions, and roll back with confidence.",
+    description: "Every edit creates an immutable commit. Browse the full history, diff any two versions, and restore prior state.",
     color: "from-sky-500 to-cyan-400",
     bgColor: "bg-sky-500/10",
     textColor: "text-sky-500",
   },
   {
+    icon: GitForkIcon,
+    title: "Fork & Customize",
+    description: "Fork any public checklist or your team's templates — to your account or to a specific team. Origin links are preserved.",
+    color: "from-primary to-orange-400",
+    bgColor: "bg-primary/10",
+    textColor: "text-primary",
+  },
+  {
     icon: PlayIcon,
     title: "Run Mode",
-    description: "Execute checklists in real-time with progress tracking. Never miss a critical step again.",
+    description: "Execute a checklist as a tracked run. Per-step progress, completion history, and an append-only audit trail.",
     color: "from-emerald-500 to-teal-400",
     bgColor: "bg-emerald-500/10",
     textColor: "text-emerald-500",
   },
   {
     icon: UserGroupIcon,
-    title: "Community Driven",
-    description: "The best processes rise to the top. Learn from thousands of teams and share your expertise.",
+    title: "Teams & Organizations",
+    description: "Multi-tenant from day one. Create orgs, scope repositories to teams, and manage member permissions with RBAC.",
     color: "from-violet-500 to-purple-400",
     bgColor: "bg-violet-500/10",
     textColor: "text-violet-500",
+  },
+  {
+    icon: BotIcon,
+    title: "AI-Ready via MCP",
+    description: "Bundled Model Context Protocol server. Connect Claude Desktop, Cursor, or Windsurf and let agents read or run checklists.",
+    color: "from-rose-500 to-pink-400",
+    bgColor: "bg-rose-500/10",
+    textColor: "text-rose-500",
+  },
+  {
+    icon: FlashIcon,
+    title: "Real-time Sync",
+    description: "Edits and run progress sync live across collaborators via Supabase Realtime — no refresh required.",
+    color: "from-amber-500 to-yellow-400",
+    bgColor: "bg-amber-500/10",
+    textColor: "text-amber-500",
   },
 ]
 
@@ -324,25 +355,30 @@ export function Home() {
               No signup required to explore templates
             </motion.p>
 
-            {/* Stats Row */}
+            {/* Product principles — what's true today, not vanity metrics */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="grid grid-cols-3 gap-6 max-w-2xl mx-auto mt-12"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto mt-12"
             >
-              <div className="text-center p-4">
-                <p className="text-3xl md:text-4xl font-bold text-gradient-primary">500+</p>
-                <p className="text-sm text-muted-foreground mt-1">Templates</p>
-              </div>
-              <div className="text-center p-4 border-x border-border">
-                <p className="text-3xl md:text-4xl font-bold text-gradient-primary">2K+</p>
-                <p className="text-sm text-muted-foreground mt-1">Teams</p>
-              </div>
-              <div className="text-center p-4">
-                <p className="text-3xl md:text-4xl font-bold text-gradient-primary">99.9%</p>
-                <p className="text-sm text-muted-foreground mt-1">Uptime</p>
-              </div>
+              {heroPrinciples.map((principle, index) => (
+                <div
+                  key={principle.title}
+                  className={cn(
+                    "flex items-center gap-3 p-4 rounded-xl bg-card/40 border border-border/60 backdrop-blur-sm",
+                    index === 1 && "sm:bg-card/60",
+                  )}
+                >
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Icon icon={principle.icon} className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-sm">{principle.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{principle.description}</p>
+                  </div>
+                </div>
+              ))}
             </motion.div>
           </div>
         </div>
@@ -488,74 +524,52 @@ export function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="bg-muted/30 py-20 md:py-28" id="testimonials">
+      {/* AI-Native Section — replaces fabricated testimonials */}
+      <section className="bg-muted/30 py-20 md:py-28" id="ai-native">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4">Testimonials</Badge>
+          <div className="text-center mb-16 max-w-3xl mx-auto">
+            <Badge variant="outline" className="mb-4">AI-Native</Badge>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-              Loved by teams worldwide
+              Designed for humans <span className="text-gradient-primary">and AI</span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              See what our users have to say about Checklist HQ.
+            <p className="text-lg text-muted-foreground">
+              Most checklist tools predate AI assistants that can actually do the work. Checklist HQ ships with a
+              Model Context Protocol server, so an LLM can read, fork, and run your checklists with the same
+              permissions as any team member.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {mcpHighlights.map((highlight, index) => (
               <motion.div
-                key={testimonial.author}
+                key={highlight.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.15 }}
+                transition={{ delay: index * 0.1 }}
               >
-                <Card className="group relative overflow-hidden h-full hover:shadow-xl transition-all duration-300">
-                  {/* Decorative gradient corner */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full" />
-
-                  <CardContent className="pt-8 pb-6 relative">
-                    {/* Quote icon with glow */}
-                    <div className="absolute top-4 right-4">
-                      <Icon icon={QuoteUpIcon} className="h-12 w-12 text-primary/10" />
+                <Card className="group relative h-full hover:shadow-xl transition-all duration-300">
+                  <CardContent className="pt-8 pb-6">
+                    <div
+                      className={cn(
+                        "h-12 w-12 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110",
+                        highlight.accent,
+                      )}
+                    >
+                      <Icon icon={highlight.icon} className="h-6 w-6" />
                     </div>
-
-                    {/* Star rating with animation */}
-                    <div className="flex gap-1 mb-6">
-                      {Array.from({ length: testimonial.rating }).map((_, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ opacity: 0, scale: 0 }}
-                          whileInView={{ opacity: 1, scale: 1 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: 0.3 + i * 0.1 }}
-                        >
-                          <Icon icon={StarIcon} className="h-5 w-5 fill-amber-400 text-amber-400" />
-                        </motion.div>
-                      ))}
-                    </div>
-
-                    {/* Quote text */}
-                    <blockquote className="text-lg leading-relaxed text-foreground mb-8 relative z-10">
-                      "{testimonial.quote}"
-                    </blockquote>
-
-                    {/* Author section */}
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center text-white font-semibold shadow-lg shadow-primary/25">
-                        {testimonial.avatar}
-                      </div>
-                      <div>
-                        <p className="font-semibold">{testimonial.author}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {testimonial.role} at {testimonial.company}
-                        </p>
-                      </div>
-                    </div>
+                    <h3 className="text-lg font-semibold mb-2">{highlight.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{highlight.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
             ))}
+          </div>
+
+          <div className="text-center mt-10">
+            <p className="text-sm text-muted-foreground">
+              Compatible with Claude Desktop, Cursor, Windsurf, and any MCP client.
+            </p>
           </div>
         </div>
       </section>
@@ -651,10 +665,11 @@ export function Home() {
               viewport={{ once: true }}
             >
               <h2 className="text-2xl md:text-3xl font-bold mb-4">
-                Ready to standardize excellence?
+                Start version-controlling your processes
               </h2>
               <p className="text-lg opacity-90 mb-8 max-w-xl mx-auto">
-                Join thousands of teams building their operational knowledge base with Checklist HQ.
+                Free during the early-access MVP. Bring your runbooks, SOPs, and checklists into one
+                versioned, AI-ready home.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
@@ -702,8 +717,9 @@ export function Home() {
               <p className="font-semibold mb-4">Product</p>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link to="/explore" className="hover:text-foreground transition-colors">Explore Templates</Link></li>
+                <li><Link to="/marketplace" className="hover:text-foreground transition-colors">Marketplace</Link></li>
                 <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
-                <li><a href="#testimonials" className="hover:text-foreground transition-colors">Testimonials</a></li>
+                <li><a href="#ai-native" className="hover:text-foreground transition-colors">AI Integration</a></li>
               </ul>
             </div>
 
