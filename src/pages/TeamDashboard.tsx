@@ -86,6 +86,15 @@ export function TeamDashboard() {
     if (!teamId) return
     const membersData = await getTeamMembers(teamId)
     setMembers(membersData)
+
+    // Re-sync the current user's cached team role so UI gates pick up
+    // promotions/demotions without a full reload.
+    if (user) {
+      const userMember = membersData.find(m => m.user_id === user.id)
+      if (userMember) {
+        setTeamPermission(teamId, userMember.role)
+      }
+    }
   }
 
   const refreshRepositories = async () => {

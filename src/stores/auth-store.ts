@@ -1,6 +1,9 @@
 import { create } from 'zustand'
-import type { User, Session } from '@supabase/supabase-js'
+import type { User, Session, Subscription } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+
+// Module-scoped subscription so initialize() is idempotent across HMR / double-mount.
+let authSubscription: Subscription | null = null
 
 
 interface AuthState {
@@ -103,10 +106,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { data: { session } } = await supabase.auth.getSession()
       set({ session, user: session?.user ?? null, loading: false, initialized: true })
 
-      // Listen for auth changes
-      supabase.auth.onAuthStateChange((_event, session) => {
+      // Tear down any previous listener before subscribing again.
+      authSubscription?.unsubscribe()
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
         set({ session, user: session?.user ?? null })
       })
+      authSubscription = data.subscription
     } catch (error) {
       console.error('Error initializing auth:', error)
       set({ loading: false, initialized: true })

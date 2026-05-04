@@ -262,14 +262,20 @@ export async function forkRepositoryToTeam(params: {
 }): Promise<string> {
   const { sourceRepoId, targetTeamId, newTitle } = params
 
-  // First, get the source repository and its latest commit
+  // First, get the source repository and its full commit history
   const sourceRepo = await getRepository(sourceRepoId)
   if (!sourceRepo) {
     throw new Error('Source repository not found')
   }
 
-  const latestCommit = await getLatestCommit(sourceRepoId)
-  if (!latestCommit) {
+  const { data: sourceCommits, error: commitsError } = await supabase
+    .from('commits')
+    .select()
+    .eq('repo_id', sourceRepoId)
+    .order('created_at', { ascending: true })
+
+  if (commitsError) throw commitsError
+  if (!sourceCommits || sourceCommits.length === 0) {
     throw new Error('Source repository has no commits')
   }
 
@@ -310,19 +316,33 @@ export async function forkRepositoryToTeam(params: {
 
   if (repoError) throw repoError
 
-  // Create the initial commit with the forked content
-  const { error: commitError } = await supabase
-    .from('commits')
-    .insert({
-      repo_id: newRepo.id,
-      content: latestCommit.content,
-      message: `Forked from ${sourceRepo.title} to ${team.name}`,
-      parent_commit_id: null,
-    })
+  // Replay the full commit history into the new repo, preserving the parent
+  // chain so version history / restore-to-version remains usable post-fork.
+  let prevCommitId: string | null = null
+  for (let i = 0; i < sourceCommits.length; i++) {
+    const sourceCommit = sourceCommits[i] as Commit
+    const isLast = i === sourceCommits.length - 1
+    const message = isLast
+      ? `Forked from ${sourceRepo.title} to ${team.name}`
+      : sourceCommit.message
 
-  if (commitError) throw commitError
+    const { data: newCommit, error: commitError } = await supabase
+      .from('commits')
+      .insert({
+        repo_id: newRepo.id,
+        content: sourceCommit.content,
+        message,
+        parent_commit_id: prevCommitId,
+      })
+      .select('id')
+      .single()
 
-  // Grant the team access to the repository
+    if (commitError) throw commitError
+    prevCommitId = (newCommit as { id: string }).id
+  }
+
+  // Grant the team access to the repository. If this fails the fork is
+  // unreachable to the team, so surface the error rather than swallowing it.
   const { error: accessError } = await supabase
     .from('repository_team_access')
     .insert({
@@ -333,8 +353,9 @@ export async function forkRepositoryToTeam(params: {
     })
 
   if (accessError) {
-    console.error('Failed to grant team access:', accessError)
-    // Don't throw - the fork was still created successfully
+    throw new Error(
+      `Repository forked, but failed to grant team access: ${accessError.message}`,
+    )
   }
 
   // Update fork count on source repo

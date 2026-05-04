@@ -105,6 +105,15 @@ export function OrganizationDashboard() {
     if (!orgId) return
     const membersData = await getOrganizationMembers(orgId)
     setMembers(membersData)
+
+    // Re-sync the current user's cached role — otherwise UI capability gates
+    // (canInvite, canCreateTeams, …) keep the stale role until full reload.
+    if (user) {
+      const userMember = membersData.find(m => m.user_id === user.id)
+      if (userMember) {
+        setOrgPermission(orgId, userMember.role as 'owner' | 'admin' | 'member' | 'viewer')
+      }
+    }
   }
 
   const handleRun = (repo: Repository) => {
