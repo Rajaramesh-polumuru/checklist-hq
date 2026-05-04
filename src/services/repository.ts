@@ -326,19 +326,20 @@ export async function forkRepositoryToTeam(params: {
       ? `Forked from ${sourceRepo.title} to ${team.name}`
       : sourceCommit.message
 
-    const { data: newCommit, error: commitError } = await supabase
+    const commitInsert: CommitInsert = {
+      repo_id: (newRepo as { id: string }).id,
+      content: sourceCommit.content,
+      message,
+      parent_commit_id: prevCommitId,
+    }
+    const insertResult = await supabase
       .from('commits')
-      .insert({
-        repo_id: newRepo.id,
-        content: sourceCommit.content,
-        message,
-        parent_commit_id: prevCommitId,
-      })
+      .insert(commitInsert as unknown as Record<string, unknown>)
       .select('id')
       .single()
 
-    if (commitError) throw commitError
-    prevCommitId = (newCommit as { id: string }).id
+    if (insertResult.error) throw insertResult.error
+    prevCommitId = (insertResult.data as { id: string }).id
   }
 
   // Grant the team access to the repository. If this fails the fork is
