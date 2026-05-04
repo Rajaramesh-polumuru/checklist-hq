@@ -104,7 +104,7 @@ export function AgentStatusIndicator({
           onClick={onApprove}
           size="sm"
           variant="default"
-          className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+          className="gap-2 bg-success hover:bg-success/90 text-success-foreground"
         >
           <Icon icon={ThumbsUpIcon} className="h-4 w-4" />
           Approve

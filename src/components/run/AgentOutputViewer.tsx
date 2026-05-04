@@ -32,7 +32,7 @@ export function AgentOutputViewer({ open, onOpenChange, item, progress }: AgentO
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
-            <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50">
+            <Badge variant="outline" className="text-purple-600 border-purple-500/30 bg-purple-500/5 dark:text-purple-400 dark:border-purple-400/30 dark:bg-purple-400/10">
               <Icon icon={AiCloud02Icon} className="mr-1 h-3 w-3" />
               Agent Action
             </Badge>

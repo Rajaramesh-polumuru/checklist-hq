@@ -51,7 +51,7 @@ export function HybridRunProgress({ items, progress, className }: HybridRunProgr
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <Icon icon={UserIcon} className="h-5 w-5 text-blue-500" />
+            <Icon icon={UserIcon} className="h-5 w-5 text-info" />
             <div>
               <div className="text-2xl font-bold">{stats.completedByHuman}</div>
               <div className="text-xs text-muted-foreground">By Human</div>
@@ -60,7 +60,7 @@ export function HybridRunProgress({ items, progress, className }: HybridRunProgr
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <Icon icon={AiCloud02Icon} className="h-5 w-5 text-purple-500" />
+            <Icon icon={AiCloud02Icon} className="h-5 w-5 text-purple-500 dark:text-purple-400" />
             <div>
               <div className="text-2xl font-bold">{stats.completedByAgent}</div>
               <div className="text-xs text-muted-foreground">By Agent</div>
@@ -142,13 +142,13 @@ export function HybridRunProgress({ items, progress, className }: HybridRunProgr
                       </Badge>
                     )}
                     {isCompleted && completedByAgent && (
-                      <Badge className="text-xs bg-purple-500/10 text-purple-600 border-purple-500/20">
+                      <Badge className="text-xs bg-purple-500/10 text-purple-600 border border-purple-500/20 dark:bg-purple-400/10 dark:text-purple-400 dark:border-purple-400/20">
                         <Icon icon={AiCloud02Icon} className="h-3 w-3 mr-1" />
                         Agent
                       </Badge>
                     )}
                     {isCompleted && !completedByAgent && (
-                      <Badge className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/20">
+                      <Badge className="text-xs bg-info/10 text-info border border-info/20">
                         <Icon icon={UserIcon} className="h-3 w-3 mr-1" />
                         Human
                       </Badge>

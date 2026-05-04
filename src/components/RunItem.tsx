@@ -221,8 +221,8 @@ export function RunItem({
           !isCompleted && isNext && 'bg-primary/5 ring-1 ring-primary/20 hover:bg-primary/10',
           !isCompleted && !isNext && 'hover:bg-muted/50',
           isFocused && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
-          item.type === 'ref' && 'border-l-2 border-blue-500/50 bg-blue-500/5',
-          item.agent_config && 'border-l-2 border-purple-500/50 bg-purple-500/5'
+          item.type === 'ref' && 'border-l-2 border-info/40 bg-info/5',
+          item.agent_config && 'border-l-2 border-purple-500/40 bg-purple-500/5 dark:border-purple-400/40 dark:bg-purple-400/10'
         )}
         whileTap={{ scale: 0.99 }}
       >
@@ -232,16 +232,16 @@ export function RunItem({
             "relative flex items-center justify-center transition-colors duration-300",
             isSubItem ? "h-5 w-5" : "h-6 w-6"
           )}>
-            {/* Base Circle */}
+            {/* Base Circle — colors are driven entirely by Tailwind classes
+                above so they pick up dark-mode shifts and design-token changes.
+                The previous animate.borderColor used `rgba(var(--muted-foreground), 0.3)`,
+                which is invalid CSS (the var resolves to `hsl(...)`, not an rgb
+                triple) and silently fell back to the default. */}
             <motion.div
               className={cn(
-                "absolute inset-0 rounded-full border-2",
+                "absolute inset-0 rounded-full border-2 transition-colors duration-300",
                 isCompleted ? "border-success bg-success" : isNext ? "border-primary" : "border-muted-foreground/30 group-hover:border-primary/50"
               )}
-              animate={{
-                scale: isCompleted ? 1 : 1,
-                borderColor: isCompleted ? 'var(--color-success)' : isNext ? 'var(--color-primary)' : 'rgba(var(--muted-foreground), 0.3)'
-              }}
             />
 
             {/* Icons with AnimatePresence */}
@@ -253,7 +253,7 @@ export function RunItem({
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0, opacity: 0 }}
                 >
-                  <Icon icon={CheckmarkCircle01Icon} className={cn("text-white", isSubItem ? "h-3 w-3" : "h-4 w-4")} />
+                  <Icon icon={CheckmarkCircle01Icon} className={cn("text-success-foreground", isSubItem ? "h-3 w-3" : "h-4 w-4")} />
                 </motion.div>
               ) : isNext ? (
                 <motion.div
@@ -321,12 +321,12 @@ export function RunItem({
           {item.type === 'ref' && item.ref_config && (
             <div className="flex items-center gap-2 flex-wrap mb-1">
               <div className="flex items-center gap-1.5">
-                <Icon icon={Link01Icon} className="h-3.5 w-3.5 text-blue-600" />
-                <Badge variant="outline" className="text-xs border-blue-500/30 text-blue-600 bg-blue-500/5">
+                <Icon icon={Link01Icon} className="h-3.5 w-3.5 text-info" />
+                <Badge variant="outline" className="text-xs border-info/30 text-info bg-info/5">
                   Sub-Checklist
                 </Badge>
               </div>
-              <Badge variant="outline" className="text-xs text-muted-foreground border-blue-200">
+              <Badge variant="outline" className="text-xs text-muted-foreground border-border">
                 {item.ref_config.execution_mode === 'inline' ? 'Inline' : 'Spawn Run'}
               </Badge>
             </div>
@@ -336,8 +336,8 @@ export function RunItem({
           {item.agent_config && (
             <div className="flex items-center gap-2 flex-wrap">
               <div className="flex items-center gap-1.5">
-                <Icon icon={BrainIcon} className="h-3.5 w-3.5 text-purple-600" />
-                <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-600 bg-purple-500/5">
+                <Icon icon={BrainIcon} className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+                <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-600 bg-purple-500/5 dark:text-purple-400 dark:border-purple-400/30 dark:bg-purple-400/10">
                   {item.agent_config.action_type === 'manual' && 'Manual'}
                   {item.agent_config.action_type === 'browse' && 'Browse'}
                   {item.agent_config.action_type === 'api_call' && 'API Call'}
@@ -346,11 +346,11 @@ export function RunItem({
                 </Badge>
               </div>
               {item.agent_config.assignee && (
-                <Badge variant="outline" className="text-xs border-purple-500/20 text-purple-600">
+                <Badge variant="outline" className="text-xs border-purple-500/20 text-purple-600 dark:text-purple-400 dark:border-purple-400/20">
                   {item.agent_config.assignee === 'human' && 'Assigned: Human'}
                   {item.agent_config.assignee === 'any_agent' && 'Assigned: Any Agent'}
-                  {item.agent_config.assignee !== 'human' && 
-                   item.agent_config.assignee !== 'any_agent' && 
+                  {item.agent_config.assignee !== 'human' &&
+                   item.agent_config.assignee !== 'any_agent' &&
                    `Agent: ${item.agent_config.assignee.slice(0, 8)}...`}
                 </Badge>
               )}

@@ -85,8 +85,8 @@ export function RunTimeline({ run, items, className }: RunTimelineProps) {
               {/* Dot Icon */}
               <div className={cn(
                 "absolute left-0 top-1 h-5 w-5 rounded-full border-2 flex items-center justify-center bg-background z-10 transition-colors",
-                event.completedByType === 'agent' 
-                  ? "border-purple-500 text-purple-500" 
+                event.completedByType === 'agent'
+                  ? "border-purple-500 text-purple-500 dark:border-purple-400 dark:text-purple-400"
                   : "border-primary text-primary"
               )}>
                 {event.completedByType === 'agent' ? (
@@ -99,8 +99,8 @@ export function RunTimeline({ run, items, className }: RunTimelineProps) {
               {/* Content Card */}
               <div className={cn(
                 "rounded-lg border p-3 text-sm transition-all hover:shadow-sm group/card relative",
-                event.completedByType === 'agent' 
-                  ? "bg-purple-50/50 border-purple-200 dark:bg-purple-900/10 dark:border-purple-800" 
+                event.completedByType === 'agent'
+                  ? "bg-purple-500/5 border-purple-500/30 dark:bg-purple-400/10 dark:border-purple-400/30"
                   : "bg-card border-border"
               )}>
                 <div className="flex justify-between items-start gap-2 mb-1">
@@ -115,7 +115,9 @@ export function RunTimeline({ run, items, className }: RunTimelineProps) {
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                   <span className={cn(
                     "flex items-center gap-1 font-medium",
-                    event.completedByType === 'agent' ? "text-purple-600 dark:text-purple-400" : ""
+                    event.completedByType === 'agent'
+                      ? "text-purple-600 dark:text-purple-400"
+                      : "text-foreground"
                   )}>
                     {event.completedByName || (event.completedByType === 'agent' ? 'AI Agent' : 'User')}
                   </span>
@@ -156,7 +158,7 @@ export function RunTimeline({ run, items, className }: RunTimelineProps) {
                 {/* Verification Status */}
                 {event.verificationStatus === 'pending' && (
                   <div className="mt-2 flex items-center gap-2">
-                     <Badge variant="outline" className="border-yellow-500 text-yellow-600 bg-yellow-50">
+                     <Badge variant="warning" className="text-xs">
                        Pending Verification
                      </Badge>
                   </div>

@@ -79,9 +79,9 @@ export const SimpleRunItem = memo(function SimpleRunItem({
           className={cn(
             'flex items-center justify-center h-5 w-5 rounded-[5px] border-[1.5px] transition-colors duration-200',
             isCompleted
-              ? 'bg-[#ED462C] border-[#ED462C]'
+              ? 'bg-primary border-primary'
               : isNext
-                ? 'border-[#ED462C]/60 group-hover:border-[#ED462C]'
+                ? 'border-primary/60 group-hover:border-primary'
                 : 'border-muted-foreground/30 group-hover:border-muted-foreground/50',
           )}
           whileTap={{ scale: 0.9 }}
@@ -95,7 +95,7 @@ export const SimpleRunItem = memo(function SimpleRunItem({
                 exit={{ scale: 0, opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               >
-                <Icon icon={Tick01Icon} size="xs" className="text-white" />
+                <Icon icon={Tick01Icon} size="xs" className="text-primary-foreground" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -122,10 +122,10 @@ export const SimpleRunItem = memo(function SimpleRunItem({
 
           {/* Inline indicators */}
           {item.type === 'ref' && item.ref_config && (
-            <Icon icon={Link01Icon} size="xs" className="text-blue-500 shrink-0 mt-1" />
+            <Icon icon={Link01Icon} size="xs" className="text-info shrink-0 mt-1" />
           )}
           {item.agent_config && (
-            <Icon icon={BrainIcon} size="xs" className="text-purple-500 shrink-0 mt-1" />
+            <Icon icon={BrainIcon} size="xs" className="text-purple-500 dark:text-purple-400 shrink-0 mt-1" />
           )}
         </div>
 
