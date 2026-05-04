@@ -414,6 +414,7 @@ export function RunMode() {
   const [completing, setCompleting] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
   const [justCompleted, setJustCompleted] = useState(false)
+  const [completionFailed, setCompletionFailed] = useState(false)
   const [durationMs, setDurationMs] = useState(0)
   const [isPauseLoading, setIsPauseLoading] = useState(false)
   const [focusedItemIndex, setFocusedItemIndex] = useState<number | null>(null)
@@ -447,8 +448,19 @@ export function RunMode() {
     },
   })
 
+  // Dedupe loadData by the URL we're processing. This protects against
+  // StrictMode dev double-mount and against effect re-fires for the same
+  // params (e.g. user.id arriving after the first render) without blocking
+  // legitimate repeat-starts on the same repo, which the previous
+  // repoId-keyed guard did.
+  const lastProcessedKeyRef = useRef<string | null>(null)
+
   // Load run data
   useEffect(() => {
+    const key = runId ? `run:${runId}` : repoId ? `start:${repoId}` : null
+    if (!key || lastProcessedKeyRef.current === key) return
+    lastProcessedKeyRef.current = key
+
     async function loadData() {
       try {
         setLoading(true)
@@ -492,6 +504,9 @@ export function RunMode() {
       } catch (err) {
         console.error('Error loading run:', err)
         setError(err instanceof Error ? err.message : 'Failed to load run')
+        // On failure, clear the dedupe so the user can retry by re-visiting
+        // or navigating away and back.
+        lastProcessedKeyRef.current = null
       } finally {
         setLoading(false)
       }
@@ -556,6 +571,14 @@ export function RunMode() {
     setIsEditingName(false)
   }, [])
 
+  // Latest progress kept in a ref so handleToggle can capture the prior value
+  // for rollback without taking `progress` as a useCallback dep (which would
+  // invalidate orchestrator callbacks every progress update).
+  const progressRef = useRef(progress)
+  useEffect(() => {
+    progressRef.current = progress
+  }, [progress])
+
   // Toggle item completion
   const handleToggle = useCallback(
     async (itemId: string, completed: boolean, note?: string) => {
@@ -589,6 +612,11 @@ export function RunMode() {
         }
       }
 
+      // Capture prior entry so we can restore it (not just delete) on failure —
+      // toggling an already-completed item to false and then rolling back must
+      // return the item to "completed", not to "no entry".
+      const priorEntry = progressRef.current[itemId]
+
       // Optimistic update
       setProgress((prev) => ({
         ...prev,
@@ -605,9 +633,13 @@ export function RunMode() {
       } catch (err) {
         console.error('Error updating progress:', err)
         setProgress((prev) => {
-          const newProgress = { ...prev }
-          delete newProgress[itemId]
-          return newProgress
+          const next = { ...prev }
+          if (priorEntry === undefined) {
+            delete next[itemId]
+          } else {
+            next[itemId] = priorEntry
+          }
+          return next
         })
       }
     },
@@ -661,11 +693,16 @@ export function RunMode() {
       await completeRun(run.id)
       setRun((prev) => (prev ? { ...prev, status: 'completed' } : null))
       setJustCompleted(true)
+      setCompletionFailed(false)
       setShowConfetti(true)
       setTimeout(() => setShowConfetti(false), 3000)
     } catch (err) {
       console.error('Error completing run:', err)
       setError('Failed to complete run')
+      // Block the auto-complete effect from retrying on every render. The user
+      // can still retry via the Complete button (which calls handleComplete
+      // directly and clears this flag on success).
+      setCompletionFailed(true)
     } finally {
       setCompleting(false)
     }
@@ -767,12 +804,26 @@ export function RunMode() {
     },
   })
 
+  // Clear the "completion failed" guard if the user un-toggles an item, so a
+  // fresh completion attempt is allowed once they finish again.
+  useEffect(() => {
+    if (progressPercent < 100 && completionFailed) {
+      setCompletionFailed(false)
+    }
+  }, [progressPercent, completionFailed])
+
   // Auto-complete when all items done
   useEffect(() => {
-    if (progressPercent === 100 && run?.status !== 'completed' && !completing && !justCompleted) {
+    if (
+      progressPercent === 100 &&
+      run?.status !== 'completed' &&
+      !completing &&
+      !justCompleted &&
+      !completionFailed
+    ) {
       handleComplete()
     }
-  }, [progressPercent, run?.status, completing, justCompleted, handleComplete])
+  }, [progressPercent, run?.status, completing, justCompleted, completionFailed, handleComplete])
 
   // J/K keyboard navigation
   useEffect(() => {
@@ -882,6 +933,11 @@ export function RunMode() {
           onComplete={handleComplete}
           onRestart={handleRestart}
           onSwitchView={switchViewMode}
+          onRename={async (newName) => {
+            if (!run) return
+            const updatedRun = await updateRunName(run.id, newName)
+            setRun(updatedRun)
+          }}
           syncConnected={syncConnected}
           otherDevices={otherDevices}
           lastSyncedAt={lastSyncedAt}
@@ -1102,13 +1158,13 @@ export function RunMode() {
                   id="auto-pilot"
                   checked={agentSettings.autoPilotEnabled}
                   onCheckedChange={agentSettings.setAutoPilotEnabled}
-                  className="scale-75 data-[state=checked]:bg-purple-600"
+                  className="scale-75 data-[state=checked]:bg-purple-600 dark:data-[state=checked]:bg-purple-500"
                 />
                 <Label
                   htmlFor="auto-pilot"
                   className={cn(
                     'text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors',
-                    agentSettings.autoPilotEnabled ? 'text-purple-600' : 'text-muted-foreground',
+                    agentSettings.autoPilotEnabled ? 'text-purple-600 dark:text-purple-400' : 'text-muted-foreground',
                   )}
                 >
                   <Icon icon={AiCloud02Icon} className="h-3.5 w-3.5" />
@@ -1218,10 +1274,22 @@ export function RunMode() {
         </div>
       </header>
 
-      {/* Animated progress bar */}
-      <div className="h-1.5 bg-muted/50">
+      {/* Animated progress bar — matches editor convention (single-tone primary
+          gradient); shifts to success once the run is complete. */}
+      <div
+        className="h-1.5 bg-muted/50"
+        role="progressbar"
+        aria-valuenow={progressPercent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
         <div
-          className="h-full bg-gradient-to-r from-primary via-primary to-success transition-all duration-500 ease-out"
+          className={cn(
+            'h-full transition-all duration-500 ease-out',
+            isComplete
+              ? 'bg-success'
+              : 'bg-gradient-to-r from-primary/80 to-primary',
+          )}
           style={{ width: `${progressPercent}%` }}
         />
       </div>
@@ -1283,7 +1351,7 @@ export function RunMode() {
                     className="h-8 w-8 text-warning absolute -top-2 -right-2 animate-bounce"
                   />
                 </div>
-                <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-success to-primary bg-clip-text text-transparent">
+                <h2 className="text-2xl font-bold mb-2 text-gradient-primary">
                   Congratulations!
                 </h2>
                 <p className="text-muted-foreground mb-8 max-w-sm mx-auto">

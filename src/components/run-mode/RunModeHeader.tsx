@@ -39,6 +39,8 @@ interface RunModeHeaderProps {
   onComplete: () => void
   onRestart: () => void
   onSwitchView: () => void
+  /** Persist a new run name. Should resolve once the server has confirmed. */
+  onRename?: (newName: string) => Promise<void>
   syncConnected: boolean
   otherDevices: Array<{
     device_id: string
@@ -65,6 +67,7 @@ export function RunModeHeader({
   onComplete,
   onRestart,
   onSwitchView,
+  onRename,
   syncConnected,
   otherDevices,
   lastSyncedAt,
@@ -72,6 +75,7 @@ export function RunModeHeader({
 }: RunModeHeaderProps) {
   const [isEditingName, setIsEditingName] = useState(false)
   const [editName, setEditName] = useState('')
+  const [isSavingName, setIsSavingName] = useState(false)
 
   const handleStartRenaming = () => {
     setEditName(run?.name || repository?.title || '')
@@ -79,10 +83,30 @@ export function RunModeHeader({
   }
 
   const handleSaveName = async () => {
-    if (!run || !editName.trim()) return
-    // Note: name saving is handled by parent via updateRunName
-    // For now we just close — parent should pass an onRename callback if needed
-    setIsEditingName(false)
+    if (!run || isSavingName) return
+    const trimmed = editName.trim()
+    if (!trimmed) return
+    // No-op if unchanged.
+    if (trimmed === (run.name || '')) {
+      setIsEditingName(false)
+      return
+    }
+    if (!onRename) {
+      // Caller didn't wire up persistence — close the input rather than
+      // pretending to save.
+      setIsEditingName(false)
+      return
+    }
+    setIsSavingName(true)
+    try {
+      await onRename(trimmed)
+      setIsEditingName(false)
+    } catch (err) {
+      console.error('Error renaming run:', err)
+      // Leave the input open so the user can retry.
+    } finally {
+      setIsSavingName(false)
+    }
   }
 
   const handleCancelRenaming = () => {
@@ -107,6 +131,7 @@ export function RunModeHeader({
                 <Input
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
+                  disabled={isSavingName}
                   className="h-8 w-[200px] sm:w-[300px]"
                   autoFocus
                   onKeyDown={(e) => {
@@ -120,8 +145,9 @@ export function RunModeHeader({
                   variant="ghost"
                   className="h-8 w-8 text-success hover:text-success hover:bg-success/10"
                   onClick={handleSaveName}
+                  disabled={isSavingName || !editName.trim()}
                 >
-                  <Icon icon={Tick01Icon} className="h-4 w-4" />
+                  <Icon icon={isSavingName ? Loading02Icon : Tick01Icon} className={cn('h-4 w-4', isSavingName && 'animate-spin')} />
                 </Button>
                 <Button
                   size="icon"
@@ -220,10 +246,23 @@ export function RunModeHeader({
         </div>
       </header>
 
-      {/* Thin progress bar */}
-      <div className="h-1 bg-muted/50" role="progressbar" aria-valuenow={progressPercent} aria-valuemin={0} aria-valuemax={100}>
+      {/* Thin progress bar — matches the editor's progress bar convention
+          (single-color subtle gradient on the brand primary). When the run
+          is fully complete we shade to success so the bar reads as "done". */}
+      <div
+        className="h-1 bg-muted/50"
+        role="progressbar"
+        aria-valuenow={progressPercent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
         <div
-          className="h-full bg-gradient-to-r from-primary via-primary to-success transition-all duration-500 ease-out"
+          className={cn(
+            'h-full transition-all duration-500 ease-out',
+            isComplete
+              ? 'bg-success'
+              : 'bg-gradient-to-r from-primary/80 to-primary',
+          )}
           style={{ width: `${progressPercent}%` }}
         />
       </div>

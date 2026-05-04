@@ -132,11 +132,13 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
         user.id
       )
 
+      // Notify parent (refresh active-runs list, etc.) and jump straight to
+      // the new run — there's no value in a "success" interstitial that
+      // requires a second click to do what the user already asked for.
       setNewRunId(run.id)
-      setRunState('success')
-
-      // Call success callback
       onSuccess?.(run.id)
+      onClose()
+      navigate(`/app/run/${run.id}`)
     } catch (err) {
       console.error('Error starting run:', err)
       setError(err instanceof Error ? err.message : 'Failed to start run')
@@ -144,7 +146,8 @@ export function StartRunModal({ repository, isOpen, onClose, onSuccess }: StartR
     }
   }
 
-  // Navigate to the run
+  // Navigate to the run (kept for the legacy success-state UI in case anyone
+  // reaches it; the happy path now navigates directly from handleStartRun).
   const handleGoToRun = () => {
     if (newRunId) {
       onClose()

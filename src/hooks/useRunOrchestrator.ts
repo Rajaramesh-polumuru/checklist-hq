@@ -114,9 +114,13 @@ export function useRunOrchestrator({
 
     // Skip if already processing this item or another one
     if (status.state === 'executing') return;
-    
+
     // Skip if pending approval
     if (status.state === 'awaiting_approval') return;
+
+    // Skip if this exact item just errored or was rejected — don't auto-retry
+    // until the user moves on to a different item or manually re-triggers.
+    if (status.state === 'error' && status.itemId === currentItem.id) return;
 
     // Check if item is already completed
     if (progress[currentItem.id]?.completed) {
@@ -137,11 +141,12 @@ export function useRunOrchestrator({
     // Execute!
     executeItem(currentItem);
   }, [
-    enabled, 
-    currentItem, 
-    progress, 
-    agentSettings.autoPilotEnabled, 
-    status.state, 
+    enabled,
+    currentItem,
+    progress,
+    agentSettings.autoPilotEnabled,
+    status.state,
+    status.itemId,
     executeItem
   ]);
 

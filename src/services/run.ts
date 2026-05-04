@@ -61,7 +61,7 @@ export async function createRun(data: RunInsert): Promise<Run> {
     const runData = run as Run
     const { data: repo } = await supabase
       .from('repositories')
-      .select('id, owner_id, organization_id, name')
+      .select('id, owner_id, organization_id, title')
       .eq('id', runData.repo_id)
       .single()
 
@@ -71,7 +71,7 @@ export async function createRun(data: RunInsert): Promise<Run> {
         organizationId: repo.organization_id || undefined,
         runId: runData.id,
         runName: runData.name || 'Untitled Run',
-        checklistName: repo.name,
+        checklistName: repo.title,
         startedAt: runData.started_at || new Date().toISOString(),
       }).catch(err => console.error('Failed to send run start notifications:', err))
     }
@@ -152,7 +152,7 @@ export async function updateRun(id: string, updates: RunUpdate): Promise<Run> {
     const runData = data as Run
     const { data: repo } = await supabase
       .from('repositories')
-      .select('id, owner_id, organization_id, name')
+      .select('id, owner_id, organization_id, title')
       .eq('id', runData.repo_id)
       .single()
 
@@ -160,14 +160,24 @@ export async function updateRun(id: string, updates: RunUpdate): Promise<Run> {
       // Count completed items from progress
       const progress = runData.progress || {}
       const itemsCompleted = Object.values(progress).filter((v: any) => v.completed === true).length
-      const itemsTotal = Object.keys(progress).length
+
+      // Total items must come from the checklist commit, not the progress dict —
+      // progress only contains items the user has interacted with, so it
+      // would otherwise inflate completion to ~100% on partial runs.
+      const { data: commit } = await supabase
+        .from('commits')
+        .select('content')
+        .eq('id', runData.commit_id)
+        .single()
+      const items = (commit?.content as { items?: Record<string, unknown> } | null)?.items
+      const itemsTotal = items ? Object.keys(items).length : itemsCompleted
 
       notifyRunCompletion({
         repositoryId: runData.repo_id,
         organizationId: repo.organization_id || undefined,
         runId: runData.id,
         runName: runData.name || 'Untitled Run',
-        checklistName: repo.name,
+        checklistName: repo.title,
         itemsCompleted,
         itemsTotal,
         completedAt: runData.completed_at!,
